@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://devos.example.com/</loc></url>
+  <url><loc>https://devos.example.com/about</loc></url>
+  <url><loc>https://devos.example.com/contact</loc></url>
+  <url><loc>https://devos.example.com/faq</loc></url>
+  <url><loc>https://devos.example.com/waitlist</loc></url>
+  <url><loc>https://devos.example.com/login</loc></url>
+  <url><loc>https://devos.example.com/register</loc></url>
+  <url><loc>https://devos.example.com/privacy</loc></url>
+  <url><loc>https://devos.example.com/terms</loc></url>
+</urlset>

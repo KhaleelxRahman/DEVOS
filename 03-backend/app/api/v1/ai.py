@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from app.core.rate_limit import rate_limit
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.api.deps import get_current_user
@@ -82,7 +83,7 @@ async def list_messages(
     )
 
 
-@router.post("/chat", response_model=ApiResponse[AIChatResponse])
+@router.post("/chat", response_model=ApiResponse[AIChatResponse], dependencies=[Depends(rate_limit(20, 60, "ai_chat"))])
 async def chat(
     project_id: str,
     data: AIChatRequest,
@@ -124,7 +125,7 @@ async def chat(
     )
 
 
-@router.post("/actions", response_model=ApiResponse[AIMessageResponse])
+@router.post("/actions", response_model=ApiResponse[AIMessageResponse], dependencies=[Depends(rate_limit(20, 60, "ai_actions"))])
 async def run_action(
     project_id: str,
     data: AIActionRequest,

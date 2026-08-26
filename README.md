@@ -71,11 +71,31 @@ supported variable. Highlights:
 
 - Passwords hashed with Argon2 (bcrypt fallback for legacy hashes).
 - JWT bearer auth on every project-scoped endpoint.
+- Per-IP, per-route rate limiting on auth (register/login), public forms
+  (waitlist/contact), AI, and terminal endpoints.
 - Terminal executes an explicit allowlist of development commands via
   `subprocess` without a shell; cwd is locked to the project workspace.
-- File API blocks path traversal, dotfiles/secrets, and key material.
+- File API blocks path traversal, dotfiles/secrets, and key material;
+  create/upload enforce size limits and block executable extensions.
 - AI context excludes `.git`, `node_modules`, secrets, and masks secret-like
   values before they reach any provider.
 - GitHub tokens are stored server-side and never returned by the API.
+- No cookies; auth token lives in browser local storage. Optional website
+  analytics (only active when `VITE_ANALYTICS_ENDPOINT` is set) is gated by
+  an explicit consent banner.
 
 See `01-docs/06_SECURITY.md` for the full model.
+
+## Public Website & Authenticated Workspace
+
+The frontend is split into two layouts:
+
+- **Public site** (`/`, `/about`, `/faq`, `/contact`, `/waitlist`,
+  `/privacy`, `/terms`) — no auth required, SEO meta tags per page, and
+  waitlist/contact forms persisted via the public API.
+- **App workspace** (`/app/dashboard`, `/app/projects`, `/app/workspace`,
+  `/app/settings`) — JWT-protected; legacy `/dashboard`-style paths redirect
+  into `/app/*`.
+
+Waitlist and contact submissions land in the `waitlist_entries` and
+`contact_messages` tables (Alembic revision `f3a1c9d2e4b5`).

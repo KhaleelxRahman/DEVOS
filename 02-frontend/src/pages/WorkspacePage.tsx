@@ -10,12 +10,17 @@ import { TerminalPanel } from '../components/workspace/TerminalPanel';
 import { GitPanel } from '../components/workspace/GitPanel';
 import { AIPanel } from '../components/workspace/AIPanel';
 import { TestingPanel } from '../components/workspace/TestingPanel';
+import { useToast } from '../components/common/Toast';
+import { useSeo } from '../hooks/useSeo';
 
 export const WorkspacePage: React.FC = () => {
+  useSeo({ title: 'Workspace', noindex: true });
+
   const { activeProject } = useProject();
   const navigate = useNavigate();
   const [tabs, setTabs] = useState<OpenTab[]>([]);
   const [activePath, setActivePath] = useState<string | null>(null);
+  const { toast } = useToast();
 
   if (!activeProject) {
     return (
@@ -25,7 +30,7 @@ export const WorkspacePage: React.FC = () => {
           title="No Project Selected"
           description="Open or select a project to launch the integrated workspace containing file explorer, code viewer, AI assistant, terminal, and Git inspector."
           actionLabel="View Projects"
-          onAction={() => navigate('/projects')}
+          onAction={() => navigate('/app/projects')}
         />
       </div>
     );
@@ -54,6 +59,20 @@ export const WorkspacePage: React.FC = () => {
     setTabs(remaining);
     if (activePath === path) {
       setActivePath(remaining.length ? remaining[remaining.length - 1].path : null);
+    }
+  };
+
+  const saveFile = async (path: string, content: string): Promise<boolean> => {
+    try {
+      const res = await filesApi.saveFile(activeProject.id, path, content);
+      setTabs((prev) =>
+        prev.map((t) => (t.path === path ? { ...t, content: res.data! } : t))
+      );
+      toast(`Saved ${path}`, 'success');
+      return true;
+    } catch (err: any) {
+      toast(err.message || `Failed to save ${path}`, 'error');
+      return false;
     }
   };
 
@@ -96,8 +115,8 @@ export const WorkspacePage: React.FC = () => {
           <FileExplorer projectId={activeProject.id} onSelectFile={openFile} activeFile={activePath} />
         </Card>
 
-        <Card title="Code Viewer" subtitle="Read-only" style={panelStyle}>
-          <CodeViewer tabs={tabs} activePath={activePath} onActivate={setActivePath} onClose={closeTab} />
+        <Card title="Code Viewer" subtitle="View & edit" style={panelStyle}>
+          <CodeViewer tabs={tabs} activePath={activePath} onActivate={setActivePath} onClose={closeTab} onSave={saveFile} />
         </Card>
 
         <Card title="AI Assistant" subtitle="Context Engine" style={panelStyle}>

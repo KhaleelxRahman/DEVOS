@@ -12,3 +12,15 @@ if backend_path not in sys.path:
 _TEST_DIR = tempfile.mkdtemp(prefix="devos_tests_")
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{os.path.join(_TEST_DIR, 'devos_test.db')}"
 os.environ["PROJECTS_STORAGE_PATH"] = os.path.join(_TEST_DIR, "projects_storage")
+
+
+# Rate limiting is process-local; reset between tests so per-IP limits in
+# auth/waitlist/contact/AI/terminal do not leak across test cases.
+import pytest as _pytest
+
+@_pytest.fixture(autouse=True)
+def _reset_rate_limiter():
+    from app.core.rate_limit import rate_limiter
+    rate_limiter.reset()
+    yield
+    rate_limiter.reset()

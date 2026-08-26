@@ -17,11 +17,13 @@ export class ApiError extends Error {
 }
 
 class ApiClient {
-  private getHeaders(customHeaders: HeadersInit = {}): HeadersInit {
+  private getHeaders(customHeaders: HeadersInit = {}, json = true): HeadersInit {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...((customHeaders as Record<string, string>) || {}),
     };
+    if (json) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     const token = localStorage.getItem('devos_token');
     if (token) {
@@ -36,7 +38,8 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
-    const headers = this.getHeaders(options.headers || {});
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    const headers = this.getHeaders(options.headers || {}, !isFormData);
 
     try {
       const response = await fetch(url, {
@@ -73,12 +76,24 @@ class ApiClient {
     });
   }
 
+  public put<T>(endpoint: string, body?: any, headers?: HeadersInit): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+      headers,
+    });
+  }
+
   public patch<T>(endpoint: string, body?: any, headers?: HeadersInit): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PATCH',
       body: body ? JSON.stringify(body) : undefined,
       headers,
     });
+  }
+
+  public postForm<T>(endpoint: string, form: FormData, headers?: HeadersInit): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { method: 'POST', body: form, headers });
   }
 
   public delete<T>(endpoint: string, headers?: HeadersInit): Promise<ApiResponse<T>> {

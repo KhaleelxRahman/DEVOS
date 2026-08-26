@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from app.core.rate_limit import rate_limit
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.api.deps import get_current_user
@@ -32,7 +33,7 @@ async def get_history(
     return ApiResponse(success=True, data={"history": history})
 
 
-@router.post("/execute", response_model=ApiResponse[TerminalResultResponse])
+@router.post("/execute", response_model=ApiResponse[TerminalResultResponse], dependencies=[Depends(rate_limit(30, 60, "terminal"))])
 async def execute_command(
     project_id: str,
     data: TerminalExecuteRequest,

@@ -62,7 +62,9 @@ The Workspace has five panels:
 1. **Files** — real project file tree. Sensitive files (`.env`, keys),
    `.git`, `node_modules`, and build output are never exposed. Filename
    search hits the backend search index.
-2. **Code Viewer** — read-only, tabbed file viewer with language detection.
+2. **Code Viewer** — tabbed file viewer with language detection and an Edit mode
+   (Edit -> Save persists via the API; closing a tab with unsaved changes asks for
+   confirmation).
 3. **AI Assistant** — chat persists per project/user. The header shows the
    active provider; without an API key it is labelled **Local/Mock**. With a
    file open, `/explain`, `/debug`, `/refactor`, `/test`, `/document`,
@@ -102,3 +104,19 @@ repositories or users are ever returned.
 | `TERMINAL_BLOCKED` | Command not on the allowlist |
 | AI always says "Mock" | Set `GEMINI_API_KEY` or `OPENAI_API_KEY` |
 | DB errors after switching to Postgres | Run `alembic upgrade head` |
+
+
+## 8. Public Website
+
+The marketing site lives at `/` (home), `/about`, `/faq`, `/contact`,
+`/waitlist`, `/privacy`, and `/terms` — no login required. Waitlist and
+contact submissions are stored in the database and rate-limited. The
+authenticated workspace moved to `/app/*`; old `/dashboard`-style links
+redirect automatically.
+
+## 9. Cookie & Analytics Preferences
+
+DEVOS sets no cookies (auth uses a bearer token in local storage). If an
+administrator configures `VITE_ANALYTICS_ENDPOINT`, a consent banner appears
+on the public site; accepting enables anonymous page-view events, rejecting
+disables all tracking. Without that variable, no banner and no tracking.

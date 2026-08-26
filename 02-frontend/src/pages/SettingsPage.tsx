@@ -3,8 +3,11 @@ import { Card, Button, Badge, Spinner } from '../components/common';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { githubApi, healthApi } from '../api';
+import { useSeo } from '../hooks/useSeo';
 
 export const SettingsPage: React.FC = () => {
+  useSeo({ title: 'Settings', noindex: true });
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [github, setGithub] = useState<{ connected: boolean; username: string | null } | null>(null);

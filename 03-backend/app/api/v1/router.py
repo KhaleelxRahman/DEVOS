@@ -9,6 +9,7 @@ from app.api.v1.ai import router as ai_router
 from app.api.v1.terminal import router as terminal_router
 from app.api.v1.activity import router as activity_router
 from app.api.v1.testing import router as testing_router
+from app.api.v1.public_forms import router as public_forms_router
 
 api_v1_router = APIRouter()
 
@@ -22,3 +23,4 @@ api_v1_router.include_router(ai_router)
 api_v1_router.include_router(terminal_router)
 api_v1_router.include_router(activity_router)
 api_v1_router.include_router(testing_router)
+api_v1_router.include_router(public_forms_router)

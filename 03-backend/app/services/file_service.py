@@ -135,3 +135,103 @@ class FileService:
             language=language,
             size=stat.st_size,
         )
+
+    # --- Mutation operations (authenticated, owner-scoped, path-validated) ---
+
+    BLOCKED_UPLOAD_EXTENSIONS = {".exe", ".bat", ".cmd", ".ps1", ".msi", ".com", ".scr"}
+    MAX_FILE_WRITE_BYTES = 2 * 1024 * 1024
+    MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+    MAX_UPLOADS_PER_REQUEST = 20
+
+    @staticmethod
+    def _validate_new_name(project_id: str, parent_rel: str, name: str) -> str:
+        if not name or name.strip() != name:
+            raise FileAccessDeniedException("Invalid name")
+        if name in (".", "..") or "/" in name or "\\" in name or "\x00" in name:
+            raise FileAccessDeniedException("Invalid name: path separators are not allowed")
+        if name.startswith("."):
+            raise FileAccessDeniedException("Hidden files and folders are not allowed")
+        if FileService.is_sensitive(name):
+            raise FileAccessDeniedException("This filename is reserved for sensitive credentials and is not allowed")
+        rel = f"{parent_rel.rstrip('/')}/{name}" if parent_rel else name
+        return FileService.validate_safe_path(project_id, rel)
+
+    @staticmethod
+    def create_file(project_id: str, parent_rel: str, name: str, content: str = "") -> FileContentResponse:
+        abs_path = FileService._validate_new_name(project_id, parent_rel, name)
+        if os.path.exists(abs_path):
+            raise FileAccessDeniedException("A file or folder with this name already exists")
+        if len(content.encode("utf-8")) > FileService.MAX_FILE_WRITE_BYTES:
+            raise FileAccessDeniedException("File content exceeds the 2MB limit")
+        os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+        with open(abs_path, "x", encoding="utf-8") as f:
+            f.write(content)
+        return FileService.get_file_content(project_id, f"{parent_rel.rstrip('/') + '/' if parent_rel else ''}{name}")
+
+    @staticmethod
+    def create_folder(project_id: str, parent_rel: str, name: str) -> str:
+        abs_path = FileService._validate_new_name(project_id, parent_rel, name)
+        if os.path.exists(abs_path):
+            raise FileAccessDeniedException("A file or folder with this name already exists")
+        os.makedirs(abs_path)
+        return f"{parent_rel.rstrip('/') + '/' if parent_rel else ''}{name}"
+
+    @staticmethod
+    def save_file(project_id: str, relative_path: str, content: str) -> FileContentResponse:
+        abs_path = FileService.validate_safe_path(project_id, relative_path)
+        if not os.path.isfile(abs_path):
+            raise FileNotFoundException()
+        if len(content.encode("utf-8")) > FileService.MAX_FILE_WRITE_BYTES:
+            raise FileAccessDeniedException("File content exceeds the 2MB limit")
+        with open(abs_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return FileService.get_file_content(project_id, relative_path)
+
+    @staticmethod
+    def rename(project_id: str, relative_path: str, new_name: str) -> str:
+        abs_path = FileService.validate_safe_path(project_id, relative_path)
+        if not os.path.exists(abs_path):
+            raise FileNotFoundException()
+        parent_abs = os.path.dirname(abs_path)
+        project_root = os.path.abspath(ProjectService.get_project_storage_path(project_id))
+        if os.path.abspath(parent_abs) == project_root and os.path.isdir(abs_path):
+            raise FileAccessDeniedException("Cannot rename the project root")
+        parent_rel = os.path.relpath(parent_abs, project_root).replace("\\", "/")
+        parent_rel = "" if parent_rel == "." else parent_rel
+        new_abs = FileService._validate_new_name(project_id, parent_rel, new_name)
+        if os.path.exists(new_abs):
+            raise FileAccessDeniedException("A file or folder with this name already exists")
+        os.rename(abs_path, new_abs)
+        return f"{parent_rel + '/' if parent_rel else ''}{new_name}"
+
+    @staticmethod
+    def delete(project_id: str, relative_path: str) -> None:
+        import shutil
+        abs_path = FileService.validate_safe_path(project_id, relative_path)
+        project_root = os.path.abspath(ProjectService.get_project_storage_path(project_id))
+        if os.path.abspath(abs_path) == project_root:
+            raise FileAccessDeniedException("Cannot delete the project root")
+        if not os.path.exists(abs_path):
+            raise FileNotFoundException()
+        if os.path.isdir(abs_path):
+            shutil.rmtree(abs_path)
+        else:
+            os.remove(abs_path)
+
+    @staticmethod
+    def save_upload(project_id: str, parent_rel: str, filename: str, data: bytes) -> str:
+        if len(data) > FileService.MAX_UPLOAD_BYTES:
+            raise FileAccessDeniedException(f"File exceeds the {FileService.MAX_UPLOAD_BYTES // (1024*1024)}MB upload limit")
+        safe_name = os.path.basename(filename.replace("\\", "/"))
+        _, ext = os.path.splitext(safe_name.lower())
+        if ext in FileService.BLOCKED_UPLOAD_EXTENSIONS:
+            raise FileAccessDeniedException(f"File type {ext} is not allowed")
+        abs_path = FileService._validate_new_name(project_id, parent_rel, safe_name)
+        os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+        if os.path.exists(abs_path):
+            # Overwriting via upload is allowed only for identical re-upload UX;
+            # rename first if the user needs to keep both copies.
+            raise FileAccessDeniedException("A file or folder with this name already exists")
+        with open(abs_path, "xb") as f:
+            f.write(data)
+        return f"{parent_rel.rstrip('/') + '/' if parent_rel else ''}{safe_name}"

@@ -30,6 +30,22 @@ export const filesApi = {
   getTree: (projectId: string) => apiClient.get<{ files: FileNode[] }>(`/projects/${projectId}/files`),
   getFile: (projectId: string, filePath: string) => apiClient.get<FileContent>(`/projects/${projectId}/files/${filePath}`),
   search: (projectId: string, query: string) => apiClient.get<{ results: string[] }>(`/projects/${projectId}/files/search?q=${encodeURIComponent(query)}`),
+  createFile: (projectId: string, parentPath: string, name: string, content = '') =>
+    apiClient.post<FileContent>(`/projects/${projectId}/files/file`, { parent_path: parentPath, name, content }),
+  createFolder: (projectId: string, parentPath: string, name: string) =>
+    apiClient.post<{ path: string }>(`/projects/${projectId}/files/folder`, { parent_path: parentPath, name }),
+  saveFile: (projectId: string, filePath: string, content: string) =>
+    apiClient.put<FileContent>(`/projects/${projectId}/files/${filePath}`, { content }),
+  rename: (projectId: string, path: string, newName: string) =>
+    apiClient.post<{ path: string }>(`/projects/${projectId}/files/rename`, { path, new_name: newName }),
+  deleteEntry: (projectId: string, filePath: string) =>
+    apiClient.delete(`/projects/${projectId}/files/${filePath}`),
+  upload: (projectId: string, parentPath: string, files: FileList | globalThis.File[]) => {
+    const form = new FormData();
+    form.append('parent_path', parentPath);
+    Array.from(files).forEach((f) => form.append('files', f, f.name));
+    return apiClient.postForm<{ uploaded: string[]; errors: string[] }>(`/projects/${projectId}/files/upload`, form);
+  },
 };
 
 export const gitApi = {
@@ -86,4 +102,11 @@ export const testingApi = {
 
 export const healthApi = {
   check: () => apiClient.get<{ status: string; service: string }>('/health'),
+};
+
+export const publicApi = {
+  joinWaitlist: (email: string, name?: string) =>
+    apiClient.post<{ status: string }>('/waitlist', { email, name: name || undefined }),
+  submitContact: (payload: { name: string; email: string; subject: string; message: string; website?: string }) =>
+    apiClient.post<{ status: string }>('/contact', payload),
 };

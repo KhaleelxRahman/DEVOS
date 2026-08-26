@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /projects
+Disallow: /workspace
+Disallow: /settings
+Disallow: /api
+
+Sitemap: https://devos.example.com/sitemap.xml

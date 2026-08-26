@@ -5,8 +5,11 @@ import { useProject } from '../hooks/useProject';
 import { Link } from 'react-router-dom';
 import { activityApi } from '../api';
 import { Activity } from '../types/activity';
+import { useSeo } from '../hooks/useSeo';
 
 export const DashboardPage: React.FC = () => {
+  useSeo({ title: 'Dashboard', noindex: true });
+
   const { activeProject } = useProject();
   const [activity, setActivity] = useState<Activity[]>([]);
 
@@ -26,7 +29,7 @@ export const DashboardPage: React.FC = () => {
             Unified project workspace with context-aware AI assistance.
           </p>
         </div>
-        <Link to="/projects">
+        <Link to="/app/projects">
           <Button variant="primary" leftIcon={<Plus size={16} />}>
             New Project
           </Button>
@@ -43,7 +46,7 @@ export const DashboardPage: React.FC = () => {
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
             {activeProject?.description || 'Select or create a project to load files, Git status, and AI context.'}
           </p>
-          <Link to="/workspace">
+          <Link to="/app/workspace">
             <Button variant="secondary" size="sm" leftIcon={<FolderGit2 size={14} />}>
               Open Workspace
             </Button>
@@ -58,7 +61,7 @@ export const DashboardPage: React.FC = () => {
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
             Ask questions about code, debugging, or workflows with automatic project context.
           </p>
-          <Link to="/workspace">
+          <Link to="/app/workspace">
             <Button variant="secondary" size="sm" leftIcon={<Bot size={14} />}>
               Ask Assistant
             </Button>
@@ -73,7 +76,7 @@ export const DashboardPage: React.FC = () => {
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
             Execute development builds and tests safely within your active project workspace.
           </p>
-          <Link to="/workspace">
+          <Link to="/app/workspace">
             <Button variant="secondary" size="sm" leftIcon={<Terminal size={14} />}>
               Launch Terminal
             </Button>

@@ -8,21 +8,21 @@ export const Sidebar: React.FC = () => {
       <div className="sidebar-nav">
         <span className="sidebar-section-title">Main Navigation</span>
         <NavLink
-          to="/dashboard"
+          to="/app/dashboard"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
         >
           <LayoutDashboard size={16} />
           <span>Dashboard</span>
         </NavLink>
         <NavLink
-          to="/projects"
+          to="/app/projects"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
         >
           <FolderGit2 size={16} />
           <span>Projects</span>
         </NavLink>
         <NavLink
-          to="/workspace"
+          to="/app/workspace"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
         >
           <Code2 size={16} />
@@ -33,7 +33,7 @@ export const Sidebar: React.FC = () => {
       <div className="sidebar-nav">
         <span className="sidebar-section-title">Preferences</span>
         <NavLink
-          to="/settings"
+          to="/app/settings"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
         >
           <Settings size={16} />

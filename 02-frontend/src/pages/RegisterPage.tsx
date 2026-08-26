@@ -4,8 +4,11 @@ import { Terminal } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
+import { useSeo } from '../hooks/useSeo';
 
 export const RegisterPage: React.FC = () => {
+  useSeo({ title: 'Create Account', noindex: false });
+
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -23,7 +26,7 @@ export const RegisterPage: React.FC = () => {
       const res = await authApi.register({ name, email, password });
       if (res.success && res.data?.user && res.data.token) {
         login(res.data.token, res.data.user);
-        navigate('/dashboard');
+        navigate('/app/dashboard');
       } else {
         setError(res.error?.message || 'Registration failed');
       }
