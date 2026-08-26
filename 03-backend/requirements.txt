@@ -2,6 +2,8 @@ fastapi>=0.110.0,<1.0.0
 uvicorn[standard]>=0.28.0,<1.0.0
 pydantic[email]>=2.6.0,<3.0.0
 pydantic-settings>=2.2.0,<3.0.0
+# Required by pydantic EmailStr (app/schemas/auth.py, public_forms.py).
+# Render ImportError "email-validator is not installed" means this line was missing.
 email-validator>=2.0.0,<3.0.0
 sqlalchemy>=2.0.28,<3.0.0
 alembic>=1.13.1,<2.0.0
