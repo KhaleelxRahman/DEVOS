@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /app
 Disallow: /dashboard
 Disallow: /projects
 Disallow: /workspace

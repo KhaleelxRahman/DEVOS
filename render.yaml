@@ -1,0 +1,33 @@
+# Render blueprint for the DEVOS FastAPI backend.
+# Secrets (AUTH_SECRET, DATABASE_URL, API keys) are marked sync:false — set
+# them in the Render dashboard, never in Git.
+services:
+  - type: web
+    name: devos-api
+    runtime: python
+    rootDir: 03-backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false   # Supabase/Postgres DSN (postgresql+asyncpg://...)
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: BACKEND_CORS_ORIGINS
+        sync: false   # e.g. ["https://your-frontend.vercel.app"]
+      - key: AI_PROVIDER
+        value: mock
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_REDIRECT_URI
+        sync: false

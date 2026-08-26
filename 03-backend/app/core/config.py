@@ -59,4 +59,25 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-settings = Settings()
+
+def _validate_production_safety(s: "Settings") -> "Settings":
+    """Fail fast on insecure defaults when ENVIRONMENT is production.
+
+    This refuses to boot a production instance with the development JWT
+    secret or wildcard CORS rather than silently deploying an unsafe API.
+    """
+    if s.ENVIRONMENT.lower() != "production":
+        return s
+    problems: list[str] = []
+    if "insecure" in s.AUTH_SECRET or "change-in-production" in s.AUTH_SECRET or len(s.AUTH_SECRET) < 32:
+        problems.append("AUTH_SECRET must be a unique random value of at least 32 characters")
+    if "*" in s.BACKEND_CORS_ORIGINS:
+        problems.append("BACKEND_CORS_ORIGINS must not contain '*' in production")
+    if not s.DATABASE_URL.startswith("postgresql"):
+        problems.append("DATABASE_URL must be a PostgreSQL DSN in production (postgresql+asyncpg://...)")
+    if problems:
+        raise ValueError("Insecure production configuration: " + "; ".join(problems))
+    return s
+
+
+settings = _validate_production_safety(Settings())
