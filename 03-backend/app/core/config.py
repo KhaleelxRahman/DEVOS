@@ -8,8 +8,9 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "DEVOS"
     API_V1_STR: str = "/api/v1"
 
-    # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/devos"
+    # Database — SQLite is the zero-dependency development default.
+    # Set DATABASE_URL to a postgresql+asyncpg:// URL for production.
+    DATABASE_URL: str = "sqlite+aiosqlite:///./devos.db"
 
     # Security & JWT
     AUTH_SECRET: str = "devos-development-insecure-secret-key-change-in-production"
@@ -35,15 +36,21 @@ class Settings(BaseSettings):
     # Workspace & Storage
     PROJECTS_STORAGE_PATH: str = "./projects_storage"
 
-    # AI Configuration (Placeholders for Future Phases)
-    AI_PROVIDER: str = "gemini"
+    # AI Provider Configuration. When no API key is configured for the
+    # selected provider, DEVOS transparently falls back to the clearly
+    # labelled local mock provider.
+    AI_PROVIDER: str = "mock"  # mock | gemini | openai
+    AI_API_KEY: str = ""
+    AI_MODEL: str = ""
     GEMINI_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
 
-    # GitHub OAuth
+    # GitHub OAuth (server-side only)
     GITHUB_CLIENT_ID: str = ""
     GITHUB_CLIENT_SECRET: str = ""
     GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/github/callback"
+    # Optional server-side token enabling read-only repository access.
+    GITHUB_TOKEN: str = ""
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../.env"),

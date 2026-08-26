@@ -11,6 +11,12 @@ SENSITIVE_PATTERNS = {
 
 SENSITIVE_EXTENSIONS = {".key", ".pem", ".p12", ".pfx"}
 
+# Directories never exposed through the file API or the AI context engine
+EXCLUDED_DIRECTORIES = {
+    "node_modules", "__pycache__", "dist", "build", ".venv", "venv",
+    "target", ".next", ".cache", "coverage",
+}
+
 EXTENSION_LANGUAGE_MAP = {
     ".py": "python",
     ".ts": "typescript",
@@ -64,7 +70,10 @@ class FileService:
                 return nodes
 
             for entry in entries:
-                if entry.name.startswith(".git") or entry.name == "__pycache__" or entry.name == "node_modules":
+                if (
+                    entry.name.startswith(".git")
+                    or entry.name in EXCLUDED_DIRECTORIES
+                ):
                     continue
                 
                 # Check sensitive

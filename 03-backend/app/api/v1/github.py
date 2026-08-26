@@ -14,11 +14,12 @@ async def get_connection(
     db: AsyncSession = Depends(get_db),
 ):
     conn = await GitHubService.get_connection(db, current_user.id)
+    token = GitHubService.resolve_token(conn)
     return ApiResponse(
         success=True,
         data={
-            "connected": conn is not None,
-            "username": conn.github_username if conn else None,
+            "connected": token is not None,
+            "username": conn.github_username if conn else ("server-token" if token else None),
         },
     )
 
@@ -32,3 +33,16 @@ async def disconnect(
         success=True,
         data={"disconnected": disconnected},
     )
+
+
+@router.get("/repos", response_model=ApiResponse[dict])
+async def list_repositories(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    conn = await GitHubService.get_connection(db, current_user.id)
+    token = GitHubService.resolve_token(conn)
+    if not token:
+        return ApiResponse(success=True, data={"connected": False, "repositories": []})
+    repos = await GitHubService.list_repositories(token)
+    return ApiResponse(success=True, data={"connected": True, "repositories": repos})

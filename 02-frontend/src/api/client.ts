@@ -1,6 +1,8 @@
 import { ApiResponse } from '../types/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+// Default to same-origin requests (served or proxied by Vite). A full URL
+// may still be supplied via VITE_API_BASE_URL for split-host deployments.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 export class ApiError extends Error {
   code: string;

@@ -8,6 +8,7 @@ from app.api.v1.github import router as github_router
 from app.api.v1.ai import router as ai_router
 from app.api.v1.terminal import router as terminal_router
 from app.api.v1.activity import router as activity_router
+from app.api.v1.testing import router as testing_router
 
 api_v1_router = APIRouter()
 
@@ -20,3 +21,4 @@ api_v1_router.include_router(github_router)
 api_v1_router.include_router(ai_router)
 api_v1_router.include_router(terminal_router)
 api_v1_router.include_router(activity_router)
+api_v1_router.include_router(testing_router)

@@ -36,11 +36,25 @@ export const gitApi = {
   getStatus: (projectId: string) => apiClient.get<GitStatus>(`/projects/${projectId}/git/status`),
   getDiff: (projectId: string) => apiClient.get<GitDiff>(`/projects/${projectId}/git/diff`),
   commit: (projectId: string, message: string) => apiClient.post(`/projects/${projectId}/git/commit`, { message }),
+  getBranches: (projectId: string) => apiClient.get<{ current: string; branches: string[] }>(`/projects/${projectId}/git/branches`),
+  getLog: (projectId: string, limit = 20) => apiClient.get<{ commits: { hash: string; author: string; date: string; message: string }[] }>(`/projects/${projectId}/git/log?limit=${limit}`),
+  stage: (projectId: string, files: string[]) => apiClient.post(`/projects/${projectId}/git/stage`, { files }),
+  unstage: (projectId: string, files: string[]) => apiClient.post(`/projects/${projectId}/git/unstage`, { files }),
+  checkout: (projectId: string, branch: string, create = false) => apiClient.post(`/projects/${projectId}/git/checkout`, { branch, create }),
+  pull: (projectId: string) => apiClient.post(`/projects/${projectId}/git/pull`),
+  push: (projectId: string) => apiClient.post(`/projects/${projectId}/git/push`),
 };
 
 export const aiApi = {
   chat: (projectId: string, payload: AIChatPayload) => apiClient.post<{ message: any; conversation_id: string }>(`/projects/${projectId}/ai/chat`, payload),
   getConversations: (projectId: string) => apiClient.get<{ conversations: Conversation[] }>(`/projects/${projectId}/ai/conversations`),
+  createConversation: (projectId: string) => apiClient.post<Conversation>(`/projects/${projectId}/ai/conversations`),
+  getMessages: (projectId: string, conversationId: string) =>
+    apiClient.get<{ messages: { role: string; content: string; provider?: string }[] }>(`/projects/${projectId}/ai/conversations/${conversationId}/messages`),
+  getProvider: (projectId: string) =>
+    apiClient.get<{ provider: string; model: string; is_mock: boolean; configured: boolean }>(`/projects/${projectId}/ai/provider`),
+  runAction: (projectId: string, payload: { action: string; code: string; file_path?: string; language?: string }) =>
+    apiClient.post<{ role: string; content: string; provider: string }>(`/projects/${projectId}/ai/actions`, payload),
 };
 
 export const terminalApi = {
@@ -52,6 +66,24 @@ export const activityApi = {
   list: () => apiClient.get<{ activities: Activity[] }>('/activity'),
 };
 
+export const githubApi = {
+  getConnection: () => apiClient.get<{ connected: boolean; username: string | null }>('/github/connection'),
+  disconnect: () => apiClient.delete('/github/connection'),
+  getRepos: () => apiClient.get<{ connected: boolean; repositories: any[] }>('/github/repos'),
+};
+
+export const testingApi = {
+  listJobs: (projectId: string) =>
+    apiClient.get<{ jobs: { id: string; label: string; available: boolean; timeout_seconds: number }[] }>(
+      `/projects/${projectId}/testing/jobs`
+    ),
+  runJob: (projectId: string, jobId: string) =>
+    apiClient.post<{
+      job: string; label: string; status: string; exit_code: number;
+      duration_ms: number; stdout: string; stderr: string;
+    }>(`/projects/${projectId}/testing/run/${jobId}`),
+};
+
 export const healthApi = {
-  check: () => apiClient.get<{ status: string; service: string }>('http://localhost:8000/health'),
+  check: () => apiClient.get<{ status: string; service: string }>('/health'),
 };

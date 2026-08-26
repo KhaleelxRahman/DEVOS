@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Bot, Terminal, FolderGit2 } from 'lucide-react';
 import { Card, Button, Badge } from '../components/common';
 import { useProject } from '../hooks/useProject';
 import { Link } from 'react-router-dom';
+import { activityApi } from '../api';
+import { Activity } from '../types/activity';
 
 export const DashboardPage: React.FC = () => {
   const { activeProject } = useProject();
+  const [activity, setActivity] = useState<Activity[]>([]);
+
+  useEffect(() => {
+    activityApi
+      .list()
+      .then((res) => setActivity(res.data?.activities || []))
+      .catch(() => setActivity([]));
+  }, []);
 
   return (
     <div>
@@ -70,6 +80,21 @@ export const DashboardPage: React.FC = () => {
           </Link>
         </Card>
       </div>
+
+      <Card title="Recent Activity" subtitle="Tracked developer activity">
+        {activity.length === 0 ? (
+          <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+            No activity yet. Open a workspace, run commands, or chat with the assistant.
+          </p>
+        ) : (
+          activity.slice(0, 8).map((a) => (
+            <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--font-size-xs)', padding: '4px 0', borderBottom: '1px solid var(--color-border-subtle)' }}>
+              <span style={{ color: 'var(--color-text-secondary)' }}>{a.activity_type}</span>
+              <span style={{ color: 'var(--color-text-muted)' }}>{new Date(a.created_at).toLocaleString()}</span>
+            </div>
+          ))
+        )}
+      </Card>
     </div>
   );
 };

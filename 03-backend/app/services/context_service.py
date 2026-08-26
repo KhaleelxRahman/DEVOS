@@ -2,7 +2,7 @@ import re
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.project_service import ProjectService
-from app.services.file_service import FileService
+from app.services.file_service import FileService, EXCLUDED_DIRECTORIES
 from app.services.git_service import GitService
 
 SECRET_KEY_PATTERNS = [
@@ -32,10 +32,20 @@ class ContextService:
             "default_branch": project.default_branch or "main",
         }
 
-        # 2. File tree
+        # 2. File tree (excludes node_modules, .git, dist, build, sensitive files)
         file_tree = FileService.get_file_tree(project_id)
 
-        # 3. Active file content if provided
+        # 3. README excerpt — the highest-value project summary document
+        readme_excerpt = None
+        for readme_name in ("README.md", "readme.md", "README"):
+            try:
+                readme_content = FileService.get_file_content(project_id, readme_name)
+                readme_excerpt = ContextService.sanitize_text(readme_content.content)[:4000]
+                break
+            except Exception:
+                continue
+
+        # 4. Active file content if provided
         active_file_data = None
         if current_file:
             try:
@@ -44,15 +54,24 @@ class ContextService:
             except Exception:
                 active_file_data = None
 
-        # 4. Git status
+        # 4. Git status — heavy/generated directories filtered so the AI
+        # context never drowns in node_modules/dist noise.
         git_status = None
         try:
             git_status = await GitService.get_status(project_id)
+            excluded = tuple(prefix + "/" for prefix in EXCLUDED_DIRECTORIES)
+            for field in ("modified", "added", "deleted", "untracked"):
+                setattr(
+                    git_status,
+                    field,
+                    [f for f in getattr(git_status, field) if not f.startswith(excluded)],
+                )
         except Exception:
             pass
 
         return {
             "project": metadata,
+            "readme": readme_excerpt,
             "file_tree": [node.model_dump() for node in file_tree],
             "current_file": active_file_data.model_dump() if active_file_data else None,
             "git_status": git_status.model_dump() if git_status else None,
