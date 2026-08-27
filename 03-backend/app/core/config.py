@@ -25,11 +25,7 @@ class Settings(BaseSettings):
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
-<<<<<<< HEAD
-    def assemble_cors_origins(cls, v: str | list[str]) -> list[str] | str:
-=======
     def assemble_cors_origins(cls, v: str | list[str]) -> str | list[str]:
->>>>>>> e51f564 (fix: modernize backend settings typing)
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
