@@ -7,4 +7,4 @@ Disallow: /workspace
 Disallow: /settings
 Disallow: /api
 
-Sitemap: https://devos.example.com/sitemap.xml
+Sitemap: https://devos-eh2p.onrender.com/sitemap.xml
