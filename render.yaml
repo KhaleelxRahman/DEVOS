@@ -18,7 +18,7 @@ services:
       - key: AUTH_SECRET
         generateValue: true
       - key: BACKEND_CORS_ORIGINS
-        sync: false   # e.g. ["https://your-frontend.vercel.app"]
+        sync: false   # e.g. ["https://devos-eh2p.onrender.com"] (your Render frontend)
       - key: AI_PROVIDER
         value: mock
       - key: GEMINI_API_KEY

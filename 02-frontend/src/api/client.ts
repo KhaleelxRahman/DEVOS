@@ -55,6 +55,14 @@ class ApiClient {
         throw new ApiError(errorMessage, errorCode, response.status);
       }
 
+      if (data === null || typeof data !== 'object') {
+        throw new ApiError(
+          'Received an unexpected response from the server',
+          'INVALID_RESPONSE',
+          response.status
+        );
+      }
+
       return data as ApiResponse<T>;
     } catch (err: any) {
       if (err instanceof ApiError) {
