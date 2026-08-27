@@ -1,6 +1,8 @@
 import { ApiResponse } from '../types/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+// Default to same-origin requests (served or proxied by Vite). A full URL
+// may still be supplied via VITE_API_BASE_URL for split-host deployments.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 export class ApiError extends Error {
   code: string;
@@ -15,11 +17,13 @@ export class ApiError extends Error {
 }
 
 class ApiClient {
-  private getHeaders(customHeaders: HeadersInit = {}): HeadersInit {
+  private getHeaders(customHeaders: HeadersInit = {}, json = true): HeadersInit {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...((customHeaders as Record<string, string>) || {}),
     };
+    if (json) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     const token = localStorage.getItem('devos_token');
     if (token) {
@@ -34,7 +38,8 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
-    const headers = this.getHeaders(options.headers || {});
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    const headers = this.getHeaders(options.headers || {}, !isFormData);
 
     try {
       const response = await fetch(url, {
@@ -48,6 +53,14 @@ class ApiClient {
         const errorCode = data?.error?.code || `HTTP_${response.status}`;
         const errorMessage = data?.error?.message || response.statusText || 'An unexpected error occurred';
         throw new ApiError(errorMessage, errorCode, response.status);
+      }
+
+      if (data === null || typeof data !== 'object') {
+        throw new ApiError(
+          'Received an unexpected response from the server',
+          'INVALID_RESPONSE',
+          response.status
+        );
       }
 
       return data as ApiResponse<T>;
@@ -71,12 +84,24 @@ class ApiClient {
     });
   }
 
+  public put<T>(endpoint: string, body?: any, headers?: HeadersInit): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+      headers,
+    });
+  }
+
   public patch<T>(endpoint: string, body?: any, headers?: HeadersInit): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PATCH',
       body: body ? JSON.stringify(body) : undefined,
       headers,
     });
+  }
+
+  public postForm<T>(endpoint: string, form: FormData, headers?: HeadersInit): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { method: 'POST', body: form, headers });
   }
 
   public delete<T>(endpoint: string, headers?: HeadersInit): Promise<ApiResponse<T>> {

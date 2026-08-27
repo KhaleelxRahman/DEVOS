@@ -1,20 +1,31 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/common';
 import { FileQuestion } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useSeo } from '../hooks/useSeo';
+import { useAuth } from '../hooks/useAuth';
 
 export const NotFoundPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  useSeo({
+    title: 'Page Not Found',
+    description: 'The requested page does not exist.',
+    noindex: true,
+  });
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <EmptyState
         icon={<FileQuestion size={48} />}
         title="404 — Page Not Found"
-        description="The requested route does not exist in the DEVOS workspace."
-        actionLabel="Return to Dashboard"
-        onAction={() => navigate('/dashboard')}
+        description="This page does not exist. It may have moved, or the link is incorrect."
       />
+      <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+        <Link to="/" className="site-btn site-btn-primary">Return Home</Link>
+        {isAuthenticated && (
+          <Link to="/app/dashboard" className="site-btn site-btn-ghost">Open Workspace</Link>
+        )}
+      </div>
     </div>
   );
 };

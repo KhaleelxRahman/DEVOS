@@ -7,6 +7,8 @@ from app.services.terminal_service import TerminalService
 from app.services.context_service import ContextService
 from app.services.ai_service import AIService
 from app.services.activity_service import ActivityService
+from app.services.conversation_service import ConversationService
+from app.services.testing_service import TestingService
 
 __all__ = [
     "AuthService",
@@ -18,4 +20,6 @@ __all__ = [
     "ContextService",
     "AIService",
     "ActivityService",
+    "ConversationService",
+    "TestingService",
 ]

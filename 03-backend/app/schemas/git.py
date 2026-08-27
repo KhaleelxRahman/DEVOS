@@ -17,3 +17,33 @@ class GitDiffResponse(BaseModel):
     files_changed: int = 0
     insertions: int = 0
     deletions: int = 0
+
+
+class GitBranchListResponse(BaseModel):
+    current: str
+    branches: List[str] = []
+
+
+class GitLogEntry(BaseModel):
+    hash: str
+    author: str
+    date: str
+    message: str
+
+
+class GitLogResponse(BaseModel):
+    commits: List[GitLogEntry] = []
+
+
+class GitStageRequest(BaseModel):
+    files: List[str]
+
+
+class GitCheckoutRequest(BaseModel):
+    branch: str
+    create: bool = False
+
+
+class GitOperationResponse(BaseModel):
+    success: bool = True
+    message: str = ""

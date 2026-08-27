@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, FolderGit2, ArrowRight } from 'lucide-react';
+import { Plus, FolderGit2, ArrowRight, Trash2 } from 'lucide-react';
 import { Card, Button, Input, Modal, EmptyState, Badge, Spinner } from '../components/common';
 import { Project } from '../types/project';
 import { projectsApi } from '../api';
 import { useProject } from '../hooks/useProject';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/common/Toast';
+import { useSeo } from '../hooks/useSeo';
 
 export const ProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -15,6 +17,9 @@ export const ProjectsPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { setActiveProject } = useProject();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  useSeo({ title: 'Projects', description: 'Your DEVOS projects.', noindex: true });
 
   useEffect(() => {
     projectsApi.list()
@@ -40,7 +45,7 @@ export const ProjectsPage: React.FC = () => {
         setIsModalOpen(false);
         setName('');
         setDescription('');
-        navigate('/workspace');
+        navigate('/app/workspace');
       }
     } catch (err) {
       console.error(err);
@@ -51,7 +56,24 @@ export const ProjectsPage: React.FC = () => {
 
   const handleOpenProject = (project: Project) => {
     setActiveProject(project);
-    navigate('/workspace');
+    navigate('/app/workspace');
+  };
+
+  const handleDelete = async (project: Project) => {
+    const confirmed = window.confirm(
+      `Delete project "${project.name}"? This permanently removes its workspace files, conversations, and activity. This cannot be undone.`
+    );
+    if (!confirmed) return;
+    setDeletingId(project.id);
+    try {
+      await projectsApi.delete(project.id);
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
+      toast(`Deleted project "${project.name}"`, 'success');
+    } catch (err: any) {
+      toast(err.message || 'Failed to delete project', 'error');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -92,14 +114,25 @@ export const ProjectsPage: React.FC = () => {
               <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)', minHeight: 40 }}>
                 {project.description || 'No description provided.'}
               </p>
-              <Button
-                variant="secondary"
-                size="sm"
-                rightIcon={<ArrowRight size={14} />}
-                onClick={() => handleOpenProject(project)}
-              >
-                Open Workspace
-              </Button>
+              <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  rightIcon={<ArrowRight size={14} />}
+                  onClick={() => handleOpenProject(project)}
+                >
+                  Open Workspace
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`Delete project ${project.name}`}
+                  isLoading={deletingId === project.id}
+                  onClick={() => handleDelete(project)}
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </div>
             </Card>
           ))}
         </div>

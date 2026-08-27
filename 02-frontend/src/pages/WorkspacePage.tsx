@@ -1,11 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { FolderGit2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useProject } from '../hooks/useProject';
 import { EmptyState, Card } from '../components/common';
-import { FolderGit2, Code2, Bot, Terminal, GitBranch } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { filesApi } from '../api';
+import { FileExplorer } from '../components/workspace/FileExplorer';
+import { CodeViewer, OpenTab } from '../components/workspace/CodeViewer';
+import { TerminalPanel } from '../components/workspace/TerminalPanel';
+import { GitPanel } from '../components/workspace/GitPanel';
+import { AIPanel } from '../components/workspace/AIPanel';
+import { TestingPanel } from '../components/workspace/TestingPanel';
+import { useToast } from '../components/common/Toast';
+import { useSeo } from '../hooks/useSeo';
 
 export const WorkspacePage: React.FC = () => {
+  useSeo({ title: 'Workspace', noindex: true });
+
   const { activeProject } = useProject();
+  const navigate = useNavigate();
+  const [tabs, setTabs] = useState<OpenTab[]>([]);
+  const [activePath, setActivePath] = useState<string | null>(null);
+  const { toast } = useToast();
 
   if (!activeProject) {
     return (
@@ -15,97 +30,107 @@ export const WorkspacePage: React.FC = () => {
           title="No Project Selected"
           description="Open or select a project to launch the integrated workspace containing file explorer, code viewer, AI assistant, terminal, and Git inspector."
           actionLabel="View Projects"
-          onAction={() => {}}
+          onAction={() => navigate('/app/projects')}
         />
       </div>
     );
   }
 
+  const openFile = async (path: string) => {
+    setActivePath(path);
+    if (tabs.some((t) => t.path === path)) return;
+    setTabs((prev) => [...prev, { path, content: null, isLoading: true, error: '' }]);
+    try {
+      const res = await filesApi.getFile(activeProject.id, path);
+      setTabs((prev) =>
+        prev.map((t) => (t.path === path ? { ...t, content: res.data!, isLoading: false } : t))
+      );
+    } catch (err: any) {
+      setTabs((prev) =>
+        prev.map((t) =>
+          t.path === path ? { ...t, isLoading: false, error: err.message || 'Failed to load file' } : t
+        )
+      );
+    }
+  };
+
+  const closeTab = (path: string) => {
+    const remaining = tabs.filter((t) => t.path !== path);
+    setTabs(remaining);
+    if (activePath === path) {
+      setActivePath(remaining.length ? remaining[remaining.length - 1].path : null);
+    }
+  };
+
+  const saveFile = async (path: string, content: string): Promise<boolean> => {
+    try {
+      const res = await filesApi.saveFile(activeProject.id, path, content);
+      setTabs((prev) =>
+        prev.map((t) => (t.path === path ? { ...t, content: res.data! } : t))
+      );
+      toast(`Saved ${path}`, 'success');
+      return true;
+    } catch (err: any) {
+      toast(err.message || `Failed to save ${path}`, 'error');
+      return false;
+    }
+  };
+
+  const activeTab = tabs.find((t) => t.path === activePath);
+  const activeFileForAI: { path: string; content: string; language?: string } | null =
+    activeTab?.content
+      ? {
+          path: activeTab.content.path,
+          content: activeTab.content.content,
+          language: activeTab.content.language,
+        }
+      : null;
+
+  const panelStyle: React.CSSProperties = { overflow: 'hidden', display: 'flex', flexDirection: 'column' };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 'var(--space-4)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 'var(--space-3)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700 }}>
             Workspace: {activeProject.name}
           </h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)' }}>
-            ID: {activeProject.id} &bull; Default Branch: {activeProject.default_branch || 'main'}
+            Default Branch: {activeProject.default_branch || 'main'}
           </p>
         </div>
-        <Link to="/projects" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-accent)' }}>
-          Switch Project
-        </Link>
       </div>
 
-      {/* Workspace Panel Placeholders */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '240px 1fr 320px',
-          gridTemplateRows: '1fr 180px',
+          gridTemplateColumns: 'minmax(200px, 240px) 1fr minmax(260px, 340px)',
+          gridTemplateRows: 'minmax(280px, 1fr) minmax(180px, 32%)',
           gap: 'var(--space-3)',
           flex: 1,
-          minHeight: 450,
+          minHeight: 480,
         }}
       >
-        {/* File Explorer Panel */}
-        <Card
-          title="Files"
-          subtitle="Project Structure"
-          style={{ overflowY: 'auto' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            <FolderGit2 size={16} />
-            <span>File Explorer (Phase 6)</span>
-          </div>
+        <Card title="Files" subtitle="Project Explorer" style={panelStyle}>
+          <FileExplorer projectId={activeProject.id} onSelectFile={openFile} activeFile={activePath} />
         </Card>
 
-        {/* Code Viewer Panel */}
-        <Card
-          title="Code Viewer"
-          subtitle="Read-only syntax display"
-          style={{ overflowY: 'auto' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-text-muted)', gap: 'var(--space-2)' }}>
-            <Code2 size={24} />
-            <span style={{ fontSize: 'var(--font-size-sm)' }}>Select a file to view code</span>
-          </div>
+        <Card title="Code Viewer" subtitle="View & edit" style={panelStyle}>
+          <CodeViewer tabs={tabs} activePath={activePath} onActivate={setActivePath} onClose={closeTab} onSave={saveFile} />
         </Card>
 
-        {/* AI Assistant Panel */}
-        <Card
-          title="AI Assistant"
-          subtitle="Project Context Engine"
-          style={{ overflowY: 'auto' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-text-muted)', gap: 'var(--space-2)' }}>
-            <Bot size={24} />
-            <span style={{ fontSize: 'var(--font-size-sm)' }}>AI Assistant ready</span>
-          </div>
+        <Card title="AI Assistant" subtitle="Context Engine" style={panelStyle}>
+          <AIPanel projectId={activeProject.id} activeFile={activeFileForAI} />
         </Card>
 
-        {/* Terminal Panel */}
-        <Card
-          title="Terminal"
-          subtitle="Sandbox Console"
-          style={{ gridColumn: 'span 2', overflowY: 'auto' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            <Terminal size={16} />
-            <span>Terminal ready for development commands</span>
-          </div>
+        <Card title="Terminal" subtitle="Sandboxed · allowlisted commands" style={{ ...panelStyle, gridColumn: 'span 2' }}>
+          <TerminalPanel projectId={activeProject.id} />
         </Card>
 
-        {/* Git Panel */}
-        <Card
-          title="Git Status"
-          subtitle="Working Tree"
-          style={{ overflowY: 'auto' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            <GitBranch size={16} />
-            <span>Working tree clean</span>
-          </div>
+        <Card title="Git & Tests" subtitle="Version control + Testing Center" style={panelStyle}>
+          <GitPanel projectId={activeProject.id} />
+          <div style={{ borderTop: '1px solid var(--color-border)', margin: '8px 0' }} />
+          <TestingPanel projectId={activeProject.id} />
         </Card>
       </div>
     </div>

@@ -578,3 +578,63 @@ MONITORED
 
 
 END OF 11_DEPLOYMENT.md
+
+
+---
+
+# APPENDIX A — Concrete Production Deployment Runbook (verified against this repo)
+
+These steps require human access to hosting providers. Nothing below is
+pre-filled with invented credentials or URLs.
+
+## A.1 Database (Supabase PostgreSQL)
+
+1. Create a Supabase project (supabase.com) — requires the user's account.
+2. From Project Settings → Database, copy the **connection string** and
+   convert it to an async SQLAlchemy DSN:
+   `postgresql+asyncpg://<user>:<password>@<host>:5432/postgres`
+3. Store it as `DATABASE_URL` in the backend host's environment/secret
+   manager. Do NOT put it in Git.
+
+## A.2 Backend (Render — `render.yaml` blueprint included)
+
+1. New → Blueprint → point at this repo (or create a Web Service manually):
+   - Root directory: `03-backend`
+   - Build: `pip install -r requirements.txt`
+   - Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - Health check path: `/api/v1/health`
+2. Environment variables (Render dashboard → Environment):
+   - `ENVIRONMENT=production`
+   - `DATABASE_URL` = Supabase DSN from A.1
+   - `AUTH_SECRET` = output of `openssl rand -hex 32` (≥32 chars)
+   - `BACKEND_CORS_ORIGINS=["https://<your-frontend-domain>"]`
+   - optional: `GEMINI_API_KEY`/`OPENAI_API_KEY`, `GITHUB_CLIENT_ID/SECRET`,
+     `GITHUB_REDIRECT_URI=https://<backend-domain>/api/v1/github/callback`
+3. The app refuses to boot in production with the dev secret, wildcard CORS,
+   or a non-PostgreSQL `DATABASE_URL` — this is intentional.
+4. First boot auto-creates tables via SQLAlchemy metadata. To use Alembic
+   instead: `alembic upgrade head` with `DATABASE_URL` set.
+
+## A.3 Frontend (Vercel — `02-frontend/vercel.json` included)
+
+1. Import the repo in Vercel, set **Root Directory** to `02-frontend`.
+2. The included `vercel.json` sets the Vite build, `dist` output, and an SPA
+   rewrite to `/index.html` (leaving `/api`, `/robots.txt`, `/sitemap.xml`,
+   `/favicon*`, `/assets` untouched).
+3. Environment variables (Vercel → Settings → Environment Variables):
+   - `VITE_API_BASE_URL=https://<backend-domain>/api/v1`
+   - optional: `VITE_ANALYTICS_ENDPOINT` (enables the consent banner only
+     when set)
+4. After deploy, verify `/`, `/about`, `/waitlist`, `/login`, `/app` (and a
+   hard refresh on a deep link) all load.
+
+## A.4 Cross-checks
+
+- Backend CORS origin list must equal the exact frontend origin
+  (scheme + host, no trailing slash).
+- GitHub OAuth app callback must match `GITHUB_REDIRECT_URI` exactly.
+- If a custom domain is added later, update: CORS origins,
+  `VITE_API_BASE_URL`, `GITHUB_REDIRECT_URI`, `robots.txt`/`sitemap.xml`
+  host, and the OAuth app settings — together.
+
+Custom domain: NOT CONFIGURED (no domain provided; use provider URLs).

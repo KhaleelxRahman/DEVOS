@@ -4,8 +4,11 @@ import { Terminal } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
+import { useSeo } from '../hooks/useSeo';
 
 export const LoginPage: React.FC = () => {
+  useSeo({ title: 'Sign In', noindex: false });
+
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -22,7 +25,7 @@ export const LoginPage: React.FC = () => {
       const res = await authApi.login({ email, password });
       if (res.success && res.data?.user && res.data.token) {
         login(res.data.token, res.data.user);
-        navigate('/dashboard');
+        navigate('/app/dashboard');
       } else {
         setError(res.error?.message || 'Login failed');
       }

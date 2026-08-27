@@ -48,3 +48,24 @@ def test_terminal_allowlist():
     with pytest.raises(AppException) as exc_info2:
         TerminalService.validate_command("nmap", ["localhost"])
     assert exc_info2.value.code == "TERMINAL_BLOCKED"
+
+def test_production_guard_rejects_insecure_defaults(monkeypatch):
+    from app.core.config import Settings, _validate_production_safety
+    s = Settings(ENVIRONMENT="production")
+    try:
+        _validate_production_safety(s)
+        raised = False
+    except ValueError:
+        raised = True
+    assert raised, "production guard must reject insecure defaults"
+
+
+def test_production_guard_accepts_secure_config():
+    from app.core.config import Settings, _validate_production_safety
+    s = Settings(
+        ENVIRONMENT="production",
+        AUTH_SECRET="x" * 48,
+        BACKEND_CORS_ORIGINS=["https://app.example.com"],
+        DATABASE_URL="postgresql+asyncpg://user:pass@host:5432/db",
+    )
+    assert _validate_production_safety(s) is s

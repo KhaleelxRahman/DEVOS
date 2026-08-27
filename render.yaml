@@ -1,0 +1,52 @@
+# Render blueprint for the DEVOS FastAPI backend.
+# Secrets (AUTH_SECRET, DATABASE_URL, API keys) are marked sync:false — set
+# them in the Render dashboard, never in Git.
+services:
+  - type: web
+    name: devos-api
+    runtime: python
+    rootDir: 03-backend
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false   # Supabase/Postgres DSN (postgresql+asyncpg://...)
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: BACKEND_CORS_ORIGINS
+        sync: false   # e.g. ["https://devos-eh2p.onrender.com"] (your Render frontend)
+      - key: AI_PROVIDER
+        value: mock
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_REDIRECT_URI
+        sync: false
+
+  # Frontend static site (Vite build -> dist/).
+  # NOTE: the currently live frontend service (devos-eh2p) was created outside
+  # this blueprint; Render will not adopt it. Either re-create the frontend
+  # from this blueprint or apply the same settings manually in the dashboard.
+  - type: web
+    name: devos-web
+    runtime: static
+    rootDir: 02-frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      # SPA fallback: serve index.html for client-side routes.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+      # API proxy: add a rewrite for /api/* to the verified backend URL once
+      # the backend service is deployed and its URL is confirmed. The backend
+      # URL is intentionally NOT hardcoded here — it is not yet verified.

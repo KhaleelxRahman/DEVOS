@@ -4,8 +4,10 @@ from jose import jwt
 from passlib.context import CryptContext
 from app.core.config import settings
 
-# Password Hashing using Passlib (Bcrypt / Argon2)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password Hashing using Passlib.
+# Argon2 is the primary scheme: passlib 1.7.4's bcrypt backend is incompatible
+# with bcrypt>=4.1 (removed __about__), which breaks hashing at runtime.
+pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     if not hashed_password:

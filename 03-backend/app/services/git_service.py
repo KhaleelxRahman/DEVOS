@@ -1,24 +1,54 @@
 import os
+import re
 import asyncio
+import shutil
 from typing import List, Optional
 from app.services.project_service import ProjectService
-from app.schemas.git import GitStatusResponse, GitDiffResponse
+from app.schemas.git import (
+    GitStatusResponse,
+    GitDiffResponse,
+    GitBranchListResponse,
+    GitLogResponse,
+    GitLogEntry,
+)
 from app.core.errors import AppException
+
+_BRANCH_RE = re.compile(r"^[A-Za-z0-9._\-/]+$")
+
 
 class GitService:
     @staticmethod
-    async def _run_git_cmd(project_id: str, args: List[str]) -> tuple[int, str, str]:
+    def _ensure_git_available() -> None:
+        if shutil.which("git") is None:
+            raise AppException(
+                "Git is not installed on this server",
+                code="GIT_UNAVAILABLE",
+                status_code=503,
+            )
+
+    @staticmethod
+    async def _run_git_cmd(project_id: str, args: List[str], auto_init: bool = True) -> tuple[int, str, str]:
+        GitService._ensure_git_available()
         project_dir = ProjectService.get_project_storage_path(project_id)
         
         # Ensure git repo initialized
-        if not os.path.exists(os.path.join(project_dir, ".git")):
+        if auto_init and not os.path.exists(os.path.join(project_dir, ".git")):
             init_proc = await asyncio.create_subprocess_exec(
-                "git", "init",
+                "git", "init", "-b", "main",
                 cwd=project_dir,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             await init_proc.communicate()
+            # Repo-local identity so commits work without a global git config.
+            for key, value in (("user.name", "DEVOS"), ("user.email", "devos@localhost")):
+                cfg_proc = await asyncio.create_subprocess_exec(
+                    "git", "config", key, value,
+                    cwd=project_dir,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+                await cfg_proc.communicate()
 
         proc = await asyncio.create_subprocess_exec(
             "git", *args,
@@ -96,3 +126,84 @@ class GitService:
             raise AppException(f"Git commit failed: {stderr or stdout}", code="GIT_ERROR", status_code=400)
 
         return True
+
+    @staticmethod
+    async def get_branches(project_id: str) -> GitBranchListResponse:
+        code, out, _ = await GitService._run_git_cmd(
+            project_id, ["branch", "--format=%(refname:short)"]
+        )
+        branches = [b.strip() for b in out.splitlines() if b.strip()]
+        code, current_out, _ = await GitService._run_git_cmd(
+            project_id, ["rev-parse", "--abbrev-ref", "HEAD"]
+        )
+        current = current_out.strip() or (branches[0] if branches else "main")
+        if current == "HEAD":
+            current = branches[0] if branches else "main"
+        return GitBranchListResponse(current=current, branches=branches)
+
+    @staticmethod
+    async def get_log(project_id: str, limit: int = 20) -> GitLogResponse:
+        limit = max(1, min(limit, 100))
+        code, out, _ = await GitService._run_git_cmd(
+            project_id, ["log", f"--max-count={limit}", "--pretty=format:%h%x1f%an%x1f%ad%x1f%s"]
+        )
+        commits: List[GitLogEntry] = []
+        if code == 0 and out.strip():
+            for line in out.splitlines():
+                parts = line.split("\x1f")
+                if len(parts) == 4:
+                    commits.append(
+                        GitLogEntry(hash=parts[0], author=parts[1], date=parts[2], message=parts[3])
+                    )
+        return GitLogResponse(commits=commits)
+
+    @staticmethod
+    async def stage(project_id: str, files: List[str]) -> None:
+        if not files:
+            raise AppException("No files specified to stage", code="GIT_ERROR", status_code=400)
+        for f in files:
+            GitService._validate_relative_path(f)
+        code, stdout, stderr = await GitService._run_git_cmd(project_id, ["add", "--", *files])
+        if code != 0:
+            raise AppException(f"Git stage failed: {stderr or stdout}", code="GIT_ERROR", status_code=400)
+
+    @staticmethod
+    async def unstage(project_id: str, files: List[str]) -> None:
+        if not files:
+            raise AppException("No files specified to unstage", code="GIT_ERROR", status_code=400)
+        for f in files:
+            GitService._validate_relative_path(f)
+        code, stdout, stderr = await GitService._run_git_cmd(
+            project_id, ["restore", "--staged", "--", *files]
+        )
+        if code != 0:
+            raise AppException(f"Git unstage failed: {stderr or stdout}", code="GIT_ERROR", status_code=400)
+
+    @staticmethod
+    async def checkout(project_id: str, branch: str, create: bool = False) -> None:
+        branch = branch.strip()
+        if not branch or not _BRANCH_RE.match(branch) or branch.startswith("-") or ".." in branch:
+            raise AppException("Invalid branch name", code="GIT_ERROR", status_code=400)
+        args = ["checkout", "-b", branch] if create else ["checkout", branch]
+        code, stdout, stderr = await GitService._run_git_cmd(project_id, args)
+        if code != 0:
+            raise AppException(f"Git checkout failed: {stderr or stdout}", code="GIT_ERROR", status_code=400)
+
+    @staticmethod
+    async def pull(project_id: str) -> str:
+        code, stdout, stderr = await GitService._run_git_cmd(project_id, ["pull"], auto_init=False)
+        if code != 0:
+            raise AppException(f"Git pull failed: {stderr or stdout}", code="GIT_ERROR", status_code=400)
+        return stdout.strip()
+
+    @staticmethod
+    async def push(project_id: str) -> str:
+        code, stdout, stderr = await GitService._run_git_cmd(project_id, ["push"], auto_init=False)
+        if code != 0:
+            raise AppException(f"Git push failed: {stderr or stdout}", code="GIT_ERROR", status_code=400)
+        return (stdout or stderr).strip()
+
+    @staticmethod
+    def _validate_relative_path(path: str) -> None:
+        if not path or os.path.isabs(path) or ".." in path.split("/") or path.startswith("-"):
+            raise AppException("Invalid file path", code="GIT_ERROR", status_code=400)

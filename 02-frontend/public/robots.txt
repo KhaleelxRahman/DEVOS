@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /dashboard
+Disallow: /projects
+Disallow: /workspace
+Disallow: /settings
+Disallow: /api
+
+Sitemap: https://devos-eh2p.onrender.com/sitemap.xml
