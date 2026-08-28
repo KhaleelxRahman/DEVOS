@@ -8,10 +8,10 @@ export const SiteFooter: React.FC = () => {
       <div className="site-footer-inner">
         <div className="site-footer-brand">
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', fontWeight: 700 }}>
-            <Terminal size={16} color="var(--color-accent)" aria-hidden="true" /> DEVOS
+            <Terminal size={16} color="var(--color-accent)" aria-hidden="true" /> DEVOS v1.0.0
           </span>
           <p>AI developer workspace for projects, files, Git, terminal, and testing.</p>
-          <p><a href="mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS%20Support">mdkhaleelurrahman51@gmail.com</a></p>
+          <p><a href="mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS v1.0.0%20Support">mdkhaleelurrahman51@gmail.com</a></p>
           <p><a href="tel:+917842835936">+91 78428 35936</a></p>
         </div>
         <nav className="site-footer-col" aria-label="Product">
@@ -31,7 +31,7 @@ export const SiteFooter: React.FC = () => {
           <Link to="/terms">Terms of Service</Link>
         </nav>
       </div>
-      <p className="site-footer-note">© {new Date().getFullYear()} DEVOS. Early-access product.</p>
+      <p className="site-footer-note">© {new Date().getFullYear()} DEVOS v1.0.0. Early-access product.</p>
     </footer>
   );
 };

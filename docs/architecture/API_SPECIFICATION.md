@@ -1,14 +1,14 @@
-DEVOS — API SPECIFICATION
+DEVOS v1.0.0 — API SPECIFICATION
 
 Document: 07_API_SPECIFICATION.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
 
 1. PURPOSE
 
-This document defines the API architecture and contracts for DEVOS.
+This document defines the API architecture and contracts for DEVOS v1.0.0.
 
 The API must provide a clean, secure and predictable interface between:
 
@@ -150,7 +150,7 @@ POST /api/v1/auth/register
 
 Purpose:
 
-Create a DEVOS account.
+Create a DEVOS v1.0.0 account.
 
 Request:
 
@@ -258,7 +258,7 @@ Create a project.
 Request:
 
 {
-  "name": "DEVOS",
+  "name": "DEVOS v1.0.0",
   "description": "AI developer workspace",
   "technologies": [
     "React",
@@ -304,7 +304,7 @@ PATCH /api/v1/projects/{project_id}
 Request:
 
 {
-  "name": "Updated DEVOS",
+  "name": "Updated DEVOS v1.0.0",
   "description": "Updated description"
 }
 
@@ -718,7 +718,7 @@ Example:
 {
   "success": true,
   "status": "online",
-  "service": "DEVOS API"
+  "service": "DEVOS v1.0.0 API"
 }
 
 
@@ -1008,7 +1008,7 @@ SIMPLE
 
 76. FINAL API PRINCIPLE
 
-DEVOS frontend should never need to know how the backend performs an operation.
+DEVOS v1.0.0 frontend should never need to know how the backend performs an operation.
 
 The frontend asks:
 

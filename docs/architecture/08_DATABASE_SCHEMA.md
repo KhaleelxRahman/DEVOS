@@ -1,16 +1,16 @@
 08_DATABASE_SCHEMA.md —
 
-DEVOS — DATABASE SCHEMA
+DEVOS v1.0.0 — DATABASE SCHEMA
 
 Document: 08_DATABASE_SCHEMA.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
 
 1. PURPOSE
 
-This document defines the database architecture for DEVOS.
+This document defines the database architecture for DEVOS v1.0.0.
 
 The database must store the minimum information required for:
 
@@ -1063,7 +1063,7 @@ Future retention policies may apply to:
 
 47. PRIVACY
 
-Only store information necessary for DEVOS functionality.
+Only store information necessary for DEVOS v1.0.0 functionality.
 
 Project source code should not be permanently duplicated in the database unless explicitly required.
 

@@ -1,6 +1,6 @@
 // Cookie/consent handling.
 //
-// DEVOS itself is cookie-free: the API uses Authorization bearer tokens
+// DEVOS v1.0.0 itself is cookie-free: the API uses Authorization bearer tokens
 // stored in localStorage, so no cookies are set and no consent banner is
 // legally required by default.
 //

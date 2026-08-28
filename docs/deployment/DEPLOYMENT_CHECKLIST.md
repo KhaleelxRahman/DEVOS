@@ -1,4 +1,4 @@
-# Deployment Checklist
+# DEVOS v1.0.0 Deployment Checklist
 
 ## Frontend
 
@@ -21,3 +21,14 @@
 - [ ] Create a project and open the workspace.
 - [ ] Create a file, run an allowlisted command, and inspect Git status.
 - [ ] Connect GitHub and browse repositories.
+
+## Release readiness
+
+- [ ] Confirm the [CI workflow](../../.github/workflows/ci.yml) passes for the
+      release commit (backend lint/tests and frontend build).
+- [ ] Confirm the [security workflow](../../.github/workflows/security.yml)
+      passes, including dependency and secret scans.
+- [ ] Confirm the [DEVOS v1.0.0 changelog](../releases/CHANGELOG.md) and
+      [release notes](../releases/RELEASE_NOTES.md) match the shipped version.
+- [ ] Record the deployed frontend/API URLs and rollback target in the release
+      record; do not add credentials or tokens.

@@ -21,7 +21,7 @@ labels: bug
 
 - OS:
 - Browser:
-- DEVOS commit/version:
+- DEVOS v1.0.0 commit/version:
 
 ## Logs or screenshots
 

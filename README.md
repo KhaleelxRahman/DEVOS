@@ -1,8 +1,8 @@
-# DEVOS
+# DEVOS v1.0.0
 
 > AI-powered Developer Workspace with Git, AI Assistant, Terminal, and GitHub Integration.
 
-[![DEVOS banner](./docs/assets/devos-banner.svg)](./docs/README.md)
+[![DEVOS v1.0.0 banner](./docs/assets/devos-banner.svg)](./docs/README.md)
 
 [![CI](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/ci.yml/badge.svg)](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/ci.yml)
 [![Security](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/security.yml/badge.svg)](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/security.yml)
@@ -83,7 +83,7 @@ The Vite server proxies `/api` to `http://localhost:8000`. Override it with `VIT
 
 ```bash
 python -m ruff check 03-backend
-python -m pytest -q
+python -m pytest -q 04-tests
 cd 02-frontend
 npm run build
 ```
@@ -126,9 +126,9 @@ Read [CONTRIBUTING.md](./.github/CONTRIBUTING.md), open an issue using the provi
 
 ## Support
 
-- Email: [mdkhaleelurrahman51@gmail.com](mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS%20Support)
+- Email: [mdkhaleelurrahman51@gmail.com](mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS v1.0.0%20Support)
 - Phone: [+91 78428 35936](tel:+917842835936)
 
 ## License
 
-DEVOS is released under the [MIT License](./LICENSE).
+DEVOS v1.0.0 is released under the [MIT License](./LICENSE).

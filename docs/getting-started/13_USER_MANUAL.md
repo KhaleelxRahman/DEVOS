@@ -1,4 +1,4 @@
-# DEVOS — User Manual
+# DEVOS v1.0.0 — User Manual
 
 Document: 13_USER_MANUAL.md
 Version: 1.0
@@ -6,7 +6,7 @@ Status: Matches implemented system (post-stabilization)
 
 ---
 
-## 1. Running DEVOS
+## 1. Running DEVOS v1.0.0
 
 ### Backend
 
@@ -84,7 +84,7 @@ Set one of these in `03-backend/.env`:
 - `GEMINI_API_KEY` (with `AI_PROVIDER=gemini`)
 - `OPENAI_API_KEY` (with `AI_PROVIDER=openai`)
 
-Without a key, DEVOS serves **Local/Mock** responses that are clearly marked
+Without a key, DEVOS v1.0.0 serves **Local/Mock** responses that are clearly marked
 as mock in the API and UI. AI context includes your README, file tree, active
 file, and Git status; secret-like values are masked first.
 
@@ -116,7 +116,7 @@ redirect automatically.
 
 ## 9. Cookie & Analytics Preferences
 
-DEVOS sets no cookies (auth uses a bearer token in local storage). If an
+DEVOS v1.0.0 sets no cookies (auth uses a bearer token in local storage). If an
 administrator configures `VITE_ANALYTICS_ENDPOINT`, a consent banner appears
 on the public site; accepting enables anonymous page-view events, rejecting
 disables all tracking. Without that variable, no banner and no tracking.

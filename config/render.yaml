@@ -1,4 +1,4 @@
-# Render blueprint for the DEVOS FastAPI backend.
+# Render blueprint for the DEVOS v1.0.0 FastAPI backend.
 # Secrets (AUTH_SECRET, DATABASE_URL, API keys) are marked sync:false — set
 # them in the Render dashboard, never in Git.
 services:

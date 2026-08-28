@@ -184,3 +184,14 @@
   letter-spacing: 0.05em;
   color: var(--color-text-secondary);
 }
+
+@media (max-width: 820px) {
+  .workspace-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(5, minmax(280px, auto)) !important;
+    min-height: 0 !important;
+  }
+  .workspace-grid > * {
+    grid-column: auto !important;
+  }
+}

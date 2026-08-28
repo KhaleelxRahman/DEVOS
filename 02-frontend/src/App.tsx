@@ -66,7 +66,7 @@ export const App: React.FC = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 
-              {/* ===== Authenticated DEVOS workspace ===== */}
+              {/* ===== Authenticated DEVOS v1.0.0 workspace ===== */}
               <Route
                 path="/app"
                 element={

@@ -1,14 +1,14 @@
-DEVOS — TESTING & QA SPECIFICATION
+DEVOS v1.0.0 — TESTING & QA SPECIFICATION
 
 Document: 10_TESTING_QA.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
 
 1. PURPOSE
 
-This document defines the testing and quality assurance strategy for DEVOS.
+This document defines the testing and quality assurance strategy for DEVOS v1.0.0.
 
 The objective is to ensure that every important feature is:
 
@@ -33,7 +33,7 @@ IMPLEMENTED
 
 3. TESTING LEVELS
 
-DEVOS should use:
+DEVOS v1.0.0 should use:
 
 1. Unit Testing
 2. API Testing
@@ -235,7 +235,7 @@ It should NOT receive unrelated files unnecessarily.
 
 Project A:
 
-DEVOS
+DEVOS v1.0.0
 
 Project B:
 
@@ -630,7 +630,7 @@ Manual testing remains necessary for:
 
 49. MVP DEFINITION OF QUALITY
 
-DEVOS MVP should:
+DEVOS v1.0.0 MVP should:
 
 ✓ Work reliably
 ✓ Fail gracefully

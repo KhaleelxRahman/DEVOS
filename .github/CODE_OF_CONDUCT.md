@@ -1,6 +1,6 @@
 # Contributor Covenant Code of Conduct
 
-We pledge to make participation in DEVOS welcoming, respectful, and harassment-free.
+We pledge to make participation in DEVOS v1.0.0 welcoming, respectful, and harassment-free.
 Use inclusive language, respect differing viewpoints, accept constructive feedback,
 and focus on what is best for the community.
 

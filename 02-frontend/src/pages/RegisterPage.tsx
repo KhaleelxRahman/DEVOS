@@ -43,10 +43,10 @@ export const RegisterPage: React.FC = () => {
         <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
             <Terminal size={24} color="var(--color-accent)" />
-            <span style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, letterSpacing: '0.05em' }}>DEVOS</span>
+            <span style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, letterSpacing: '0.05em' }}>DEVOS v1.0.0</span>
           </div>
           <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            Create your DEVOS account
+            Create your DEVOS v1.0.0 account
           </p>
         </div>
 

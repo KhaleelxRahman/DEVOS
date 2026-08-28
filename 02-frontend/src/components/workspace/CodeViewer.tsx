@@ -76,7 +76,14 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ tabs, activePath, onActi
             role="tab"
             aria-selected={tab.path === activePath}
             className={`editor-tab ${tab.path === activePath ? 'active' : ''}`}
+            tabIndex={0}
             onClick={() => onActivate(tab.path)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onActivate(tab.path);
+              }
+            }}
           >
             <span style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {tab.path.split('/').pop()}

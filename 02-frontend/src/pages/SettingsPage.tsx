@@ -76,7 +76,7 @@ export const SettingsPage: React.FC = () => {
         Manage account and workspace preferences.
       </p>
 
-      <Card title="Account Profile" subtitle="Your DEVOS developer identity" style={{ marginBottom: 'var(--space-4)' }}>
+      <Card title="Account Profile" subtitle="Your DEVOS v1.0.0 developer identity" style={{ marginBottom: 'var(--space-4)' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', fontSize: 'var(--font-size-sm)' }}>
           <div>
             <span style={{ color: 'var(--color-text-muted)', display: 'block', fontSize: 'var(--font-size-xs)' }}>Name</span>
@@ -129,7 +129,7 @@ export const SettingsPage: React.FC = () => {
         )}
       </Card>
 
-      <Card title="Backend Status" subtitle="DEVOS API health">
+      <Card title="Backend Status" subtitle="DEVOS v1.0.0 API health">
         <span style={{ fontSize: 'var(--font-size-sm)' }}>
           {apiStatus === null ? (
             <Spinner size={14} />

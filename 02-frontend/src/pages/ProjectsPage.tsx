@@ -20,7 +20,7 @@ export const ProjectsPage: React.FC = () => {
   const { toast } = useToast();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState('');
-  useSeo({ title: 'Projects', description: 'Your DEVOS projects.', noindex: true });
+  useSeo({ title: 'Projects', description: 'Your DEVOS v1.0.0 projects.', noindex: true });
 
   useEffect(() => {
     projectsApi.list()
@@ -107,7 +107,7 @@ export const ProjectsPage: React.FC = () => {
         <EmptyState
           icon={<FolderGit2 size={40} />}
           title="No projects yet"
-          description="Create your first DEVOS project to connect repository files, start the terminal, and enable context-aware AI."
+          description="Create your first DEVOS v1.0.0 project to connect repository files, start the terminal, and enable context-aware AI."
           actionLabel="Create Project"
           onAction={() => setIsModalOpen(true)}
         />

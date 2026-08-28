@@ -14,7 +14,7 @@ class InMemoryRateLimiter:
     """Sliding-window, per-IP, per-route-key rate limiter.
 
     Process-local and best-effort: suitable for the single-process deployment
-    DEVOS targets. Swap for Redis-backed limiting for multi-process setups.
+    DEVOS v1.0.0 targets. Swap for Redis-backed limiting for multi-process setups.
     """
 
     def __init__(self):

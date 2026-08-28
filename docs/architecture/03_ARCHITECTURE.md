@@ -1,12 +1,12 @@
 03_ARCHITECTURE.md
-DEVOS — SYSTEM ARCHITECTURE
+DEVOS v1.0.0 — SYSTEM ARCHITECTURE
 Document: 03_ARCHITECTURE.md
 Version: 1.0
 Status: Active Development
 
 1. ARCHITECTURE PURPOSE
 
-This document defines the technical architecture of DEVOS.
+This document defines the technical architecture of DEVOS v1.0.0.
 
 It covers:
 • Frontend
@@ -46,7 +46,7 @@ Files + Git + Terminal + AI
 
 3. HIGH-LEVEL ARCHITECTURE
 
-DEVOS UI
+DEVOS v1.0.0 UI
 ↓
 API Layer
 ↓
@@ -474,7 +474,7 @@ AI Provider Interface
 ├── Provider B
 └── Future Providers
 
-DEVOS must not be tightly coupled to one AI provider.
+DEVOS v1.0.0 must not be tightly coupled to one AI provider.
 
 
 25. AI CONTEXT ARCHITECTURE
@@ -894,7 +894,7 @@ Architecture is sufficiently implemented when:
 
 49. FINAL ARCHITECTURE PRINCIPLE
 
-DEVOS must NOT be architected as a collection of unrelated tools.
+DEVOS v1.0.0 must NOT be architected as a collection of unrelated tools.
 
 The architecture revolves around:
 
@@ -923,7 +923,7 @@ The DATABASE is the persistence layer.
 
 50. FINAL STATEMENT
 
-DEVOS architecture must remain:
+DEVOS v1.0.0 architecture must remain:
 
 PROJECT-CENTRIC
 API-FIRST

@@ -1,12 +1,12 @@
-DEVOS — REQUIREMENTS SPECIFICATION
+DEVOS v1.0.0 — REQUIREMENTS SPECIFICATION
 Document: 02_REQUIREMENTS.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 Related Document: 01_PRD.md
 --------------------
 1. Purpose
-This document defines the functional, non-functional, security, usability, reliability, and acceptance requirements for DEVOS MVP.
+This document defines the functional, non-functional, security, usability, reliability, and acceptance requirements for DEVOS v1.0.0 MVP.
 The requirements in this document convert the product vision defined in 01_PRD.md into verifiable product behavior.
 Every MVP feature should satisfy its relevant requirements before being considered complete.
 --------------------
@@ -104,7 +104,7 @@ Deletion should require appropriate confirmation.
 --------------------
 REQ-PROJ-007 — Active Project
 Priority: P0
-DEVOS shall maintain an identifiable active project during workspace usage.
+DEVOS v1.0.0 shall maintain an identifiable active project during workspace usage.
 --------------------
 REQ-PROJ-008 — Project Metadata
 Priority: P0
@@ -246,7 +246,7 @@ Command failures shall be displayed clearly.
 11. Git Requirements
 REQ-GIT-001 — Repository Information
 Priority: P0
-DEVOS shall be able to display repository information when a repository is connected.
+DEVOS v1.0.0 shall be able to display repository information when a repository is connected.
 --------------------
 REQ-GIT-002 — Current Branch
 Priority: P0
@@ -254,11 +254,11 @@ The active Git branch should be visible.
 --------------------
 REQ-GIT-003 — Git Status
 Priority: P0
-DEVOS shall display Git working-tree status.
+DEVOS v1.0.0 shall display Git working-tree status.
 --------------------
 REQ-GIT-004 — Changed Files
 Priority: P0
-DEVOS shall identify changed files.
+DEVOS v1.0.0 shall identify changed files.
 --------------------
 REQ-GIT-005 — Change Review
 Priority: P1
@@ -266,7 +266,7 @@ Users should be able to inspect relevant changes before committing.
 --------------------
 REQ-GIT-006 — Commit
 Priority: P1
-Users should be able to create a Git commit through the DEVOS workflow.
+Users should be able to create a Git commit through the DEVOS v1.0.0 workflow.
 --------------------
 REQ-GIT-007 — Git Errors
 Priority: P0
@@ -279,7 +279,7 @@ Users should be able to connect a supported GitHub repository.
 --------------------
 REQ-GH-002 — Repository Metadata
 Priority: P1
-DEVOS should retrieve relevant repository information.
+DEVOS v1.0.0 should retrieve relevant repository information.
 --------------------
 REQ-GH-003 — Credential Security
 Priority: P0
@@ -372,7 +372,7 @@ The context engine should support Git information.
 --------------------
 REQ-CONTEXT-005 — Context Assembly
 Priority: P0
-DEVOS shall construct relevant context before sending supported AI requests.
+DEVOS v1.0.0 shall construct relevant context before sending supported AI requests.
 --------------------
 REQ-CONTEXT-006 — Secret Protection
 Priority: P0
@@ -403,7 +403,7 @@ The system should maintain appropriate conversation context without unnecessaril
 16. Activity Requirements
 REQ-ACT-001 — Activity Recording
 Priority: P1
-DEVOS should record relevant project activities.
+DEVOS v1.0.0 should record relevant project activities.
 Examples:
 • Project created
 • Project opened
@@ -502,7 +502,7 @@ REQ-UX-001 — Responsive Design
 The application should work across supported desktop and smaller-screen environments.
 --------------------
 REQ-UX-002 — Consistent Design
-UI components must follow the DEVOS design system defined in 04_UI_UX.md.
+UI components must follow the DEVOS v1.0.0 design system defined in 04_UI_UX.md.
 --------------------
 REQ-UX-003 — Accessibility
 Important controls must be usable through keyboard interaction and have understandable labels.
@@ -515,7 +515,7 @@ The interface must clearly communicate:
 • Current system state
 --------------------
 REQ-UX-005 — Developer Aesthetic
-DEVOS should maintain a professional developer-tool visual language.
+DEVOS v1.0.0 should maintain a professional developer-tool visual language.
 --------------------
 22. No-Fake-Functionality Requirement
 REQ-TRUST-001
@@ -534,7 +534,7 @@ This applies to:
 • Project data
 --------------------
 23. Acceptance Criteria
-The DEVOS MVP is acceptable when all P0 requirements are satisfied and the following complete workflow works:
+The DEVOS v1.0.0 MVP is acceptable when all P0 requirements are satisfied and the following complete workflow works:
 Register ↓ Login ↓ Create Project ↓ Open Project ↓ Enter Workspace ↓ Browse Files ↓ Open Code ↓ Ask AI ↓ AI Uses Project Context ↓ Use Terminal ↓ View Git Status ↓ Review Changes ↓ Commit ↓ Continue Development
 --------------------
 24. MVP Definition of Done
@@ -614,4 +614,4 @@ The PRD remains the source of truth for product direction.
 This requirements document remains the source of truth for MVP behavior.
 --------------------
 28. Final Requirement Principle
-DEVOS should be judged by whether it provides real developer valu
+DEVOS v1.0.0 should be judged by whether it provides real developer valu

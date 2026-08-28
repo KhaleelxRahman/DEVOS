@@ -1,4 +1,4 @@
-"""Provider-independent DEVOS AI architecture.
+"""Provider-independent DEVOS v1.0.0 AI architecture.
 
 Providers implement BaseAIProvider. The factory (AIService.from_settings)
 selects a real provider only when its API key is configured; otherwise it
@@ -92,7 +92,7 @@ class MockAIProvider(BaseAIProvider):
         current_file = context.get("current_file")
         file_note = f" I can see your active file `{current_file.get('path')}`." if current_file else ""
         content = (
-            "**DEVOS Local/Mock AI** (no AI provider configured — set `AI_PROVIDER` and "
+            "**DEVOS v1.0.0 Local/Mock AI** (no AI provider configured — set `AI_PROVIDER` and "
             "`AI_API_KEY` to enable a real model).\n\n"
             f"You asked about `{project_name}`:{file_note}\n\n"
             f"> {prompt[:500]}\n\n"
@@ -150,7 +150,7 @@ class OpenAIProvider(BaseAIProvider):
     async def generate_response(self, prompt, context, history) -> AIMessageResponse:
         context_text = _render_context(context)
         messages = [
-            {"role": "system", "content": "You are the DEVOS coding assistant. Use the project context provided."},
+            {"role": "system", "content": "You are the DEVOS v1.0.0 coding assistant. Use the project context provided."},
             {"role": "system", "content": context_text},
         ]
         messages.extend(

@@ -50,9 +50,9 @@ export const SiteNavbar: React.FC = () => {
 
   return (
     <header className="site-nav">
-      <Link to="/" className="site-nav-brand" aria-label="DEVOS home">
+      <Link to="/" className="site-nav-brand" aria-label="DEVOS v1.0.0 home">
         <Terminal size={20} color="var(--color-accent)" aria-hidden="true" />
-        <span>DEVOS</span>
+        <span>DEVOS v1.0.0</span>
       </Link>
 
       <nav className="site-nav-links" aria-label="Primary">

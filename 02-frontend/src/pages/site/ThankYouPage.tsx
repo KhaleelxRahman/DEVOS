@@ -20,7 +20,7 @@ export const ThankYouPage: React.FC = () => {
       <h1>{isWaitlist ? "You're on the list." : 'Message received.'}</h1>
       <p style={{ color: 'var(--color-text-secondary)', maxWidth: 480, margin: '0 auto var(--space-6)' }}>
         {isWaitlist
-          ? 'Your email is saved. When meaningful DEVOS updates ship, you will hear about them — no launch date is promised yet.'
+          ? 'Your email is saved. When meaningful DEVOS v1.0.0 updates ship, you will hear about them — no launch date is promised yet.'
           : 'Thanks for reaching out. Your message was stored and will be read by the team. Replies go to the email address you provided.'}
       </p>
       <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'center', flexWrap: 'wrap' }}>

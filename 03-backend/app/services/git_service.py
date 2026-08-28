@@ -42,7 +42,7 @@ class GitService:
             )
             await init_proc.communicate()
             # Repo-local identity so commits work without a global git config.
-            for key, value in (("user.name", "DEVOS"), ("user.email", "devos@localhost")):
+            for key, value in (("user.name", "DEVOS v1.0.0"), ("user.email", "devos@localhost")):
                 cfg_proc = await asyncio.create_subprocess_exec(
                     "git", "config", key, value,
                     cwd=project_dir,

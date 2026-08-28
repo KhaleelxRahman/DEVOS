@@ -99,6 +99,10 @@
 .form-input:focus {
   border-color: var(--color-border-focus);
 }
+.form-input:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 1px;
+}
 
 .form-error {
   font-size: var(--font-size-xs);
@@ -233,6 +237,10 @@
 .editor-tab.active {
   color: var(--color-text-primary);
   border-bottom-color: var(--color-accent);
+}
+.editor-tab:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: -2px;
 }
 .editor-tab-close {
   border: none;

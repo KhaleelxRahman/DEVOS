@@ -1,14 +1,14 @@
-DEVOS — AI CONTEXT ENGINE
+DEVOS v1.0.0 — AI CONTEXT ENGINE
 
 Document: 09_AI_CONTEXT_ENGINE.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
 
 1. PURPOSE
 
-The AI Context Engine is one of the core differentiators of DEVOS.
+The AI Context Engine is one of the core differentiators of DEVOS v1.0.0.
 
 Its purpose is to ensure that the AI understands the active development project instead of treating every user message as an isolated question.
 
@@ -127,7 +127,7 @@ The context engine may use:
 Example:
 
 {
-  "name": "DEVOS",
+  "name": "DEVOS v1.0.0",
   "description": "AI developer workspace",
   "technologies": [
     "React",
@@ -524,7 +524,7 @@ ai.requested
 
 33. TECHNOLOGY DETECTION
 
-DEVOS may detect technologies from:
+DEVOS v1.0.0 may detect technologies from:
 
 package.json
 requirements.txt
@@ -817,11 +817,11 @@ Add:
 
 57. FINAL PRINCIPLE
 
-DEVOS should not simply provide:
+DEVOS v1.0.0 should not simply provide:
 
 AI CHAT.
 
-DEVOS should provide:
+DEVOS v1.0.0 should provide:
 
 PROJECT-AWARE AI.
 
@@ -830,7 +830,7 @@ The difference is:
 CHATBOT
 → Answers the question.
 
-DEVOS
+DEVOS v1.0.0
 → Understands the project behind the question.
 
 

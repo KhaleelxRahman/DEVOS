@@ -1,15 +1,15 @@
-DEVOS — UI/UX SPECIFICATION
+DEVOS v1.0.0 — UI/UX SPECIFICATION
 
 Document: 04_UI_UX.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
 1. UI/UX PURPOSE
 
-This document defines the visual language, interaction model, layout system, component system, responsive behavior, accessibility requirements, and UX standards for DEVOS.
+This document defines the visual language, interaction model, layout system, component system, responsive behavior, accessibility requirements, and UX standards for DEVOS v1.0.0.
 
-DEVOS must feel like a professional developer SaaS platform.
+DEVOS v1.0.0 must feel like a professional developer SaaS platform.
 
 It must NOT feel like:
 • Generic admin dashboard
@@ -18,12 +18,12 @@ It must NOT feel like:
 • Prototype with fake interactions
 • Collection of oversized cards
 
-DEVOS should feel like one unified developer command center.
+DEVOS v1.0.0 should feel like one unified developer command center.
 
 
 2. CORE UX PRINCIPLE
 
-The PROJECT is the center of the DEVOS experience.
+The PROJECT is the center of the DEVOS v1.0.0 experience.
 
 The user should always understand:
 
@@ -42,7 +42,7 @@ CREATE → CONNECT → CONTEXTUALIZE → BUILD → APPROVE → CONTINUE
 
 3. DESIGN PERSONALITY
 
-DEVOS should communicate:
+DEVOS v1.0.0 should communicate:
 
 • Professional
 • Technical
@@ -58,7 +58,7 @@ Visual personality:
 
 "Premium developer infrastructure SaaS"
 
-Avoid making DEVOS look like:
+Avoid making DEVOS v1.0.0 look like:
 • Gaming interface
 • Flashy AI landing page
 • Cryptocurrency dashboard
@@ -82,7 +82,7 @@ Every screen must have a clear purpose.
 
 5. VISUAL DIRECTION
 
-DEVOS should use a dark-first developer workspace.
+DEVOS v1.0.0 should use a dark-first developer workspace.
 
 Use:
 
@@ -272,7 +272,7 @@ The shell should remain consistent across the application.
 
 Include:
 
-• DEVOS branding
+• DEVOS v1.0.0 branding
 • Active project
 • Project selector
 • Global status
@@ -281,7 +281,7 @@ Include:
 
 Example:
 
-DEVOS | Project ▼ | Git Status | AI | Account
+DEVOS v1.0.0 | Project ▼ | Git Status | AI | Account
 
 
 15. SIDEBAR
@@ -408,7 +408,7 @@ Never silently delete a project.
 
 23. WORKSPACE
 
-Workspace is the core DEVOS interface.
+Workspace is the core DEVOS v1.0.0 interface.
 
 Recommended:
 
@@ -826,7 +826,7 @@ Example:
 
 "No projects yet."
 
-"Create your first DEVOS project to get started."
+"Create your first DEVOS v1.0.0 project to get started."
 
 [Create Project]
 
@@ -1125,7 +1125,7 @@ Show compact context information.
 Example:
 
 Project:
-DEVOS
+DEVOS v1.0.0
 
 Technology:
 React + FastAPI
@@ -1397,7 +1397,7 @@ UI/UX is complete when:
 
 91. FINAL UI/UX PRINCIPLE
 
-DEVOS should feel like:
+DEVOS v1.0.0 should feel like:
 
 A professional developer command center.
 
@@ -1448,7 +1448,7 @@ If not, remove it.
 
 94. FINAL UI/UX STATEMENT
 
-DEVOS must prioritize:
+DEVOS v1.0.0 must prioritize:
 
 SIMPLE
 → FAST

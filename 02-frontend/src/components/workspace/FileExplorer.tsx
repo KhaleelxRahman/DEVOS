@@ -271,7 +271,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectId, onSelectF
               <Upload size={12} /> Upload files
             </button>
             <p style={{ margin: 0, fontSize: 11 }}>
-              Uploading copies files you pick from your computer into this project — DEVOS cannot browse your
+              Uploading copies files you pick from your computer into this project — DEVOS v1.0.0 cannot browse your
               device. Max 10MB per file; executable formats are blocked. To bring in a whole folder tree,
               import it via Git instead.
             </p>

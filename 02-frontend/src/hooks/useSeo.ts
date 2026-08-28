@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const SITE = 'DEVOS';
+const SITE = 'DEVOS v1.0.0';
 
 export interface SeoOptions {
   title: string;

@@ -1,9 +1,12 @@
 # Changelog
 
+## v1.0.0 - Release Candidate
+
+- Consolidated the project into an enterprise-ready repository structure.
+- Added responsive workspace behavior and keyboard-accessible controls.
+- Expanded documentation navigation, deployment readiness, and release guidance.
+- Added PWA, SEO, GitHub integration, and production security hardening.
+
 ## Unreleased
 
-- Added verified DEVOS support email and phone links.
-- Added complete PWA icon assets and manifest references.
-- Added robots and public-route sitemap assets.
-- Added GitHub repository search, pagination, refresh, metadata, and workspace opening.
-- Hardened terminal, OAuth, workspace, and Git behavior (see prior release notes).
+- No unreleased changes.

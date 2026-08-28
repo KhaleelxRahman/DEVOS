@@ -1,6 +1,6 @@
 {
-  "name": "DEVOS — AI Developer Workspace",
-  "short_name": "DEVOS",
+  "name": "DEVOS v1.0.0 — AI Developer Workspace",
+  "short_name": "DEVOS v1.0.0",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#0d1117",

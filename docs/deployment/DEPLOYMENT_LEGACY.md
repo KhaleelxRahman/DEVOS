@@ -1,14 +1,14 @@
-DEVOS — DEPLOYMENT SPECIFICATION
+DEVOS v1.0.0 — DEPLOYMENT SPECIFICATION
 
 Document: 11_DEPLOYMENT.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
 
 1. PURPOSE
 
-This document defines how DEVOS moves from local development to production.
+This document defines how DEVOS v1.0.0 moves from local development to production.
 
 
 2. DEPLOYMENT ARCHITECTURE
@@ -186,14 +186,14 @@ Secure cookies should be enabled when cookie-based authentication is used.
 
 Endpoint:
 
-GET /health
+GET /api/v1/health
 
 Expected:
 
 {
   "success": true,
   "status": "online",
-  "service": "DEVOS API"
+  "service": "DEVOS v1.0.0 API"
 }
 
 
@@ -335,7 +335,7 @@ Database migration rollback strategy
 
 30. ZERO-DOWNTIME FUTURE
 
-As DEVOS grows:
+As DEVOS v1.0.0 grows:
 
 • Rolling deployments
 • Health checks

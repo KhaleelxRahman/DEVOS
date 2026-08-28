@@ -1,4 +1,4 @@
-# Contributing to DEVOS
+# Contributing to DEVOS v1.0.0
 
 1. Open an issue for bugs or proposals before large changes.
 2. Preserve project-scoped security boundaries and keep changes focused.

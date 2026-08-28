@@ -1,6 +1,6 @@
 # Architecture
 
-DEVOS uses a Vite React client and FastAPI service. The client calls JSON
+DEVOS v1.0.0 uses a Vite React client and FastAPI service. The client calls JSON
 endpoints under `/api/v1`; the service enforces authentication and owner
 scoping before accessing project storage, Git, terminal, AI, or GitHub.
 

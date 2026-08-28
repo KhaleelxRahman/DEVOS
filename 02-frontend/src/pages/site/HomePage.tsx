@@ -15,8 +15,8 @@ const FEATURES = [
 
 export const HomePage: React.FC = () => {
   useSeo({
-    title: 'DEVOS — AI Developer Workspace',
-    description: 'DEVOS is a project-aware AI developer workspace: files, terminal, Git, GitHub, testing, and a context-aware AI assistant in one interface.',
+    title: 'DEVOS v1.0.0 — AI Developer Workspace',
+    description: 'DEVOS v1.0.0 is a project-aware AI developer workspace: files, terminal, Git, GitHub, testing, and a context-aware AI assistant in one interface.',
     canonicalPath: '/',
   });
 
@@ -25,7 +25,7 @@ export const HomePage: React.FC = () => {
       <section className="site-hero">
         <h1>One workspace for your whole development loop</h1>
         <p className="site-lede">
-          DEVOS unifies project files, a sandboxed terminal, Git, GitHub, a testing center,
+          DEVOS v1.0.0 unifies project files, a sandboxed terminal, Git, GitHub, a testing center,
           and a context-aware AI assistant — scoped to the project you're working on.
         </p>
         <div className="site-hero-actions">
@@ -37,7 +37,7 @@ export const HomePage: React.FC = () => {
           </Link>
         </div>
 
-        <div className="site-terminal-preview" role="img" aria-label="Illustration of the DEVOS workspace terminal running a git status command and an AI chat exchange">
+        <div className="site-terminal-preview" role="img" aria-label="Illustration of the DEVOS v1.0.0 workspace terminal running a git status command and an AI chat exchange">
           <div className="tp-bar" aria-hidden="true">
             <span className="tp-dot" /><span className="tp-dot" /><span className="tp-dot" />
           </div>
@@ -51,7 +51,7 @@ On branch main — 2 files staged
       </section>
 
       <section className="site-section" aria-labelledby="features-heading">
-        <h2 id="features-heading">What DEVOS actually does</h2>
+        <h2 id="features-heading">What DEVOS v1.0.0 actually does</h2>
         <div className="site-grid">
           {FEATURES.map((f) => (
             <div className="site-card" key={f.title}>
@@ -73,11 +73,11 @@ On branch main — 2 files staged
           </div>
           <div className="site-card">
             <h3>Your laptop stays yours</h3>
-            <p>DEVOS only sees files you explicitly create, upload, or import into a project. It cannot browse arbitrary folders on your computer.</p>
+            <p>DEVOS v1.0.0 only sees files you explicitly create, upload, or import into a project. It cannot browse arbitrary folders on your computer.</p>
           </div>
           <div className="site-card">
             <h3>Early-access product</h3>
-            <p>DEVOS is in active development. User feedback shapes the roadmap — no fake testimonials, no invented metrics.</p>
+            <p>DEVOS v1.0.0 is in active development. User feedback shapes the roadmap — no fake testimonials, no invented metrics.</p>
           </div>
         </div>
       </section>

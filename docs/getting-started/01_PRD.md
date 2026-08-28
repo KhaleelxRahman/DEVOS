@@ -1,12 +1,12 @@
-Devos setup
+DEVOS v1.0.0 setup
 
 
 
-DEVOS — Product Requirements Document
+DEVOS v1.0.0 — Product Requirements Document
 
 Document: 01\_PRD.md
 
-Product: DEVOS
+Product: DEVOS v1.0.0
 
 Version: 1.0
 
@@ -22,13 +22,13 @@ Primary Audience: Individual Developers \& Small Development Teams
 
 1.1 Product Name
 
-DEVOS
+DEVOS v1.0.0
 
 1.2 Product Definition
 
-DEVOS is a project-aware AI developer command center that unifies essential software-development workflows into one focused workspace.
+DEVOS v1.0.0 is a project-aware AI developer command center that unifies essential software-development workflows into one focused workspace.
 
-DEVOS brings together:
+DEVOS v1.0.0 brings together:
 
 • Project management
 
@@ -54,15 +54,15 @@ Vision Statement
 
 Make software development more focused by giving developers one intelligent workspace that understands the project they are working on.
 
-DEVOS should become a developer's central command center rather than another disconnected development tool.
+DEVOS v1.0.0 should become a developer's central command center rather than another disconnected development tool.
 
-The long-term vision is to evolve DEVOS from a project-aware workspace into an intelligent AI development platform capable of assisting with increasingly complex development workflows.
+The long-term vision is to evolve DEVOS v1.0.0 from a project-aware workspace into an intelligent AI development platform capable of assisting with increasingly complex development workflows.
 
 \--------------------
 
 3\. Core Product Philosophy
 
-DEVOS follows the workflow:
+DEVOS v1.0.0 follows the workflow:
 
 CREATE → CONNECT → CONTEXTUALIZE → BUILD → APPROVE → CONTINUE
 
@@ -170,9 +170,9 @@ Developers spend unnecessary time managing development context instead of solvin
 
 5\. Product Opportunity
 
-DEVOS can address this problem by making the project the central source of development context.
+DEVOS v1.0.0 can address this problem by making the project the central source of development context.
 
-Instead of asking developers to repeatedly provide context to AI tools, DEVOS should maintain relevant project information and make it available to development workflows.
+Instead of asking developers to repeatedly provide context to AI tools, DEVOS v1.0.0 should maintain relevant project information and make it available to development workflows.
 
 The product opportunity is:
 
@@ -228,7 +228,7 @@ The MVP should prioritize:
 
 Individual developers and small development teams.
 
-DEVOS should not initially optimize for:
+DEVOS v1.0.0 should not initially optimize for:
 
 • Large enterprises
 
@@ -246,7 +246,7 @@ These capabilities can be introduced after product validation.
 
 8\. Product Goals
 
-DEVOS should:
+DEVOS v1.0.0 should:
 
 1\. Provide one unified developer workspace.
 
@@ -272,11 +272,11 @@ DEVOS should:
 
 9\. Core Product Experience
 
-The ideal DEVOS workflow is:
+The ideal DEVOS v1.0.0 workflow is:
 
 Create Project ↓ Connect Repository ↓ Understand Project ↓ Open Workspace ↓ Browse Files ↓ Inspect Code ↓ Use Terminal ↓ Ask AI ↓ Generate / Modify ↓ Test ↓ Review Changes ↓ Commit / Push ↓ Continue Development
 
-The user should not need to repeatedly explain the active project to DEVOS.
+The user should not need to repeatedly explain the active project to DEVOS v1.0.0.
 
 \--------------------
 
@@ -380,7 +380,7 @@ The dashboard should not become an analytics-heavy administration panel.
 
 12\. Developer Workspace
 
-The workspace is the primary DEVOS experience.
+The workspace is the primary DEVOS v1.0.0 experience.
 
 It should unify:
 
@@ -468,13 +468,13 @@ Users should be able to:
 
 • Establish push/pull capability
 
-DEVOS should not attempt to reproduce every GitHub feature.
+DEVOS v1.0.0 should not attempt to reproduce every GitHub feature.
 
 \--------------------
 
 16\. AI Developer Assistant
 
-The AI assistant is a core differentiating capability of DEVOS.
+The AI assistant is a core differentiating capability of DEVOS v1.0.0.
 
 The assistant should support:
 
@@ -534,9 +534,9 @@ AI responses should use relevant project context whenever possible.
 
 17\. Project Context Engine
 
-The Project Context Engine is a core DEVOS capability.
+The Project Context Engine is a core DEVOS v1.0.0 capability.
 
-DEVOS should maintain contextual information about the active project.
+DEVOS v1.0.0 should maintain contextual information about the active project.
 
 Potential context includes:
 
@@ -572,7 +572,7 @@ The context system should be modular and extensible.
 
 The AI should not blindly receive the entire repository for every request.
 
-DEVOS should attempt to identify relevant context based on the user's request.
+DEVOS v1.0.0 should attempt to identify relevant context based on the user's request.
 
 Conceptually:
 
@@ -646,7 +646,7 @@ Unnecessary navigation items should not be added merely to expose internal funct
 
 Authentication
 
-As a developer, I want to create an account so that I can securely access DEVOS.
+As a developer, I want to create an account so that I can securely access DEVOS v1.0.0.
 
 Projects
 
@@ -666,7 +666,7 @@ As a developer, I want to ask AI questions about my project so that I can build 
 
 Context
 
-As a developer, I want DEVOS to understand my project so that I do not need to repeatedly explain my codebase.
+As a developer, I want DEVOS v1.0.0 to understand my project so that I do not need to repeatedly explain my codebase.
 
 Git
 
@@ -674,7 +674,7 @@ As a developer, I want to review Git changes so that I can understand my work be
 
 Terminal
 
-As a developer, I want an integrated terminal so that I can execute development commands without leaving DEVOS.
+As a developer, I want an integrated terminal so that I can execute development commands without leaving DEVOS v1.0.0.
 
 \--------------------
 
@@ -706,7 +706,7 @@ Included
 
 Primary MVP Outcome
 
-A developer should be able to enter DEVOS, open a project, understand its context, perform meaningful development tasks, and receive project-aware AI assistance without repeatedly switching between multiple tools.
+A developer should be able to enter DEVOS v1.0.0, open a project, understand its context, perform meaningful development tasks, and receive project-aware AI assistance without repeatedly switching between multiple tools.
 
 \--------------------
 
@@ -752,7 +752,7 @@ These may be considered in future product phases.
 
 24\. Product Differentiation
 
-DEVOS should not compete primarily by having more features.
+DEVOS v1.0.0 should not compete primarily by having more features.
 
 Its differentiation should come from:
 
@@ -784,7 +784,7 @@ Every product decision should follow these principles.
 
 Principle 1 — Project First
 
-The project is the central unit of DEVOS.
+The project is the central unit of DEVOS v1.0.0.
 
 Principle 2 — Context Over Conversation
 
@@ -792,7 +792,7 @@ AI should understand relevant project context rather than relying only on conver
 
 Principle 3 — Integration Over Duplication
 
-DEVOS should connect important workflows rather than rebuild every existing developer tool.
+DEVOS v1.0.0 should connect important workflows rather than rebuild every existing developer tool.
 
 Principle 4 — Working Over Impressive
 
@@ -860,13 +860,13 @@ The primary MVP success criterion is:
 
 Can a developer create or open a project and complete meaningful development tasks without repeatedly switching between multiple developer tools?
 
-If the answer is yes, DEVOS has successfully demonstrated its core value proposition.
+If the answer is yes, DEVOS v1.0.0 has successfully demonstrated its core value proposition.
 
 \--------------------
 
 28\. Non-Functional Product Goals
 
-DEVOS should provide:
+DEVOS v1.0.0 should provide:
 
 Performance
 
@@ -1020,7 +1020,7 @@ Potential capabilities:
 
 30\. MVP Product Boundaries
 
-DEVOS is not intended to replace every developer application in the MVP.
+DEVOS v1.0.0 is not intended to replace every developer application in the MVP.
 
 The product should instead provide a unified layer around the most important development workflows.
 
@@ -1032,9 +1032,9 @@ Not: "Replace everything." Instead: "Connect what developers already use, unders
 
 31\. Hackathon Product Strategy
 
-DEVOS may be demonstrated in hackathons as an AI-powered developer workspace.
+DEVOS v1.0.0 may be demonstrated in hackathons as an AI-powered developer workspace.
 
-The hackathon implementation should preserve the core DEVOS product principles while adapting the implementation to the official event requirements.
+The hackathon implementation should preserve the core DEVOS v1.0.0 product principles while adapting the implementation to the official event requirements.
 
 Hackathon-specific requirements, judging criteria, submission requirements, and event constraints should be maintained separately from this core PRD.
 
@@ -1042,7 +1042,7 @@ Hackathon-specific requirements, judging criteria, submission requirements, and 
 
 32\. Future Vision
 
-The long-term vision is for DEVOS to evolve from:
+The long-term vision is for DEVOS v1.0.0 to evolve from:
 
 Project Workspace ↓ Context-Aware Workspace ↓ AI-Assisted Workspace ↓ AI Development Agents ↓ Intelligent Development Platform
 
@@ -1052,13 +1052,13 @@ However, each stage should be validated before expanding the product.
 
 33\. Final Product Definition
 
-DEVOS is a project-aware AI developer command center that connects essential software-development workflows into one focused environment.
+DEVOS v1.0.0 is a project-aware AI developer command center that connects essential software-development workflows into one focused environment.
 
 The MVP should prove that:
 
 A project-aware AI developer workspace can reduce context switching and help developers move from idea to working code faster.
 
-DEVOS should remain:
+DEVOS v1.0.0 should remain:
 
 SIMPLE → FAST → CONTEXT-AWARE → RELIABLE → PROFESSIONAL
 
@@ -1068,17 +1068,17 @@ The product should prioritize real developer value over feature quantity.
 
 34\. Definition of Product Success
 
-DEVOS succeeds at the MVP stage when a developer can:
+DEVOS v1.0.0 succeeds at the MVP stage when a developer can:
 
 LOGIN ↓ CREATE / OPEN PROJECT ↓ UNDERSTAND PROJECT ↓ OPEN WORKSPACE ↓ BROWSE FILES ↓ USE TERMINAL ↓ ASK PROJECT-AWARE AI ↓ DEVELOP / DEBUG ↓ TEST ↓ REVIEW GIT CHANGES ↓ COMMIT ↓ CONTINUE
 
-without repeatedly leaving the DEVOS environment to manually provide project context.
+without repeatedly leaving the DEVOS v1.0.0 environment to manually provide project context.
 
 \--------------------
 
 35\. Source of Truth
 
-This document defines the product vision, product scope, goals, users, MVP, boundaries, and roadmap for DEVOS.
+This document defines the product vision, product scope, goals, users, MVP, boundaries, and roadmap for DEVOS v1.0.0.
 
 For detailed implementation decisions, refer to:
 
@@ -1098,7 +1098,7 @@ These documents should remain aligned with this PRD.
 
 END OF PRD
 
-DEVOS
+DEVOS v1.0.0
 
 CREATE → CONNECT → CONTEXTUALIZE → BUILD → APPROVE → CONTINUE
 

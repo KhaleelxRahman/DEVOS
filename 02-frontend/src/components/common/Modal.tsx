@@ -48,6 +48,10 @@ export const Modal: React.FC<ModalProps> = ({
     >
       <div
         className="card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        aria-describedby={description ? 'modal-description' : undefined}
         style={{
           width: '100%',
           maxWidth: 500,
@@ -60,11 +64,11 @@ export const Modal: React.FC<ModalProps> = ({
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
           <div>
-            <h2 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--color-text-primary)' }}>{title}</h2>
-            {description && <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)', marginTop: 2 }}>{description}</p>}
+            <h2 id="modal-title" style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, color: 'var(--color-text-primary)' }}>{title}</h2>
+            {description && <p id="modal-description" style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)', marginTop: 2 }}>{description}</p>}
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} style={{ padding: 4 }}>
-            <X size={18} />
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close dialog" style={{ padding: 4 }}>
+            <X size={18} aria-hidden="true" />
           </Button>
         </div>
 

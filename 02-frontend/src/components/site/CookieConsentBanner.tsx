@@ -4,7 +4,7 @@ import { getConsent, isConsentRequired, setConsent } from '../../lib/consent';
 import { Button } from '../common/Button';
 
 // Renders only when optional analytics is configured (see lib/consent.ts).
-// DEVOS sets no cookies of its own.
+// DEVOS v1.0.0 sets no cookies of its own.
 export const CookieConsentBanner: React.FC = () => {
   const [choice, setChoice] = useState(getConsent());
   if (!isConsentRequired() || choice) return null;
@@ -26,7 +26,7 @@ export const CookieConsentBanner: React.FC = () => {
       }}
     >
       <p style={{ margin: 0, maxWidth: 560, color: 'var(--color-text-secondary)' }}>
-        DEVOS uses no cookies of its own. An optional analytics endpoint is configured; if you accept,
+        DEVOS v1.0.0 uses no cookies of its own. An optional analytics endpoint is configured; if you accept,
         anonymous page-view events are sent. If you reject, nothing is tracked. See the{' '}
         <Link to="/privacy" style={{ color: 'var(--color-accent)' }}>Privacy Policy</Link>.
       </p>

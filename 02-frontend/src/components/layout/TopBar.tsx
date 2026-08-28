@@ -22,7 +22,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {menuOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
         <Terminal size={18} color="var(--color-accent)" />
-        <span>DEVOS</span>
+        <span>DEVOS v1.0.0</span>
         <span className="top-bar-badge">v1.0 MVP</span>
       </div>
 

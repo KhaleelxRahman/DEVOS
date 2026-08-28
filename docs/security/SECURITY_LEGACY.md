@@ -1,16 +1,16 @@
-DEVOS — SECURITY SPECIFICATION
+DEVOS v1.0.0 — SECURITY SPECIFICATION
 
 Document: 06_SECURITY.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
 
 1. PURPOSE
 
-This document defines the security requirements for DEVOS.
+This document defines the security requirements for DEVOS v1.0.0.
 
-DEVOS handles:
+DEVOS v1.0.0 handles:
 
 • User accounts
 • Project data
@@ -28,7 +28,7 @@ Security must therefore be treated as a core product requirement.
 
 SECURE BY DEFAULT
 
-DEVOS must:
+DEVOS v1.0.0 must:
 
 • Minimize access
 • Validate input
@@ -280,7 +280,7 @@ Repository operations must respect the permissions granted by the authenticated 
 
 22. FILE SYSTEM SECURITY
 
-DEVOS must restrict file access to the active project workspace.
+DEVOS v1.0.0 must restrict file access to the active project workspace.
 
 Prevent path traversal.
 
@@ -684,7 +684,7 @@ Never store sensitive credentials.
 
 59. DATA PRIVACY
 
-DEVOS should follow data minimization.
+DEVOS v1.0.0 should follow data minimization.
 
 Only store information required for the product.
 
@@ -923,7 +923,7 @@ Future versions may add:
 
 76. FINAL SECURITY PRINCIPLE
 
-DEVOS must treat:
+DEVOS v1.0.0 must treat:
 
 CODE
 +
@@ -942,7 +942,7 @@ Security must be built into the architecture rather than added at the end.
 
 77. FINAL STATEMENT
 
-DEVOS should be:
+DEVOS v1.0.0 should be:
 
 SECURE
 → PRIVATE

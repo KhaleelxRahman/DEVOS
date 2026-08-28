@@ -11,4 +11,4 @@ async def test_health_check_endpoint():
         data = response.json()
         assert data["success"] is True
         assert data["data"]["status"] == "online"
-        assert data["data"]["service"] == "DEVOS API"
+        assert data["data"]["service"] == "DEVOS v1.0.0 API"

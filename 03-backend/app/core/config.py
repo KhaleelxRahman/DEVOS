@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
-    PROJECT_NAME: str = "DEVOS"
+    PROJECT_NAME: str = "DEVOS v1.0.0"
     API_V1_STR: str = "/api/v1"
 
     # Database — SQLite is the zero-dependency development default.
@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     TERMINAL_MAX_OUTPUT_CHARS: int = 20000
 
     # AI Provider Configuration. When no API key is configured for the
-    # selected provider, DEVOS transparently falls back to the clearly
+    # selected provider, DEVOS v1.0.0 transparently falls back to the clearly
     # labelled local mock provider.
     AI_PROVIDER: str = "mock"  # mock | gemini | openai
     AI_API_KEY: str = ""

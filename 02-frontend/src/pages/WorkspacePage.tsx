@@ -121,6 +121,7 @@ export const WorkspacePage: React.FC = () => {
           flex: 1,
           minHeight: 480,
         }}
+        className="workspace-grid"
       >
         <Card title="Files" subtitle="Project Explorer" style={panelStyle}>
           <FileExplorer projectId={activeProject.id} onSelectFile={openFile} activeFile={activePath} />

@@ -1,4 +1,4 @@
-# DEVOS Release Candidate
+# DEVOS v1.0.0 Release Candidate
 
 ## Highlights
 

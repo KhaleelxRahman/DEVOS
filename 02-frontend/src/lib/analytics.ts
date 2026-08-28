@@ -1,6 +1,6 @@
 // Privacy-conscious website analytics.
 //
-// DEVOS does NOT ship a third-party analytics tracker. This module buffers
+// DEVOS v1.0.0 does NOT ship a third-party analytics tracker. This module buffers
 // high-level, non-sensitive website events (page views of public pages, CTA
 // clicks, form submissions) and forwards them ONLY when an analytics
 // endpoint is explicitly configured via VITE_ANALYTICS_ENDPOINT.

@@ -9,7 +9,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const WaitlistPage: React.FC = () => {
   useSeo({
     title: 'Waitlist',
-    description: 'Join the DEVOS early-access waitlist. One email when meaningful updates ship — no spam.',
+    description: 'Join the DEVOS v1.0.0 early-access waitlist. One email when meaningful updates ship — no spam.',
     canonicalPath: '/waitlist',
   });
   const navigate = useNavigate();
@@ -43,10 +43,10 @@ export const WaitlistPage: React.FC = () => {
 
   return (
     <div className="site-narrow">
-      <h1>Join the DEVOS early-access list</h1>
+      <h1>Join the DEVOS v1.0.0 early-access list</h1>
       <p style={{ color: 'var(--color-text-secondary)' }}>
         You will get a product update email when meaningful changes ship. No launch date is promised
-        and no marketing drip — your address is used only for DEVOS updates. You can ask to be
+        and no marketing drip — your address is used only for DEVOS v1.0.0 updates. You can ask to be
         removed at any time via the <Link to="/contact" style={{ color: 'var(--color-accent)' }}>contact page</Link>.
       </p>
       <form className="site-form" onSubmit={onSubmit} noValidate>
@@ -81,7 +81,7 @@ export const WaitlistPage: React.FC = () => {
         </button>
       </form>
       <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)', marginTop: 'var(--space-4)' }}>
-        Submitting stores your email address (and optional name) in the DEVOS database. See the{' '}
+        Submitting stores your email address (and optional name) in the DEVOS v1.0.0 database. See the{' '}
         <Link to="/privacy" style={{ color: 'var(--color-accent)' }}>Privacy Policy</Link>.
       </p>
     </div>

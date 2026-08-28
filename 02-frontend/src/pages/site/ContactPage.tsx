@@ -9,7 +9,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const ContactPage: React.FC = () => {
   useSeo({
     title: 'Contact',
-    description: 'Contact the DEVOS team: questions, feedback, and early-access conversations.',
+    description: 'Contact the DEVOS v1.0.0 team: questions, feedback, and early-access conversations.',
     canonicalPath: '/contact',
   });
   const navigate = useNavigate();
@@ -56,13 +56,13 @@ export const ContactPage: React.FC = () => {
 
   return (
     <div className="site-narrow">
-      <h1>Contact DEVOS</h1>
+      <h1>Contact DEVOS v1.0.0</h1>
       <p style={{ color: 'var(--color-text-secondary)' }}>
         Questions, feedback, or early-access conversations. Messages are stored privately and read
         by the team — nothing is published.
       </p>
       <div className="contact-options">
-        <a href="mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS%20Support">Email mdkhaleelurrahman51@gmail.com</a>
+        <a href="mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS v1.0.0%20Support">Email mdkhaleelurrahman51@gmail.com</a>
         <a href="tel:+917842835936">Call +91 78428 35936</a>
       </div>
       <form className="site-form" onSubmit={onSubmit} noValidate>

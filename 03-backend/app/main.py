@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
     # record for schema evolution on existing deployments.
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    logger.info("DEVOS database schema verified/created")
+    logger.info("DEVOS v1.0.0 database schema verified/created")
     yield
     await engine.dispose()
 

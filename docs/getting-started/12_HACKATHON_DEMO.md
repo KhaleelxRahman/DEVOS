@@ -1,14 +1,14 @@
-DEVOS — HACKATHON DEMO & SUBMISSION PLAN
+DEVOS v1.0.0 — HACKATHON DEMO & SUBMISSION PLAN
 
 Document: 12_HACKATHON_DEMO.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Hackathon Ready
 
 
 1. PURPOSE
 
-This document defines the hackathon demonstration strategy for DEVOS.
+This document defines the hackathon demonstration strategy for DEVOS v1.0.0.
 
 The objective is not to demonstrate every feature.
 
@@ -19,9 +19,9 @@ A project-aware AI developer workspace can reduce context switching and help dev
 
 2. CORE HACKATHON MESSAGE
 
-DEVOS is not just another AI chatbot.
+DEVOS v1.0.0 is not just another AI chatbot.
 
-DEVOS understands the developer's project.
+DEVOS v1.0.0 understands the developer's project.
 
 
 3. CORE PRODUCT LOOP
@@ -68,9 +68,9 @@ This causes:
 • Fragmented workflow
 
 
-5. DEVOS SOLUTION
+5. DEVOS v1.0.0 SOLUTION
 
-DEVOS brings:
+DEVOS v1.0.0 brings:
 
 Project
 +
@@ -105,7 +105,7 @@ The project should contain:
 
 STEP 1
 
-Open DEVOS.
+Open DEVOS v1.0.0.
 
 
 STEP 2
@@ -204,7 +204,7 @@ Problem
 
 60 seconds:
 
-DEVOS concept
+DEVOS v1.0.0 concept
 
 2 minutes:
 
@@ -227,7 +227,7 @@ They have a context problem.
 
 Their code is in one place, GitHub in another, terminal somewhere else, and AI has no understanding of the complete project.
 
-DEVOS brings those workflows into one project-aware developer command center."
+DEVOS v1.0.0 brings those workflows into one project-aware developer command center."
 
 
 11. DIFFERENTIATION
@@ -238,7 +238,7 @@ Question
 →
 Answer
 
-DEVOS:
+DEVOS v1.0.0:
 
 Project
 →
@@ -280,7 +280,7 @@ AI response
 
 Judges should remember:
 
-"DEVOS understands the project, not just the prompt."
+"DEVOS v1.0.0 understands the project, not just the prompt."
 
 
 14. VISUAL DEMO PRIORITY
@@ -345,7 +345,7 @@ Use local Git repository.
 
 If internet fails:
 
-Use local DEVOS instance.
+Use local DEVOS v1.0.0 instance.
 
 
 If backend fails:
@@ -380,7 +380,7 @@ Test:
 Recommended:
 
 Slide 1:
-DEVOS
+DEVOS v1.0.0
 
 Slide 2:
 Problem
@@ -389,7 +389,7 @@ Slide 3:
 Solution
 
 Slide 4:
-How DEVOS works
+How DEVOS v1.0.0 works
 
 Slide 5:
 Architecture
@@ -412,7 +412,7 @@ Conclusion
 
 22. SLIDE 1
 
-DEVOS
+DEVOS v1.0.0
 
 AI-Powered Developer Command Center
 
@@ -442,7 +442,7 @@ Too much context switching.
 
 24. SLIDE 3 — SOLUTION
 
-DEVOS combines essential developer workflows into one project-aware environment.
+DEVOS v1.0.0 combines essential developer workflows into one project-aware environment.
 
 
 25. SLIDE 4 — WORKFLOW
@@ -520,7 +520,7 @@ Do not show screenshots if a live working demonstration is available.
 
 29. SLIDE 8 — IMPACT
 
-DEVOS aims to reduce:
+DEVOS v1.0.0 aims to reduce:
 
 • Context switching
 • Repeated prompting
@@ -549,14 +549,14 @@ Enterprise developer ecosystem
 
 31. SLIDE 10 — CONCLUSION
 
-"DEVOS turns the project itself into the AI's context."
+"DEVOS v1.0.0 turns the project itself into the AI's context."
 
 
 32. JUDGE QUESTIONS
 
 Be prepared to answer:
 
-Why DEVOS?
+Why DEVOS v1.0.0?
 
 Why not VS Code?
 
@@ -570,12 +570,12 @@ How are secrets protected?
 
 How is terminal execution secured?
 
-What makes DEVOS scalable?
+What makes DEVOS v1.0.0 scalable?
 
 
-33. ANSWER — WHY DEVOS?
+33. ANSWER — WHY DEVOS v1.0.0?
 
-"DEVOS is not trying to replace every developer tool.
+"DEVOS v1.0.0 is not trying to replace every developer tool.
 
 It creates a project-aware command center that connects the essential workflow and gives AI the context required to help effectively."
 
@@ -584,19 +584,19 @@ It creates a project-aware command center that connects the essential workflow a
 
 "VS Code is primarily an editor.
 
-DEVOS focuses on the broader developer workflow: project context, AI, Git, terminal, files and development operations in one focused environment."
+DEVOS v1.0.0 focuses on the broader developer workflow: project context, AI, Git, terminal, files and development operations in one focused environment."
 
 
 35. ANSWER — WHY NOT AI CHATBOT?
 
 "A normal chatbot receives a prompt.
 
-DEVOS can build context from the active project, relevant files, Git state and recent development activity."
+DEVOS v1.0.0 can build context from the active project, relevant files, Git state and recent development activity."
 
 
 36. ANSWER — AI CONTEXT
 
-"DEVOS first identifies the active project and selects relevant context instead of blindly sending the entire repository."
+"DEVOS v1.0.0 first identifies the active project and selects relevant context instead of blindly sending the entire repository."
 
 
 37. ANSWER — SECURITY
@@ -616,7 +616,7 @@ Before leaving for venue:
 ✓ Laptop charged
 ✓ Charger
 ✓ Mobile hotspot
-✓ DEVOS local version
+✓ DEVOS v1.0.0 local version
 ✓ Production URL
 ✓ GitHub repository
 ✓ Demo project
@@ -662,7 +662,7 @@ Repository should contain:
 
 README should clearly explain:
 
-What DEVOS is
+What DEVOS v1.0.0 is
 Problem
 Solution
 Features
@@ -682,7 +682,7 @@ Show:
 
 Problem
 →
-DEVOS
+DEVOS v1.0.0
 →
 Live workflow
 →
@@ -752,7 +752,7 @@ Only fix critical issues afterward.
 
 50. FINAL MESSAGE
 
-DEVOS should be presented as:
+DEVOS v1.0.0 should be presented as:
 
 A project-aware AI developer command center.
 

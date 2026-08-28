@@ -5,18 +5,18 @@ import { useSeo } from '../../hooks/useSeo';
 export const AboutPage: React.FC = () => {
   useSeo({
     title: 'About',
-    description: 'What DEVOS is, the developer workflow problem it solves, and the product philosophy behind it.',
+    description: 'What DEVOS v1.0.0 is, the developer workflow problem it solves, and the product philosophy behind it.',
     canonicalPath: '/about',
   });
 
   return (
     <div className="site-narrow">
-      <h1>About DEVOS</h1>
+      <h1>About DEVOS v1.0.0</h1>
 
       <div className="site-card" style={{ marginBottom: 'var(--space-4)' }}>
-        <h3>What DEVOS is</h3>
+        <h3>What DEVOS v1.0.0 is</h3>
         <p>
-          DEVOS (Developer Environment Operating System) is a project-aware AI developer workspace.
+          DEVOS v1.0.0 (Developer Environment Operating System) is a project-aware AI developer workspace.
           It brings the everyday loop of a developer — browsing files, editing code, running commands,
           committing with Git, running tests, and asking an AI assistant for help — into a single
           web application where everything is scoped to the active project.
@@ -28,7 +28,7 @@ export const AboutPage: React.FC = () => {
         <p>
           Developer context is scattered: a file tree in one window, a terminal in another, Git state
           in a third, and an AI chat that knows nothing about any of it. Copying context into a chat
-          box is tedious and error-prone, and secrets can leak into prompts by accident. DEVOS keeps
+          box is tedious and error-prone, and secrets can leak into prompts by accident. DEVOS v1.0.0 keeps
           context attached to the project, sanitizes it, and feeds it to the assistant automatically.
         </p>
       </div>
@@ -36,7 +36,7 @@ export const AboutPage: React.FC = () => {
       <div className="site-card" style={{ marginBottom: 'var(--space-4)' }}>
         <h3>The developer workflow</h3>
         <p>
-          Create a project, and DEVOS provisions an isolated workspace directory with Git initialized.
+          Create a project, and DEVOS v1.0.0 provisions an isolated workspace directory with Git initialized.
           Create or upload files, or import an existing Git repository. Open files in the tabbed viewer,
           run allowlisted commands in the sandboxed terminal, stage and commit changes, run test jobs,
           and ask the AI assistant questions that automatically include your README, file tree, and
@@ -56,7 +56,7 @@ export const AboutPage: React.FC = () => {
       <div className="site-card">
         <h3>Current product stage</h3>
         <p>
-          DEVOS is an early-access product under active development. The core workspace —
+          DEVOS v1.0.0 is an early-access product under active development. The core workspace —
           projects, files, terminal, Git, GitHub connection, AI assistant, and testing — is
           implemented and covered by an automated test suite. There is no company history to tell
           yet; this page will grow with the project.

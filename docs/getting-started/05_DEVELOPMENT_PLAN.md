@@ -1,16 +1,16 @@
-DEVOS — DEVELOPMENT PLAN
+DEVOS v1.0.0 — DEVELOPMENT PLAN
 
 Document: 05_DEVELOPMENT_PLAN.md
-Product: DEVOS
+Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
 
 1. PURPOSE
 
-This document defines the implementation roadmap for DEVOS.
+This document defines the implementation roadmap for DEVOS v1.0.0.
 
-The goal is to build DEVOS incrementally as a real, production-oriented developer workspace.
+The goal is to build DEVOS v1.0.0 incrementally as a real, production-oriented developer workspace.
 
 Development priority:
 
@@ -549,7 +549,7 @@ AIService
 
 33. PHASE 11 — PROJECT CONTEXT ENGINE
 
-This is a core DEVOS differentiator.
+This is a core DEVOS v1.0.0 differentiator.
 
 Context sources:
 
@@ -674,7 +674,7 @@ Register
 
 Scenario:
 
-1. Create DEVOS project
+1. Create DEVOS v1.0.0 project
 2. Open project workspace
 3. Inspect project structure
 4. Open a source file
@@ -755,7 +755,7 @@ Review:
 
 45. UI QUALITY STANDARD
 
-DEVOS should feel:
+DEVOS v1.0.0 should feel:
 
 Professional
 Fast
@@ -990,7 +990,7 @@ Simplify:
 Recommended demonstration:
 
 1. Login
-2. Create/open DEVOS project
+2. Create/open DEVOS v1.0.0 project
 3. Show project-aware workspace
 4. Show file tree
 5. Open code
@@ -1010,7 +1010,7 @@ Demonstrate the strongest workflow.
 
 The judges should understand:
 
-"DEVOS knows the project, not just the question."
+"DEVOS v1.0.0 knows the project, not just the question."
 
 
 61. PRODUCTION READINESS
@@ -1143,7 +1143,7 @@ Do not allow P2/P3 features to delay P0.
 
 69. DEFINITION OF MVP
 
-DEVOS MVP is complete when:
+DEVOS v1.0.0 MVP is complete when:
 
 A developer can:
 
@@ -1162,7 +1162,7 @@ Register
 
 70. FINAL DEVELOPMENT PRINCIPLE
 
-Build the smallest product that proves the DEVOS vision.
+Build the smallest product that proves the DEVOS v1.0.0 vision.
 
 Do not optimize for:
 
