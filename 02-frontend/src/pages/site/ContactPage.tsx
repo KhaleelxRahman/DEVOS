@@ -61,6 +61,10 @@ export const ContactPage: React.FC = () => {
         Questions, feedback, or early-access conversations. Messages are stored privately and read
         by the team — nothing is published.
       </p>
+      <div className="contact-options">
+        <a href="mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS%20Support">Email mdkhaleelurrahman51@gmail.com</a>
+        <a href="tel:+917842835936">Call +91 78428 35936</a>
+      </div>
       <form className="site-form" onSubmit={onSubmit} noValidate>
         <div className="site-field">
           <label htmlFor="contact-name">Name</label>

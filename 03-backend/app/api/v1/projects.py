@@ -1,15 +1,20 @@
-from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import get_db
+
 from app.api.deps import get_current_user
+from app.db.session import get_db
 from app.models.user import User
+from app.schemas.activity import ActivityListResponse, ActivityResponse
 from app.schemas.common import ApiResponse
-from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, ProjectListResponse
-from app.schemas.activity import ActivityResponse, ActivityListResponse
-from app.services.project_service import ProjectService
+from app.schemas.project import (
+    ProjectCreate,
+    ProjectListResponse,
+    ProjectResponse,
+    ProjectUpdate,
+)
 from app.services.activity_service import ActivityService
 from app.services.context_service import ContextService
+from app.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 

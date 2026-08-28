@@ -1,9 +1,18 @@
 import uuid
-from typing import List, Optional
+from typing import TYPE_CHECKING
+from typing import Optional
+
 from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+
 from app.db.base import Base, TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.activity import Activity
+    from app.models.conversation import Conversation
+    from app.models.github_connection import GitHubConnection
+    from app.models.project import Project
+
 
 class User(Base, TimestampMixin):
     __tablename__ = "users"
@@ -15,16 +24,16 @@ class User(Base, TimestampMixin):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    password_hash: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
-    projects: Mapped[List["Project"]] = relationship(
+    projects: Mapped[list["Project"]] = relationship(
         "Project", back_populates="user", cascade="all, delete-orphan"
     )
-    conversations: Mapped[List["Conversation"]] = relationship(
+    conversations: Mapped[list["Conversation"]] = relationship(
         "Conversation", back_populates="user", cascade="all, delete-orphan"
     )
-    activities: Mapped[List["Activity"]] = relationship(
+    activities: Mapped[list["Activity"]] = relationship(
         "Activity", back_populates="user", cascade="all, delete-orphan"
     )
     github_connection: Mapped[Optional["GitHubConnection"]] = relationship(

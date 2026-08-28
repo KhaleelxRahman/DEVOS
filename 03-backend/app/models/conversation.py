@@ -1,8 +1,16 @@
 import uuid
-from typing import List
-from sqlalchemy import String, ForeignKey
+from typing import TYPE_CHECKING
+
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import Base, TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.message import ConversationMessage
+    from app.models.project import Project
+    from app.models.user import User
+
 
 class Conversation(Base, TimestampMixin):
     __tablename__ = "conversations"
@@ -29,6 +37,6 @@ class Conversation(Base, TimestampMixin):
     # Relationships
     project: Mapped["Project"] = relationship("Project", back_populates="conversations")
     user: Mapped["User"] = relationship("User", back_populates="conversations")
-    messages: Mapped[List["ConversationMessage"]] = relationship(
+    messages: Mapped[list["ConversationMessage"]] = relationship(
         "ConversationMessage", back_populates="conversation", cascade="all, delete-orphan"
     )

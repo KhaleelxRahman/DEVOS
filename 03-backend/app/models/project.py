@@ -1,8 +1,16 @@
 import uuid
-from typing import List, Optional, Any
-from sqlalchemy import String, Text, ForeignKey, JSON
+from typing import TYPE_CHECKING, Any
+
+from sqlalchemy import JSON, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import Base, TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.activity import Activity
+    from app.models.conversation import Conversation
+    from app.models.user import User
+
 
 class Project(Base, TimestampMixin):
     __tablename__ = "projects"
@@ -19,18 +27,18 @@ class Project(Base, TimestampMixin):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    technologies: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
-    repository_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    repository_provider: Mapped[Optional[str]] = mapped_column(String(50), default="github", nullable=True)
-    repository_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    default_branch: Mapped[Optional[str]] = mapped_column(String(100), default="main", nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    technologies: Mapped[Any | None] = mapped_column(JSON, nullable=True)
+    repository_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    repository_provider: Mapped[str | None] = mapped_column(String(50), default="github", nullable=True)
+    repository_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    default_branch: Mapped[str | None] = mapped_column(String(100), default="main", nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="projects")
-    conversations: Mapped[List["Conversation"]] = relationship(
+    conversations: Mapped[list["Conversation"]] = relationship(
         "Conversation", back_populates="project", cascade="all, delete-orphan"
     )
-    activities: Mapped[List["Activity"]] = relationship(
+    activities: Mapped[list["Activity"]] = relationship(
         "Activity", back_populates="project", cascade="all, delete-orphan"
     )

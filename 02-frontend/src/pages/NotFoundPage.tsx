@@ -19,9 +19,11 @@ export const NotFoundPage: React.FC = () => {
         icon={<FileQuestion size={48} />}
         title="404 — Page Not Found"
         description="This page does not exist. It may have moved, or the link is incorrect."
+        headingLevel="h1"
       />
       <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
         <Link to="/" className="site-btn site-btn-primary">Return Home</Link>
+        <button className="site-btn site-btn-ghost" onClick={() => window.history.back()}>Go Back</button>
         {isAuthenticated && (
           <Link to="/app/dashboard" className="site-btn site-btn-ghost">Open Workspace</Link>
         )}

@@ -1,15 +1,15 @@
-from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, UploadFile, File, Form
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import get_db
+
 from app.api.deps import get_current_user
+from app.db.session import get_db
 from app.models.user import User
 from app.schemas.common import ApiResponse
-from app.schemas.file import FileTreeResponse, FileContentResponse
-from app.services.project_service import ProjectService
-from app.services.file_service import FileService
+from app.schemas.file import FileContentResponse, FileTreeResponse
 from app.services.activity_service import ActivityService
+from app.services.file_service import FileService
+from app.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects/{project_id}/files", tags=["files"])
 
@@ -36,7 +36,7 @@ async def search_files(
     await ProjectService.get_for_user(db, project_id, current_user.id)
     tree = FileService.get_file_tree(project_id)
 
-    matches: List[str] = []
+    matches: list[str] = []
     def search_nodes(nodes):
         for node in nodes:
             if q.lower() in node.name.lower():
@@ -116,15 +116,15 @@ async def create_folder(
 async def upload_files(
     project_id: str,
     parent_path: str = Form(default=""),
-    files: List[UploadFile] = File(...),
+    files: list[UploadFile] = File(...),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     await ProjectService.get_for_user(db, project_id, current_user.id)
     if len(files) > FileService.MAX_UPLOADS_PER_REQUEST:
         return ApiResponse(success=False, data={"uploaded": [], "errors": [f"Too many files (max {FileService.MAX_UPLOADS_PER_REQUEST})"]})
-    uploaded: List[str] = []
-    errors: List[str] = []
+    uploaded: list[str] = []
+    errors: list[str] = []
     for uf in files:
         data = await uf.read()
         try:

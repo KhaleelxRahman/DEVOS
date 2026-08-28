@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional, Union
+from typing import Any
+
 from jose import jwt
 from passlib.context import CryptContext
+
 from app.core.config import settings
 
 # Password Hashing using Passlib.
@@ -18,7 +20,7 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 def create_access_token(
-    subject: Union[str, Any], expires_delta: Optional[timedelta] = None
+    subject: str | Any, expires_delta: timedelta | None = None
 ) -> str:
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -32,7 +34,7 @@ def create_access_token(
     )
     return encoded_jwt
 
-def decode_access_token(token: str) -> Optional[str]:
+def decode_access_token(token: str) -> str | None:
     try:
         payload = jwt.decode(
             token, settings.AUTH_SECRET, algorithms=[settings.JWT_ALGORITHM]

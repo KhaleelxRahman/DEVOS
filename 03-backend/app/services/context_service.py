@@ -1,9 +1,11 @@
 import re
-from typing import Dict, Any, Optional
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.project_service import ProjectService
-from app.services.file_service import FileService, EXCLUDED_DIRECTORIES
+
+from app.services.file_service import EXCLUDED_DIRECTORIES, FileService
 from app.services.git_service import GitService
+from app.services.project_service import ProjectService
 
 SECRET_KEY_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|secret|token|password|auth[_-]?key)\s*[:=]\s*['\"]?([a-zA-Z0-9_\-\.]{8,})['\"]?"),
@@ -20,8 +22,8 @@ class ContextService:
 
     @staticmethod
     async def build_project_context(
-        db: AsyncSession, project_id: str, user_id: str, current_file: Optional[str] = None
-    ) -> Dict[str, Any]:
+        db: AsyncSession, project_id: str, user_id: str, current_file: str | None = None
+    ) -> dict[str, Any]:
         project = await ProjectService.get_for_user(db, project_id, user_id)
         
         # 1. Project metadata

@@ -1,10 +1,9 @@
-from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.errors import AppException
 from app.models.conversation import Conversation
 from app.models.message import ConversationMessage
-from app.core.errors import AppException
 
 
 class ConversationService:
@@ -34,7 +33,7 @@ class ConversationService:
         return conversation
 
     @staticmethod
-    async def list_for_project(db: AsyncSession, project_id: str, user_id: str) -> List[Conversation]:
+    async def list_for_project(db: AsyncSession, project_id: str, user_id: str) -> list[Conversation]:
         stmt = (
             select(Conversation)
             .where(Conversation.project_id == project_id, Conversation.user_id == user_id)
@@ -54,7 +53,7 @@ class ConversationService:
         return message
 
     @staticmethod
-    async def list_messages(db: AsyncSession, conversation_id: str) -> List[ConversationMessage]:
+    async def list_messages(db: AsyncSession, conversation_id: str) -> list[ConversationMessage]:
         stmt = (
             select(ConversationMessage)
             .where(ConversationMessage.conversation_id == conversation_id)

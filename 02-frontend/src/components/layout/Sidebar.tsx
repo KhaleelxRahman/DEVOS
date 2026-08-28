@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, FolderGit2, Code2, Settings, User } from 'lucide-react';
 
-export const Sidebar: React.FC = () => {
+export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) => {
   return (
     <aside className="sidebar">
       <div className="sidebar-nav">
@@ -10,6 +10,7 @@ export const Sidebar: React.FC = () => {
         <NavLink
           to="/app/dashboard"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+          onClick={onNavigate}
         >
           <LayoutDashboard size={16} />
           <span>Dashboard</span>
@@ -17,6 +18,7 @@ export const Sidebar: React.FC = () => {
         <NavLink
           to="/app/projects"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+          onClick={onNavigate}
         >
           <FolderGit2 size={16} />
           <span>Projects</span>
@@ -24,6 +26,7 @@ export const Sidebar: React.FC = () => {
         <NavLink
           to="/app/workspace"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+          onClick={onNavigate}
         >
           <Code2 size={16} />
           <span>Workspace</span>
@@ -35,6 +38,7 @@ export const Sidebar: React.FC = () => {
         <NavLink
           to="/app/settings"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+          onClick={onNavigate}
         >
           <Settings size={16} />
           <span>Settings</span>

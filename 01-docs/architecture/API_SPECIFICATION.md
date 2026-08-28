@@ -510,6 +510,8 @@ GET /api/v1/github/repositories
 
 Return repositories accessible to the authenticated user according to granted permissions.
 
+The legacy alias `/api/v1/github/repos` remains supported for existing clients.
+
 
 37. CONNECT REPOSITORY
 

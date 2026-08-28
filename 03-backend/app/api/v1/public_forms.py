@@ -1,16 +1,17 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.rate_limit import rate_limit
 from app.db.session import get_db
-from app.models.waitlist import WaitlistEntry, ContactMessage
+from app.models.waitlist import ContactMessage, WaitlistEntry
 from app.schemas.common import ApiResponse
 from app.schemas.public_forms import (
-    WaitlistJoinRequest,
-    WaitlistJoinResponse,
     ContactRequest,
     ContactResponse,
+    WaitlistJoinRequest,
+    WaitlistJoinResponse,
 )
-from app.core.rate_limit import rate_limit
 
 # Intentionally PUBLIC endpoints (no authentication). These power the
 # public marketing website's waitlist and contact forms. Rate-limited and

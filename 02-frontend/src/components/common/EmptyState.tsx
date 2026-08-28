@@ -8,6 +8,9 @@ export interface EmptyStateProps {
   description: string;
   actionLabel?: string;
   onAction?: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
+  headingLevel?: 'h1' | 'h2' | 'h3';
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -16,16 +19,23 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   actionLabel,
   onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
+  headingLevel = 'h3',
 }) => {
+  const Heading = headingLevel;
   return (
     <div className="empty-state">
       <div className="empty-state-icon">{icon}</div>
-      <h3 className="empty-state-title">{title}</h3>
+      <Heading className="empty-state-title">{title}</Heading>
       <p className="empty-state-description">{description}</p>
       {actionLabel && onAction && (
         <Button variant="primary" onClick={onAction}>
           {actionLabel}
         </Button>
+      )}
+      {secondaryActionLabel && onSecondaryAction && (
+        <Button variant="ghost" onClick={onSecondaryAction}>{secondaryActionLabel}</Button>
       )}
     </div>
   );

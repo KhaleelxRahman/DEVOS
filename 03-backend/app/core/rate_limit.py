@@ -1,8 +1,10 @@
 import time
 from collections import defaultdict
-from typing import Dict, List
+
 from fastapi import Request
+
 from app.core.errors import AppException
+
 
 class RateLimitExceededException(AppException):
     def __init__(self, message: str = "Too many requests. Please try again later."):
@@ -16,7 +18,7 @@ class InMemoryRateLimiter:
     """
 
     def __init__(self):
-        self._hits: Dict[str, List[float]] = defaultdict(list)
+        self._hits: dict[str, list[float]] = defaultdict(list)
 
     def check(self, key: str, limit: int, window_seconds: int) -> None:
         now = time.monotonic()

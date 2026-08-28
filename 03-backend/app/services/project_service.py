@@ -1,11 +1,14 @@
 import os
-from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
+import shutil
+
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import settings
+from app.core.errors import ProjectAccessDeniedException, ProjectNotFoundException
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectUpdate
-from app.core.errors import ProjectNotFoundException, ProjectAccessDeniedException
-from app.core.config import settings
+
 
 class ProjectService:
     @staticmethod
@@ -35,7 +38,7 @@ class ProjectService:
         return project
 
     @staticmethod
-    async def get_by_id(db: AsyncSession, project_id: str) -> Optional[Project]:
+    async def get_by_id(db: AsyncSession, project_id: str) -> Project | None:
         stmt = select(Project).where(Project.id == project_id)
         result = await db.execute(stmt)
         return result.scalars().first()
@@ -50,7 +53,7 @@ class ProjectService:
         return project
 
     @staticmethod
-    async def list_for_user(db: AsyncSession, user_id: str) -> List[Project]:
+    async def list_for_user(db: AsyncSession, user_id: str) -> list[Project]:
         stmt = select(Project).where(Project.user_id == user_id).order_by(Project.created_at.desc())
         result = await db.execute(stmt)
         return list(result.scalars().all())
@@ -75,6 +78,11 @@ class ProjectService:
     @staticmethod
     async def delete(db: AsyncSession, project_id: str, user_id: str) -> bool:
         project = await ProjectService.get_for_user(db, project_id, user_id)
+        storage_path = os.path.abspath(
+            os.path.join(settings.PROJECTS_STORAGE_PATH, project_id)
+        )
         await db.delete(project)
         await db.flush()
+        if os.path.isdir(storage_path):
+            shutil.rmtree(storage_path)
         return True

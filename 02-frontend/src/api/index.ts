@@ -7,6 +7,21 @@ import { AIChatPayload, Conversation } from '../types/ai';
 import { TerminalExecutePayload, TerminalResult } from '../types/terminal';
 import { Activity } from '../types/activity';
 
+export interface GithubRepository {
+  id: number;
+  name: string;
+  full_name: string;
+  private: boolean;
+  default_branch?: string | null;
+  description?: string | null;
+  html_url: string;
+  avatar_url?: string | null;
+  stars: number;
+  forks: number;
+  language?: string | null;
+  updated_at?: string | null;
+}
+
 export * from './client';
 
 export const authApi = {
@@ -83,9 +98,10 @@ export const activityApi = {
 };
 
 export const githubApi = {
+  connect: () => apiClient.post<{ authorization_url: string }>('/github/connect'),
   getConnection: () => apiClient.get<{ connected: boolean; username: string | null }>('/github/connection'),
   disconnect: () => apiClient.delete('/github/connection'),
-  getRepos: () => apiClient.get<{ connected: boolean; repositories: any[] }>('/github/repos'),
+  getRepos: () => apiClient.get<{ connected: boolean; repositories: GithubRepository[] }>('/github/repositories'),
 };
 
 export const testingApi = {

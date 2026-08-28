@@ -23,11 +23,11 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    aiApi.getProvider(projectId).then((res) => setProvider(res.data || null)).catch(() => {});
+    aiApi.getProvider(projectId).then((res) => setProvider(res.data || null)).catch((err) => setError(err.message || 'Unable to load AI provider'));
     aiApi
       .getConversations(projectId)
       .then((res) => setConversations(res.data?.conversations || []))
-      .catch(() => {});
+      .catch((err) => setError(err.message || 'Unable to load conversations'));
   }, [projectId]);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
         aiApi
           .getConversations(projectId)
           .then((r) => setConversations(r.data?.conversations || []))
-          .catch(() => {});
+          .catch((err) => setError(err.message || 'Unable to refresh conversations'));
       }
     } catch (err: any) {
       setError(err.message || 'AI request failed');
@@ -107,10 +107,12 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
   const copyLast = () => {
     const last = [...messages].reverse().find((m) => m.role === 'assistant');
     if (last) {
-      navigator.clipboard.writeText(last.content).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      });
+      navigator.clipboard.writeText(last.content)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        })
+        .catch((err) => setError(err instanceof Error ? err.message : 'Unable to copy response'));
     }
   };
 

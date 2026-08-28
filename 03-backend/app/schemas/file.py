@@ -1,20 +1,21 @@
-from typing import List, Optional
+
 from pydantic import BaseModel
+
 
 class FileNodeResponse(BaseModel):
     name: str
     path: str
     type: str  # "file" | "directory"
-    size: Optional[int] = None
-    extension: Optional[str] = None
-    children: Optional[List["FileNodeResponse"]] = None
+    size: int | None = None
+    extension: str | None = None
+    children: list["FileNodeResponse"] | None = None
 
 class FileTreeResponse(BaseModel):
-    files: List[FileNodeResponse]
+    files: list[FileNodeResponse]
 
 class FileContentResponse(BaseModel):
     name: str
     path: str
     content: str
-    language: Optional[str] = None
+    language: str | None = None
     size: int

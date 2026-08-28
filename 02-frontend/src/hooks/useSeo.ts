@@ -34,16 +34,12 @@ export function useSeo({ title, description, canonicalPath, noindex }: SeoOption
   useEffect(() => {
     const fullTitle = title.includes(SITE) ? title : `${SITE} — ${title}`;
     document.title = fullTitle;
-    if (description) {
-      upsertMeta('name', 'description', description);
-      upsertMeta('property', 'og:description', description);
-      upsertMeta('name', 'twitter:description', description);
-    }
+    upsertMeta('name', 'description', description || '');
+    upsertMeta('property', 'og:description', description || '');
+    upsertMeta('name', 'twitter:description', description || '');
     upsertMeta('property', 'og:title', fullTitle);
     upsertMeta('name', 'twitter:title', fullTitle);
     upsertMeta('name', 'robots', noindex ? 'noindex,nofollow' : 'index,follow');
-    if (canonicalPath) {
-      upsertCanonical(`${window.location.origin}${canonicalPath}`);
-    }
+    upsertCanonical(`${window.location.origin}${canonicalPath || window.location.pathname}`);
   }, [title, description, canonicalPath, noindex]);
 }

@@ -7,12 +7,12 @@ caller beyond the project scope.
 import asyncio
 import shutil
 import time
-from typing import Any, Dict, List
+from typing import Any
 
-from app.services.project_service import ProjectService
 from app.core.errors import AppException
+from app.services.project_service import ProjectService
 
-ALLOWED_TEST_JOBS: Dict[str, Dict[str, Any]] = {
+ALLOWED_TEST_JOBS: dict[str, dict[str, Any]] = {
     "pytest": {
         "label": "Python test suite (pytest)",
         "argv": ["pytest", "-q"],
@@ -33,7 +33,7 @@ ALLOWED_TEST_JOBS: Dict[str, Dict[str, Any]] = {
 
 class TestingService:
     @staticmethod
-    def list_jobs() -> List[Dict[str, Any]]:
+    def list_jobs() -> list[dict[str, Any]]:
         return [
             {
                 "id": job_id,
@@ -45,7 +45,7 @@ class TestingService:
         ]
 
     @staticmethod
-    async def run_job(project_id: str, job_id: str) -> Dict[str, Any]:
+    async def run_job(project_id: str, job_id: str) -> dict[str, Any]:
         spec = ALLOWED_TEST_JOBS.get(job_id)
         if spec is None:
             raise AppException(
