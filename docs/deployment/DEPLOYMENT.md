@@ -1,6 +1,6 @@
 # Deployment
 
-The repository includes a [Render blueprint](../../render.yaml) and Vercel
+The repository includes a [Render blueprint](../../config/render.yaml) and Vercel
 configuration at [`02-frontend/vercel.json`](../../02-frontend/vercel.json).
 
 Set backend secrets and origins only in the hosting provider. Set frontend
