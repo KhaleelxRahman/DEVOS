@@ -2,6 +2,8 @@
 
 > AI-powered Developer Workspace with Git, AI Assistant, Terminal, and GitHub Integration.
 
+[![DEVOS banner](./docs/assets/devos-banner.svg)](./docs/README.md)
+
 [![CI](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/ci.yml/badge.svg)](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/ci.yml)
 [![Security](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/security.yml/badge.svg)](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/security.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -10,7 +12,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](./02-frontend/public/manifest.webmanifest)
 
-**Project links:** [Launch Commander](./DEPLOYMENT_CHECKLIST.md) · [Live Demo](#live-demo) · [Documentation](./docs/README.md) · [Deployment Checklist](./DEPLOYMENT_CHECKLIST.md) · [Release Notes](./RELEASE_NOTES.md) · [Rollback Plan](./ROLLBACK_PLAN.md)
+**Project links:** [Live Demo](#live-demo) · [Documentation](./docs/README.md) · [Deployment Checklist](./docs/deployment/DEPLOYMENT_CHECKLIST.md) · [Release Notes](./docs/releases/RELEASE_NOTES.md) · [Rollback Plan](./docs/deployment/ROLLBACK_PLAN.md)
 
 ## Project Status
 
@@ -41,6 +43,16 @@ FastAPI ── SQLAlchemy async ── SQLite or PostgreSQL
    ├── allowlisted terminal and Git services
    ├── GitHub OAuth (server-side tokens)
    └── AI provider adapters
+```
+
+## Repository Structure
+
+```text
+02-frontend/   React, TypeScript, and Vite client
+03-backend/    FastAPI service and database layer
+04-tests/      API and unit test suites
+docs/          Architecture, operations, security, and product docs
+.github/       Community health files and CI/security workflows
 ```
 
 ## Quick Start
@@ -85,6 +97,11 @@ The public landing page includes an accessible workspace illustration. Add revie
 No production demo URL has been verified yet. Configure the deployment first,
 then replace this note with the owned public URL.
 
+## Release Status
+
+**DEVOS v1.0.0 Release Candidate**. Production deployment and public demo URL
+remain human-owned configuration steps.
+
 ## Tech Stack
 
 - **Frontend:** React 18, TypeScript, Vite, React Router, Lucide
@@ -101,7 +118,7 @@ then replace this note with the owned public URL.
 
 ## Documentation
 
-Start at [docs/README.md](./docs/README.md). Security details are in [docs/SECURITY.md](./docs/SECURITY.md); API and deployment references are linked there.
+Start at [docs/README.md](./docs/README.md). Security details are in [docs/security/SECURITY.md](./docs/security/SECURITY.md); API and deployment references are linked there.
 
 ## Contributing
 

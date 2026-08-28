@@ -13,4 +13,4 @@ GitHub OAuth contract:
 - `GET /api/v1/github/callback`
 - `GET /api/v1/github/repositories`
 
-See the detailed [API specification](../01-docs/07_API_SPECIFICATION.md).
+See the detailed [API specification](./API_SPECIFICATION.md).

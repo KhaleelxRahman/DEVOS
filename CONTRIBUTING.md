@@ -7,4 +7,4 @@
 4. Never commit `.env` files, credentials, tokens, or runtime data.
 5. Describe security implications and verification evidence.
 
-See [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md).
+See the [documentation index](./docs/README.md).

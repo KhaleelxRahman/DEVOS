@@ -8,4 +8,5 @@ SQLite is the default local database. PostgreSQL is supported for deployment.
 GitHub access tokens remain server-side and terminal commands execute without a
 shell from an explicit allowlist.
 
-See [API](./API.md), [Security](./SECURITY.md), and [Deployment](./DEPLOYMENT.md).
+See [API](./API.md), [Security](../security/SECURITY.md), and
+[Deployment](../deployment/DEPLOYMENT.md).
