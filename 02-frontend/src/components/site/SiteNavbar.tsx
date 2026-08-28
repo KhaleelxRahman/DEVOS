@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Menu, X, Terminal } from 'lucide-react';
 import { track } from '../../lib/analytics';
@@ -13,7 +13,33 @@ const NAV_LINKS = [
 
 export const SiteNavbar: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const mobileNavRef = useRef<HTMLElement>(null);
   const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    if (open) mobileNavRef.current?.querySelector<HTMLElement>('a,button')?.focus();
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Escape') {
+      setOpen(false);
+      return;
+    }
+    if (event.key !== 'Tab' || !mobileNavRef.current) return;
+    const focusable = Array.from(mobileNavRef.current.querySelectorAll<HTMLElement>('a,button'));
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   const linkStyle = ({ isActive }: { isActive: boolean }): React.CSSProperties => ({
     color: isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)',
@@ -62,7 +88,7 @@ export const SiteNavbar: React.FC = () => {
       </button>
 
       {open && (
-        <nav className="site-nav-mobile" aria-label="Mobile">
+        <nav ref={mobileNavRef} className="site-nav-mobile" aria-label="Mobile" onKeyDown={handleMenuKeyDown}>
           {NAV_LINKS.map((l) => (
             <NavLink key={l.to} to={l.to} end={l.end as any} style={linkStyle} onClick={() => setOpen(false)}>
               {l.label}

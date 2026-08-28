@@ -1,13 +1,13 @@
-from typing import List, Optional
 from pydantic import BaseModel
+
 
 class GitStatusResponse(BaseModel):
     branch: str
     is_clean: bool
-    modified: List[str] = []
-    added: List[str] = []
-    deleted: List[str] = []
-    untracked: List[str] = []
+    modified: list[str] = []
+    added: list[str] = []
+    deleted: list[str] = []
+    untracked: list[str] = []
 
 class GitCommitRequest(BaseModel):
     message: str
@@ -21,7 +21,7 @@ class GitDiffResponse(BaseModel):
 
 class GitBranchListResponse(BaseModel):
     current: str
-    branches: List[str] = []
+    branches: list[str] = []
 
 
 class GitLogEntry(BaseModel):
@@ -32,11 +32,11 @@ class GitLogEntry(BaseModel):
 
 
 class GitLogResponse(BaseModel):
-    commits: List[GitLogEntry] = []
+    commits: list[GitLogEntry] = []
 
 
 class GitStageRequest(BaseModel):
-    files: List[str]
+    files: list[str]
 
 
 class GitCheckoutRequest(BaseModel):

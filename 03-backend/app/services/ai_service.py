@@ -5,9 +5,8 @@ selects a real provider only when its API key is configured; otherwise it
 returns the clearly labelled local mock provider. Mock responses are never
 presented as coming from a real provider.
 """
-import re
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 import httpx
 
@@ -24,15 +23,15 @@ class BaseAIProvider(ABC):
     async def generate_response(
         self,
         prompt: str,
-        context: Dict[str, Any],
-        history: List[Dict[str, str]],
+        context: dict[str, Any],
+        history: list[dict[str, str]],
     ) -> AIMessageResponse:
         ...
 
 
-def _render_context(context: Dict[str, Any]) -> str:
+def _render_context(context: dict[str, Any]) -> str:
     """Render a compact, size-limited text view of the project context."""
-    parts: List[str] = []
+    parts: list[str] = []
     project = context.get("project") or {}
     if project:
         parts.append(f"Project: {project.get('name')} | stack: {', '.join(project.get('technologies') or [])}")
@@ -42,7 +41,7 @@ def _render_context(context: Dict[str, Any]) -> str:
         parts.append(f"README excerpt:\n{readme[:2000]}")
 
     tree = context.get("file_tree") or []
-    paths: List[str] = []
+    paths: list[str] = []
 
     def collect(nodes):
         for node in nodes:
@@ -86,8 +85,8 @@ class MockAIProvider(BaseAIProvider):
     async def generate_response(
         self,
         prompt: str,
-        context: Dict[str, Any],
-        history: List[Dict[str, str]],
+        context: dict[str, Any],
+        history: list[dict[str, str]],
     ) -> AIMessageResponse:
         project_name = (context.get("project") or {}).get("name", "your project")
         current_file = context.get("current_file")
@@ -184,7 +183,7 @@ _ACTION_PROMPTS = {
 
 
 class AIService:
-    def __init__(self, provider: Optional[BaseAIProvider] = None):
+    def __init__(self, provider: BaseAIProvider | None = None):
         self.provider = provider or MockAIProvider()
 
     @classmethod
@@ -207,7 +206,7 @@ class AIService:
 
         return cls(MockAIProvider())
 
-    def status(self) -> Dict[str, Any]:
+    def status(self) -> dict[str, Any]:
         return {
             "provider": self.provider.name,
             "model": self.provider.model,
@@ -218,8 +217,8 @@ class AIService:
     async def chat(
         self,
         prompt: str,
-        context: Dict[str, Any],
-        history: List[Dict[str, str]] = None,
+        context: dict[str, Any],
+        history: list[dict[str, str]] = None,
     ) -> AIMessageResponse:
         return await self.provider.generate_response(prompt, context, history or [])
 
@@ -227,9 +226,9 @@ class AIService:
         self,
         action: str,
         code: str,
-        context: Dict[str, Any],
-        file_path: Optional[str] = None,
-        language: Optional[str] = None,
+        context: dict[str, Any],
+        file_path: str | None = None,
+        language: str | None = None,
     ) -> AIMessageResponse:
         if action not in _ACTION_PROMPTS:
             from app.core.errors import ValidationException

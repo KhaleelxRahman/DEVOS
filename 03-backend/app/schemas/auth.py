@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import Optional
+
 from pydantic import BaseModel, EmailStr, Field
+
 
 class UserRegister(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
@@ -16,7 +17,7 @@ class UserResponse(BaseModel):
     name: str
     email: str
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 

@@ -1,7 +1,6 @@
-import os
-from typing import List, Union
-from pydantic import AnyHttpUrl, field_validator
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
@@ -18,7 +17,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
 
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = [
+    BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
@@ -26,7 +25,7 @@ class Settings(BaseSettings):
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
+    def assemble_cors_origins(cls, v: str | list[str]) -> list[str] | str:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
@@ -35,6 +34,8 @@ class Settings(BaseSettings):
 
     # Workspace & Storage
     PROJECTS_STORAGE_PATH: str = "./projects_storage"
+    TERMINAL_TIMEOUT_SECONDS: int = 30
+    TERMINAL_MAX_OUTPUT_CHARS: int = 20000
 
     # AI Provider Configuration. When no API key is configured for the
     # selected provider, DEVOS transparently falls back to the clearly
@@ -49,6 +50,7 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_ID: str = ""
     GITHUB_CLIENT_SECRET: str = ""
     GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/github/callback"
+    FRONTEND_APP_URL: str = "http://localhost:5173"
     # Optional server-side token enabling read-only repository access.
     GITHUB_TOKEN: str = ""
 

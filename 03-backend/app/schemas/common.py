@@ -1,4 +1,5 @@
-from typing import Generic, TypeVar, Optional, Any
+from typing import Generic, TypeVar
+
 from pydantic import BaseModel
 
 T = TypeVar("T")
@@ -9,8 +10,8 @@ class ErrorDetail(BaseModel):
 
 class ApiResponse(BaseModel, Generic[T]):
     success: bool = True
-    data: Optional[T] = None
-    error: Optional[ErrorDetail] = None
+    data: T | None = None
+    error: ErrorDetail | None = None
 
 class HealthResponse(BaseModel):
     status: str

@@ -11,6 +11,8 @@ export const SiteFooter: React.FC = () => {
             <Terminal size={16} color="var(--color-accent)" aria-hidden="true" /> DEVOS
           </span>
           <p>AI developer workspace for projects, files, Git, terminal, and testing.</p>
+          <p><a href="mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS%20Support">mdkhaleelurrahman51@gmail.com</a></p>
+          <p><a href="tel:+917842835936">+91 78428 35936</a></p>
         </div>
         <nav className="site-footer-col" aria-label="Product">
           <strong>Product</strong>

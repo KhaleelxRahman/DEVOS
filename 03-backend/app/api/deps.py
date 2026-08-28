@@ -1,11 +1,12 @@
-from typing import AsyncGenerator
 from fastapi import Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import get_db
-from app.core.security import decode_access_token
+
 from app.core.errors import AuthRequiredException
+from app.core.security import decode_access_token
+from app.db.session import get_db
 from app.models.user import User
 from app.services.auth_service import AuthService
+
 
 async def get_current_user(
     authorization: str = Header(None),

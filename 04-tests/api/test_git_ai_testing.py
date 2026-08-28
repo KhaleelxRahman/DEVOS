@@ -91,6 +91,14 @@ async def test_git_status_branches_commit_log(client):
         await client.post(f"{base}/unstage", json={"files": ["new.py"]}, headers=headers)
     ).status_code == 200
 
+    with open(os.path.join(ProjectService.get_project_storage_path(project_id), ".env"), "w") as f:
+        f.write("SECRET=should-not-be-committed\n")
+    blocked_commit = await client.post(
+        f"{base}/commit", json={"message": "blocked secret"}, headers=headers
+    )
+    assert blocked_commit.status_code == 403
+    assert blocked_commit.json()["error"]["code"] == "GIT_SENSITIVE_FILE"
+
     # Empty commit message rejected
     assert (
         await client.post(f"{base}/commit", json={"message": "   "}, headers=headers)
@@ -222,3 +230,26 @@ async def test_testing_center_allowlist(client):
         assert run.json()["data"]["job"] == "pytest"
         # Empty project -> pytest exit code 5 (no tests collected) -> failed
         assert run.json()["data"]["status"] in ("passed", "failed")
+
+
+@pytest.mark.asyncio
+async def test_github_documented_routes_and_oauth_state(client, monkeypatch):
+    headers, _project_id, _root = await _setup(client)
+
+    monkeypatch.setattr("app.api.v1.github.settings.GITHUB_CLIENT_ID", "client-id")
+    connect = await client.post("/api/v1/github/connect", headers=headers)
+    assert connect.status_code == 200
+    authorization_url = connect.json()["data"]["authorization_url"]
+    assert "client_id=client-id" in authorization_url
+    assert "state=" in authorization_url
+
+    repositories = await client.get("/api/v1/github/repositories", headers=headers)
+    legacy_repositories = await client.get("/api/v1/github/repos", headers=headers)
+    assert repositories.status_code == 200
+    assert legacy_repositories.status_code == 200
+    assert repositories.json()["data"]["connected"] is False
+
+    invalid_callback = await client.get(
+        "/api/v1/github/callback?code=example&state=invalid"
+    )
+    assert invalid_callback.status_code == 401

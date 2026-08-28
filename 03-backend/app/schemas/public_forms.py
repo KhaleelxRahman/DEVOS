@@ -1,5 +1,6 @@
-from typing import Optional
+
 from pydantic import BaseModel, EmailStr, Field, field_validator
+
 
 # No HTML tags allowed in free-text fields; plain-text forms only.
 def _reject_html(value: str) -> str:
@@ -10,11 +11,11 @@ def _reject_html(value: str) -> str:
 
 class WaitlistJoinRequest(BaseModel):
     email: EmailStr
-    name: Optional[str] = Field(default=None, max_length=120)
+    name: str | None = Field(default=None, max_length=120)
 
     @field_validator("name")
     @classmethod
-    def name_plain_text(cls, v: Optional[str]) -> Optional[str]:
+    def name_plain_text(cls, v: str | None) -> str | None:
         if v is not None:
             return _reject_html(v.strip()) or None
         return v

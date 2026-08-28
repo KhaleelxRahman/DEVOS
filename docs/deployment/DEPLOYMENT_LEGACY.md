@@ -86,7 +86,20 @@ Only public configuration.
 
 Example:
 
-API_BASE_URL
+VITE_API_BASE_URL
+
+For a split frontend/backend deployment, set `VITE_API_BASE_URL` to the
+complete backend API prefix, for example
+`https://devos-api.example.com/api/v1`. Vite embeds this public value at build
+time; do not put secrets in frontend variables. Render static sites do not
+proxy `/api` automatically, so this variable is required unless an equivalent
+reverse-proxy rewrite is configured.
+
+The included Render blueprint sets `VITE_API_BASE_URL` to the `devos-api`
+service and `FRONTEND_APP_URL` to the `devos-web` service. If either service
+name is changed, update both values and the GitHub OAuth application's callback
+URL (`GITHUB_REDIRECT_URI`) accordingly. On Vercel, configure
+`VITE_API_BASE_URL` in the project environment before building.
 
 
 8. SECRET RULE

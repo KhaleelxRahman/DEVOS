@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
-from app.core.rate_limit import rate_limit
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import get_db
+
 from app.api.deps import get_current_user
+from app.core.rate_limit import rate_limit
+from app.db.session import get_db
 from app.models.user import User
-from app.schemas.common import ApiResponse
 from app.schemas.ai import (
     AIActionRequest,
     AIChatRequest,
@@ -15,11 +15,12 @@ from app.schemas.ai import (
     ConversationResponse,
     MessageListResponse,
 )
-from app.services.project_service import ProjectService
-from app.services.context_service import ContextService
-from app.services.ai_service import AIService
-from app.services.conversation_service import ConversationService
+from app.schemas.common import ApiResponse
 from app.services.activity_service import ActivityService
+from app.services.ai_service import AIService
+from app.services.context_service import ContextService
+from app.services.conversation_service import ConversationService
+from app.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects/{project_id}/ai", tags=["ai"])
 ai_service = AIService.from_settings()

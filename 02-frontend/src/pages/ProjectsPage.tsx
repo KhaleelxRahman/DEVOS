@@ -19,6 +19,7 @@ export const ProjectsPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState('');
   useSeo({ title: 'Projects', description: 'Your DEVOS projects.', noindex: true });
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export const ProjectsPage: React.FC = () => {
           setProjects(res.data.projects);
         }
       })
-      .catch(() => {})
+      .catch((err) => setLoadError(err.message || 'Unable to load projects'))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -94,6 +95,14 @@ export const ProjectsPage: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-12)' }}>
           <Spinner size={32} />
         </div>
+      ) : loadError ? (
+        <EmptyState
+          icon={<FolderGit2 size={40} />}
+          title="Unable to load projects"
+          description={loadError}
+          actionLabel="Retry"
+          onAction={() => window.location.reload()}
+        />
       ) : projects.length === 0 ? (
         <EmptyState
           icon={<FolderGit2 size={40} />}

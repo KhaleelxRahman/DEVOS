@@ -1,8 +1,8 @@
 import os
-from typing import List, Optional
+
+from app.core.errors import FileAccessDeniedException, FileNotFoundException
+from app.schemas.file import FileContentResponse, FileNodeResponse
 from app.services.project_service import ProjectService
-from app.schemas.file import FileNodeResponse, FileContentResponse
-from app.core.errors import FileNotFoundException, FileAccessDeniedException
 
 SENSITIVE_PATTERNS = {
     ".env", ".env.local", ".env.production", ".env.development",
@@ -44,12 +44,12 @@ class FileService:
 
     @staticmethod
     def validate_safe_path(project_id: str, relative_path: str) -> str:
-        project_root = os.path.abspath(ProjectService.get_project_storage_path(project_id))
+        project_root = os.path.realpath(ProjectService.get_project_storage_path(project_id))
         clean_rel = relative_path.lstrip("/\\")
-        target_path = os.path.abspath(os.path.join(project_root, clean_rel))
+        target_path = os.path.realpath(os.path.join(project_root, clean_rel))
 
         # Check path traversal
-        if not target_path.startswith(project_root):
+        if os.path.commonpath((project_root, target_path)) != project_root:
             raise FileAccessDeniedException("Path traversal attempt detected")
 
         # Check sensitive file
@@ -59,11 +59,11 @@ class FileService:
         return target_path
 
     @staticmethod
-    def get_file_tree(project_id: str) -> List[FileNodeResponse]:
+    def get_file_tree(project_id: str) -> list[FileNodeResponse]:
         project_root = os.path.abspath(ProjectService.get_project_storage_path(project_id))
         
-        def walk_dir(current_path: str, rel_path: str = "") -> List[FileNodeResponse]:
-            nodes: List[FileNodeResponse] = []
+        def walk_dir(current_path: str, rel_path: str = "") -> list[FileNodeResponse]:
+            nodes: list[FileNodeResponse] = []
             try:
                 entries = sorted(os.scandir(current_path), key=lambda e: (not e.is_dir(), e.name.lower()))
             except Exception:
@@ -123,7 +123,7 @@ class FileService:
             with open(abs_path, "r", encoding="utf-8", errors="replace") as f:
                 content = f.read()
         except Exception as e:
-            raise FileAccessDeniedException(f"Unable to read file: {str(e)}")
+            raise FileAccessDeniedException(f"Unable to read file: {e!s}")
 
         _, ext = os.path.splitext(abs_path)
         language = EXTENSION_LANGUAGE_MAP.get(ext.lower(), "plaintext")

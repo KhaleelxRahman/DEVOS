@@ -1,9 +1,16 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Optional, Any
-from sqlalchemy import String, ForeignKey, DateTime, JSON
+from typing import TYPE_CHECKING, Any, Optional
+
+from sqlalchemy import JSON, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.project import Project
+    from app.models.user import User
+
 
 class Activity(Base):
     __tablename__ = "activities"
@@ -19,14 +26,14 @@ class Activity(Base):
         nullable=False,
         index=True,
     )
-    project_id: Mapped[Optional[str]] = mapped_column(
+    project_id: Mapped[str | None] = mapped_column(
         String(36),
         ForeignKey("projects.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )
     activity_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    metadata_json: Mapped[Optional[Any]] = mapped_column("metadata", JSON, nullable=True)
+    metadata_json: Mapped[Any | None] = mapped_column("metadata", JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),

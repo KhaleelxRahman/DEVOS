@@ -1,17 +1,18 @@
+import asyncio
 import os
 import re
-import asyncio
 import shutil
-from typing import List, Optional
-from app.services.project_service import ProjectService
-from app.schemas.git import (
-    GitStatusResponse,
-    GitDiffResponse,
-    GitBranchListResponse,
-    GitLogResponse,
-    GitLogEntry,
-)
+
 from app.core.errors import AppException
+from app.services.file_service import FileService
+from app.schemas.git import (
+    GitBranchListResponse,
+    GitDiffResponse,
+    GitLogEntry,
+    GitLogResponse,
+    GitStatusResponse,
+)
+from app.services.project_service import ProjectService
 
 _BRANCH_RE = re.compile(r"^[A-Za-z0-9._\-/]+$")
 
@@ -27,7 +28,7 @@ class GitService:
             )
 
     @staticmethod
-    async def _run_git_cmd(project_id: str, args: List[str], auto_init: bool = True) -> tuple[int, str, str]:
+    async def _run_git_cmd(project_id: str, args: list[str], auto_init: bool = True) -> tuple[int, str, str]:
         GitService._ensure_git_available()
         project_dir = ProjectService.get_project_storage_path(project_id)
         
@@ -120,6 +121,26 @@ class GitService:
 
         # Stage all
         await GitService._run_git_cmd(project_id, ["add", "."])
+        code, staged_out, staged_err = await GitService._run_git_cmd(
+            project_id, ["diff", "--cached", "--name-only"], auto_init=False
+        )
+        if code != 0:
+            raise AppException(
+                f"Unable to inspect staged files: {staged_err or staged_out}",
+                code="GIT_ERROR",
+                status_code=400,
+            )
+        sensitive = [
+            path for path in staged_out.splitlines()
+            if FileService.is_sensitive(os.path.basename(path))
+        ]
+        if sensitive:
+            await GitService._run_git_cmd(project_id, ["reset"], auto_init=False)
+            raise AppException(
+                f"Commit contains blocked sensitive files: {', '.join(sensitive)}",
+                code="GIT_SENSITIVE_FILE",
+                status_code=403,
+            )
         # Commit
         code, stdout, stderr = await GitService._run_git_cmd(project_id, ["commit", "-m", message.strip()])
         if code != 0 and "nothing to commit" not in stdout and "nothing to commit" not in stderr:
@@ -147,7 +168,7 @@ class GitService:
         code, out, _ = await GitService._run_git_cmd(
             project_id, ["log", f"--max-count={limit}", "--pretty=format:%h%x1f%an%x1f%ad%x1f%s"]
         )
-        commits: List[GitLogEntry] = []
+        commits: list[GitLogEntry] = []
         if code == 0 and out.strip():
             for line in out.splitlines():
                 parts = line.split("\x1f")
@@ -158,7 +179,7 @@ class GitService:
         return GitLogResponse(commits=commits)
 
     @staticmethod
-    async def stage(project_id: str, files: List[str]) -> None:
+    async def stage(project_id: str, files: list[str]) -> None:
         if not files:
             raise AppException("No files specified to stage", code="GIT_ERROR", status_code=400)
         for f in files:
@@ -168,7 +189,7 @@ class GitService:
             raise AppException(f"Git stage failed: {stderr or stdout}", code="GIT_ERROR", status_code=400)
 
     @staticmethod
-    async def unstage(project_id: str, files: List[str]) -> None:
+    async def unstage(project_id: str, files: list[str]) -> None:
         if not files:
             raise AppException("No files specified to unstage", code="GIT_ERROR", status_code=400)
         for f in files:

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FolderGit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../hooks/useProject';
 import { EmptyState, Card } from '../components/common';
-import { filesApi } from '../api';
+import { filesApi, projectsApi } from '../api';
 import { FileExplorer } from '../components/workspace/FileExplorer';
 import { CodeViewer, OpenTab } from '../components/workspace/CodeViewer';
 import { TerminalPanel } from '../components/workspace/TerminalPanel';
@@ -16,11 +16,22 @@ import { useSeo } from '../hooks/useSeo';
 export const WorkspacePage: React.FC = () => {
   useSeo({ title: 'Workspace', noindex: true });
 
-  const { activeProject } = useProject();
+  const { activeProject, setActiveProject } = useProject();
   const navigate = useNavigate();
   const [tabs, setTabs] = useState<OpenTab[]>([]);
   const [activePath, setActivePath] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (activeProject) return;
+    const projectId = localStorage.getItem('devos_active_project_id');
+    if (!projectId) return;
+    projectsApi.get(projectId)
+      .then((res) => {
+        if (res.success && res.data) setActiveProject(res.data);
+      })
+      .catch(() => localStorage.removeItem('devos_active_project_id'));
+  }, [activeProject, setActiveProject]);
 
   if (!activeProject) {
     return (

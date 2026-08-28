@@ -1,19 +1,26 @@
 import React from 'react';
-import { Terminal, Bot, GitBranch, FolderGit2 } from 'lucide-react';
+import { Terminal, Bot, GitBranch, FolderGit2, Menu, X } from 'lucide-react';
 import { Badge } from '../common/Badge';
 
 export interface TopBarProps {
   activeProjectName?: string;
   gitBranch?: string;
+  menuOpen?: boolean;
+  onMenuToggle?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
   activeProjectName,
   gitBranch = 'main',
+  menuOpen = false,
+  onMenuToggle,
 }) => {
   return (
     <header className="top-bar">
       <div className="top-bar-brand">
+        <button className="app-menu-toggle" onClick={onMenuToggle} aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen}>
+          {menuOpen ? <X size={18} /> : <Menu size={18} />}
+        </button>
         <Terminal size={18} color="var(--color-accent)" />
         <span>DEVOS</span>
         <span className="top-bar-badge">v1.0 MVP</span>

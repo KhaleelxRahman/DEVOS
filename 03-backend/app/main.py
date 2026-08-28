@@ -1,21 +1,23 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+
+import app.models
+from app.api.v1.router import api_v1_router
 from app.core.config import settings
-from app.core.logging import logger
-from app.db.base import Base
-from app.db.session import engine
-import app.models  # noqa: F401  (register all models on the metadata)
 from app.core.errors import (
     AppException,
     app_exception_handler,
-    validation_exception_handler,
     generic_exception_handler,
+    validation_exception_handler,
 )
-from app.api.v1.router import api_v1_router
+from app.core.logging import logger
+from app.db.base import Base
+from app.db.session import engine
 from app.schemas.common import ApiResponse, HealthResponse
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

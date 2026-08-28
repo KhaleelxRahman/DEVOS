@@ -1,101 +1,134 @@
-# DEVOS — Developer Environment Operating System
+# DEVOS
 
-DEVOS is a project-aware AI developer command center. It unifies project
-management, a file explorer, a code viewer, an allowlisted sandboxed terminal,
-Git version control, a testing center, and a context-aware AI assistant into a
-single dark, developer-first workspace.
+> AI-powered Developer Workspace with Git, AI Assistant, Terminal, and GitHub Integration.
 
-## Repository Layout
+[![DEVOS banner](./docs/assets/devos-banner.svg)](./docs/README.md)
 
-| Directory      | Purpose                                            |
-| -------------- | -------------------------------------------------- |
-| `01-docs/`     | Product, architecture, security, and API documents |
-| `02-frontend/` | React 18 + TypeScript + Vite frontend              |
-| `03-backend/`  | FastAPI backend (Python 3.11+)                     |
-| `04-tests/`    | pytest suite (API + unit)                          |
+[![CI](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/ci.yml/badge.svg)](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/ci.yml)
+[![Security](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/security.yml/badge.svg)](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/security.yml)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=111827)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+[![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](./02-frontend/public/manifest.webmanifest)
 
-## Quick Start (Local)
+**Project links:** [Live Demo](#live-demo) · [Documentation](./docs/README.md) · [Deployment Checklist](./docs/deployment/DEPLOYMENT_CHECKLIST.md) · [Release Notes](./docs/releases/RELEASE_NOTES.md) · [Rollback Plan](./docs/deployment/ROLLBACK_PLAN.md)
+
+## Project Status
+
+| Area | Status |
+| --- | --- |
+| Backend, API, Git, workspace | Ready |
+| Frontend build and responsive UI | Ready |
+| Automated tests | 48 passing |
+| GitHub OAuth and repository dashboard | Implemented |
+| Production deployment | Human-owned configuration required |
+
+## Features
+
+| Workspace | Intelligence | Delivery |
+| --- | --- | --- |
+| Project-scoped files and explorer | Context-aware AI assistant | Git status, branches, commits |
+| Allowlisted terminal | Local/Mock, Gemini, or OpenAI providers | Testing center |
+| GitHub OAuth and repository browser | Secret-aware context sanitization | PWA installability |
+
+## Architecture
+
+```text
+React + TypeScript + Vite
+          │ HTTPS / JSON API
+          ▼
+FastAPI ── SQLAlchemy async ── SQLite or PostgreSQL
+   ├── project-scoped file/workspace storage
+   ├── allowlisted terminal and Git services
+   ├── GitHub OAuth (server-side tokens)
+   └── AI provider adapters
+```
+
+## Repository Structure
+
+```text
+02-frontend/   React, TypeScript, and Vite client
+03-backend/    FastAPI service and database layer
+04-tests/      API and unit test suites
+docs/          Architecture, operations, security, and product docs
+.github/       Community health files and CI/security workflows
+```
+
+## Quick Start
 
 ### Backend
 
 ```bash
 cd 03-backend
-python -m venv .venv && source .venv/bin/activate
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env          # optional; sensible defaults are built in
+copy .env.example .env  # Windows; use cp on Linux/macOS
 uvicorn app.main:app --reload --port 8000
 ```
-
-The backend defaults to a local SQLite database (`./devos.db`) and creates
-tables automatically on startup. No external services are required. To use
-PostgreSQL instead, set `DATABASE_URL` in `.env` and run
-`alembic upgrade head`.
-
-Interactive API documentation is available at `http://localhost:8000/docs`.
 
 ### Frontend
 
 ```bash
 cd 02-frontend
-npm install
-npm run dev                   # http://localhost:5173
+npm ci
+npm run dev
 ```
 
-The frontend talks to the backend through same-origin `/api` requests. The
-Vite dev server proxies `/api` to `http://localhost:8000` by default
-(override with `VITE_API_PROXY_TARGET`). This works identically on Replit or
-behind reverse proxies without CORS changes or hardcoded backend URLs.
+The Vite server proxies `/api` to `http://localhost:8000`. Override it with `VITE_API_PROXY_TARGET`.
 
-### Tests
+### Tests and build
 
 ```bash
-cd 04-tests
+python -m ruff check 03-backend
 python -m pytest -q
+cd 02-frontend
+npm run build
 ```
 
-## Configuration
+## Screenshots
 
-See `03-backend/.env.example` and `02-frontend/.env.example` for every
-supported variable. Highlights:
+The public landing page includes an accessible workspace illustration. Add reviewed product screenshots to `docs/assets/` before publishing external marketing material.
 
-- `AUTH_SECRET` — JWT signing secret; **must be changed in production**.
-- `AI_PROVIDER` / `GEMINI_API_KEY` / `OPENAI_API_KEY` — without a key, the AI
-  assistant runs in **Local/Mock mode** and clearly labels its responses.
-- `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` — enable GitHub OAuth. When
-  unset, GitHub endpoints honestly report "not connected" instead of serving
-  fake data.
-- `TERMINAL_TIMEOUT_SECONDS`, `TERMINAL_MAX_OUTPUT_CHARS` — terminal sandbox
-  limits.
+## Live Demo
 
-## Security Model (Summary)
+No production demo URL has been verified yet. Configure the deployment first,
+then replace this note with the owned public URL.
 
-- Passwords hashed with Argon2 (bcrypt fallback for legacy hashes).
-- JWT bearer auth on every project-scoped endpoint.
-- Per-IP, per-route rate limiting on auth (register/login), public forms
-  (waitlist/contact), AI, and terminal endpoints.
-- Terminal executes an explicit allowlist of development commands via
-  `subprocess` without a shell; cwd is locked to the project workspace.
-- File API blocks path traversal, dotfiles/secrets, and key material;
-  create/upload enforce size limits and block executable extensions.
-- AI context excludes `.git`, `node_modules`, secrets, and masks secret-like
-  values before they reach any provider.
-- GitHub tokens are stored server-side and never returned by the API.
-- No cookies; auth token lives in browser local storage. Optional website
-  analytics (only active when `VITE_ANALYTICS_ENDPOINT` is set) is gated by
-  an explicit consent banner.
+## Release Status
 
-See `01-docs/06_SECURITY.md` for the full model.
+**DEVOS v1.0.0 Release Candidate**. Production deployment and public demo URL
+remain human-owned configuration steps.
 
-## Public Website & Authenticated Workspace
+## Tech Stack
 
-The frontend is split into two layouts:
+- **Frontend:** React 18, TypeScript, Vite, React Router, Lucide
+- **Backend:** FastAPI, SQLAlchemy async, Pydantic Settings
+- **Data:** SQLite locally; PostgreSQL supported for deployment
+- **Quality:** Ruff, pytest, TypeScript, Vite build, GitHub Actions
 
-- **Public site** (`/`, `/about`, `/faq`, `/contact`, `/waitlist`,
-  `/privacy`, `/terms`) — no auth required, SEO meta tags per page, and
-  waitlist/contact forms persisted via the public API.
-- **App workspace** (`/app/dashboard`, `/app/projects`, `/app/workspace`,
-  `/app/settings`) — JWT-protected; legacy `/dashboard`-style paths redirect
-  into `/app/*`.
+## Roadmap
 
-Waitlist and contact submissions land in the `waitlist_entries` and
-`contact_messages` tables (Alembic revision `f3a1c9d2e4b5`).
+- Container or OS-level isolation for terminal workloads
+- Production observability and privacy-preserving analytics
+- Expanded repository import and collaboration flows
+- Formal Lighthouse and multi-browser release gates
+
+## Documentation
+
+Start at [docs/README.md](./docs/README.md). Security details are in [docs/security/SECURITY.md](./docs/security/SECURITY.md); API and deployment references are linked there.
+
+## Contributing
+
+Read [CONTRIBUTING.md](./CONTRIBUTING.md), open an issue using the provided template, and include reproducible steps and verification evidence.
+
+## Support
+
+- Email: [mdkhaleelurrahman51@gmail.com](mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS%20Support)
+- Phone: [+91 78428 35936](tel:+917842835936)
+
+## License
+
+DEVOS is released under the [MIT License](./LICENSE).

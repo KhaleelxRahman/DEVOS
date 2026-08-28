@@ -1,7 +1,9 @@
-from typing import Any, Optional
+from typing import Any
+
 from fastapi import Request, status
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
 
 class AppException(Exception):
     def __init__(
@@ -9,7 +11,7 @@ class AppException(Exception):
         message: str,
         code: str = "INTERNAL_ERROR",
         status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-        data: Optional[Any] = None,
+        data: Any | None = None,
     ):
         self.message = message
         self.code = code
@@ -70,7 +72,7 @@ class ValidationException(AppException):
         super().__init__(
             message=message,
             code="VALIDATION_ERROR",
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
 
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
@@ -91,7 +93,7 @@ async def validation_exception_handler(
     errors = exc.errors()
     first_error = errors[0]["msg"] if errors else "Validation failed"
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={
             "success": False,
             "error": {
