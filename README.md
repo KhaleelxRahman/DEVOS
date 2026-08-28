@@ -122,7 +122,7 @@ Start at [docs/README.md](./docs/README.md). Security details are in [docs/secur
 
 ## Contributing
 
-Read [CONTRIBUTING.md](./CONTRIBUTING.md), open an issue using the provided template, and include reproducible steps and verification evidence.
+Read [CONTRIBUTING.md](./.github/CONTRIBUTING.md), open an issue using the provided template, and include reproducible steps and verification evidence.
 
 ## Support
 
