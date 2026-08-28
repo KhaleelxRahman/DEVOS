@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
@@ -118,7 +118,7 @@ async def get_project_context(
 @router.get("/{project_id}/activity", response_model=ApiResponse[ActivityListResponse])
 async def get_project_activity(
     project_id: str,
-    limit: int = 20,
+    limit: int = Query(default=20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):

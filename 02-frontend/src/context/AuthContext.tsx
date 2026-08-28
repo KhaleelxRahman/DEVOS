@@ -45,9 +45,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    localStorage.removeItem('devos_token');
-    setUser(null);
-    authApi.logout().catch(() => {});
+    void authApi.logout()
+      .catch(() => undefined)
+      .finally(() => {
+        localStorage.removeItem('devos_token');
+        setUser(null);
+      });
   };
 
   return (

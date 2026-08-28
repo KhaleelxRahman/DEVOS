@@ -71,6 +71,8 @@ class FileService:
 
             for entry in entries:
                 if (
+                    entry.is_symlink()
+                    or
                     entry.name.startswith(".git")
                     or entry.name in EXCLUDED_DIRECTORIES
                 ):

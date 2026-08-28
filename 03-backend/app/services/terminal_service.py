@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import time
+import ntpath
 
 from app.core.config import settings
 from app.core.errors import AppException
@@ -30,8 +31,21 @@ class TerminalService:
 
         # Check blocked shell combinations
         full_command = f"{cmd_clean} {' '.join(args or [])}".lower()
-        if any("\x00" in arg or len(arg) > 4096 for arg in (args or [])):
+        command_args = args or []
+        if len(command_args) > 64 or sum(len(arg) for arg in command_args) > 65536:
+            raise AppException("Too many or too-large command arguments", code="TERMINAL_BLOCKED", status_code=403)
+        if any("\x00" in arg or len(arg) > 4096 for arg in command_args):
             raise AppException("Invalid command argument", code="TERMINAL_BLOCKED", status_code=403)
+        for arg in command_args:
+            # Commands run with the project directory as their cwd. Never allow
+            # an argument to address a parent, absolute, or credential path.
+            normalized = arg.replace("\\", "/")
+            if ntpath.isabs(arg) or normalized.startswith("/") or ".." in normalized.split("/"):
+                raise AppException("Command arguments must stay within the project workspace", code="TERMINAL_BLOCKED", status_code=403)
+            if any(part.lower() in {".env", ".env.local", ".env.production", ".env.development",
+                                   "credentials.json", "secrets.json", "id_rsa", "id_ed25519"}
+                   for part in normalized.split("/")):
+                raise AppException("Access to sensitive credential files is blocked", code="TERMINAL_BLOCKED", status_code=403)
         for blocked in BLOCKED_PATTERNS:
             if blocked in full_command:
                 raise AppException("Command contains prohibited hazardous patterns", code="TERMINAL_BLOCKED", status_code=403)
@@ -45,7 +59,6 @@ class TerminalService:
 
         if cmd_clean not in ALLOWED_COMMANDS:
             raise AppException(f"Command '{command}' is not permitted in the sandbox environment", code="TERMINAL_BLOCKED", status_code=403)
-        command_args = args or []
         if cmd_clean in {"python", "python3", "node"} and any(
             arg in {"-c", "--eval", "-e", "--eval-file"} for arg in command_args
         ):
