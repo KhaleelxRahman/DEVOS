@@ -13,7 +13,9 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4`n        with:`n          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0`n        with:`n          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
