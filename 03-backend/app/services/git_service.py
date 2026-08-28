@@ -67,13 +67,13 @@ class GitService:
     @staticmethod
     async def get_status(project_id: str) -> GitStatusResponse:
         # Get branch
-        code, branch_out, _ = await GitService._run_git_cmd(project_id, ["rev-parse", "--abbrev-ref", "HEAD"])
+        _code, branch_out, _ = await GitService._run_git_cmd(project_id, ["rev-parse", "--abbrev-ref", "HEAD"])
         branch = branch_out.strip() or "main"
         if branch == "HEAD":
             branch = "main"
 
         # Get status porcelain
-        code, status_out, _ = await GitService._run_git_cmd(project_id, ["status", "--porcelain"])
+        _code, status_out, _ = await GitService._run_git_cmd(project_id, ["status", "--porcelain"])
         
         modified = []
         added = []
@@ -108,7 +108,7 @@ class GitService:
 
     @staticmethod
     async def get_diff(project_id: str) -> GitDiffResponse:
-        code, diff_out, _ = await GitService._run_git_cmd(project_id, ["diff"])
+        _code, diff_out, _ = await GitService._run_git_cmd(project_id, ["diff"])
         return GitDiffResponse(
             diff=diff_out,
             files_changed=len(diff_out.split("diff --git")) - 1 if "diff --git" in diff_out else 0,
@@ -150,11 +150,12 @@ class GitService:
 
     @staticmethod
     async def get_branches(project_id: str) -> GitBranchListResponse:
-        code, out, _ = await GitService._run_git_cmd(
+        _code, out, _ = await GitService._run_git_cmd(
             project_id, ["branch", "--format=%(refname:short)"]
-        )
+)
+
         branches = [b.strip() for b in out.splitlines() if b.strip()]
-        code, current_out, _ = await GitService._run_git_cmd(
+        _code, current_out, _ = await GitService._run_git_cmd(
             project_id, ["rev-parse", "--abbrev-ref", "HEAD"]
         )
         current = current_out.strip() or (branches[0] if branches else "main")
