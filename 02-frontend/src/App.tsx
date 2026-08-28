@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProjectProvider } from './context/ProjectContext';
@@ -10,6 +10,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { WorkspacePage } from './pages/WorkspacePage';
 import { SettingsPage } from './pages/SettingsPage';
+
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -21,6 +22,8 @@ import { WaitlistPage } from './pages/site/WaitlistPage';
 import { ThankYouPage } from './pages/site/ThankYouPage';
 import { PrivacyPage } from './pages/site/PrivacyPage';
 import { TermsPage } from './pages/site/TermsPage';
+import { DocumentationPage } from './pages/DocumentationPage';
+import { HelpPage } from './pages/HelpPage';
 import { useAuth } from './hooks/useAuth';
 import { Spinner } from './components/common/Spinner';
 
@@ -29,7 +32,15 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--color-background)' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          backgroundColor: 'var(--color-background)',
+        }}
+      >
         <Spinner size={32} />
       </div>
     );
@@ -55,6 +66,8 @@ export const App: React.FC = () => {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/faq" element={<FaqPage />} />
+                <Route path="/docs" element={<DocumentationPage />} />
+                <Route path="/help" element={<HelpPage />} />
                 <Route path="/waitlist" element={<WaitlistPage />} />
                 <Route path="/thank-you" element={<ThankYouPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
