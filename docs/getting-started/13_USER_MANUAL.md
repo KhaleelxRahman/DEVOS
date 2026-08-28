@@ -19,7 +19,7 @@ uvicorn app.main:app --reload --port 8000
 - Default database: SQLite at `03-backend/devos.db` (no setup needed).
 - Tables are created automatically at startup.
 - For PostgreSQL: set `DATABASE_URL` and run `alembic upgrade head`.
-- API docs: `http://localhost:8000/docs` and `/redoc`.
+- API docs: `http://localhost:8000/api/v1/docs` and `/api/v1/redoc`.
 - Health: `GET /health` and `GET /api/v1/health`.
 
 ### Frontend

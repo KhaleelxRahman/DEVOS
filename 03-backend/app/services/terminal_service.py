@@ -68,7 +68,7 @@ class TerminalService:
         project_dir = ProjectService.get_project_storage_path(project_id)
 
         start_time = time.time()
-        if command.lower() == "echo":
+        if command.lower() == "echo" and os.name != "nt":
             return TerminalResultResponse(
                 exit_code=0,
                 stdout=" ".join(args or []) + "\n",
@@ -76,8 +76,10 @@ class TerminalService:
                 execution_time_ms=round((time.time() - start_time) * 1000, 2),
             )
         exec_args = [command] + (args or [])
-        if os.name == "nt" and command.lower() in {"python3", "python"}:
-            exec_args[0] = sys.executable
+        if os.name == "nt" and command.lower() in {"echo", "dir"}:
+            exec_args = [os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", command] + (args or [])
+        elif os.name == "nt" and command.lower() in {"python", "python3"}:
+            exec_args = [sys.executable] + (args or [])
 
         try:
             proc = await asyncio.create_subprocess_exec(

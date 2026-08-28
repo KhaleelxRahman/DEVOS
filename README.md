@@ -69,6 +69,13 @@ copy .env.example .env  # Windows; use cp on Linux/macOS
 uvicorn app.main:app --reload --port 8000
 ```
 
+The backend defaults to a local SQLite database (`./devos.db`) and creates
+tables automatically on startup. No external services are required. To use
+PostgreSQL instead, set `DATABASE_URL` in `.env` and run
+`alembic upgrade head`.
+
+Interactive API documentation is available at `http://localhost:8000/api/v1/docs`.
+
 ### Frontend
 
 ```bash

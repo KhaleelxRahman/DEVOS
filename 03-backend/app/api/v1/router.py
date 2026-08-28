@@ -7,6 +7,7 @@ from app.api.v1.files import router as files_router
 from app.api.v1.git import router as git_router
 from app.api.v1.github import router as github_router
 from app.api.v1.projects import router as projects_router
+from app.api.v1.public import router as public_router
 from app.api.v1.public_forms import router as public_forms_router
 from app.api.v1.terminal import router as terminal_router
 from app.api.v1.testing import router as testing_router
@@ -25,3 +26,4 @@ api_v1_router.include_router(terminal_router)
 api_v1_router.include_router(activity_router)
 api_v1_router.include_router(testing_router)
 api_v1_router.include_router(public_forms_router)
+api_v1_router.include_router(public_router)

@@ -67,3 +67,7 @@ coverage/
 
 # GitHub
 .github/*.cache
+
+# Runtime artifacts
+projects_storage/
+.vercel/
