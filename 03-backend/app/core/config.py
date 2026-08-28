@@ -71,6 +71,8 @@ def _validate_production_safety(s: "Settings") -> "Settings":
     """
     if s.ENVIRONMENT.lower() != "production":
         return s
+    if "https://devos-ebon.vercel.app" not in s.BACKEND_CORS_ORIGINS:
+        s.BACKEND_CORS_ORIGINS.append("https://devos-ebon.vercel.app")
     problems: list[str] = []
     if "insecure" in s.AUTH_SECRET or "change-in-production" in s.AUTH_SECRET or len(s.AUTH_SECRET) < 32:
         problems.append("AUTH_SECRET must be a unique random value of at least 32 characters")
