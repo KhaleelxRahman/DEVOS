@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 
-const siteUrl = (process.env.VITE_SITE_URL || 'http://localhost:4173').replace(/\/+$/, '');
+const siteUrl = (process.env.VITE_SITE_URL || 'https://devos-ebon.vercel.app').replace(/\/+$/, '');
 const routes = ['/', '/about', '/contact', '/faq', '/waitlist', '/thank-you', '/privacy', '/terms'];
 const urls = routes.map((route) => `  <url><loc>${siteUrl}${route}</loc></url>`).join('\n');
 await writeFile(

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>http://localhost:4173/</loc></url>
-  <url><loc>http://localhost:4173/about</loc></url>
-  <url><loc>http://localhost:4173/contact</loc></url>
-  <url><loc>http://localhost:4173/faq</loc></url>
-  <url><loc>http://localhost:4173/waitlist</loc></url>
-  <url><loc>http://localhost:4173/thank-you</loc></url>
-  <url><loc>http://localhost:4173/privacy</loc></url>
-  <url><loc>http://localhost:4173/terms</loc></url>
+  <url><loc>https://devos-ebon.vercel.app/</loc></url>
+  <url><loc>https://devos-ebon.vercel.app/about</loc></url>
+  <url><loc>https://devos-ebon.vercel.app/contact</loc></url>
+  <url><loc>https://devos-ebon.vercel.app/faq</loc></url>
+  <url><loc>https://devos-ebon.vercel.app/waitlist</loc></url>
+  <url><loc>https://devos-ebon.vercel.app/thank-you</loc></url>
+  <url><loc>https://devos-ebon.vercel.app/privacy</loc></url>
+  <url><loc>https://devos-ebon.vercel.app/terms</loc></url>
 </urlset>
