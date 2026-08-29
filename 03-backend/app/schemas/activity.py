@@ -17,3 +17,4 @@ class ActivityResponse(BaseModel):
 
 class ActivityListResponse(BaseModel):
     activities: list[ActivityResponse]
+

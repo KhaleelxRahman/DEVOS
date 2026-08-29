@@ -1,4 +1,4 @@
-﻿from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr
 
 class WaitlistJoinRequest(BaseModel):
     email: EmailStr
@@ -14,3 +14,4 @@ class ContactRequest(BaseModel):
 
 class ContactResponse(BaseModel):
     message: str
+

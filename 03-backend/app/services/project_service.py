@@ -86,3 +86,4 @@ class ProjectService:
         if os.path.isdir(storage_path):
             shutil.rmtree(storage_path)
         return True
+

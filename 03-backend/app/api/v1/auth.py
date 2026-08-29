@@ -49,3 +49,4 @@ async def me(current_user: User = Depends(get_current_user)):
         success=True,
         data={"user": UserResponse.model_validate(current_user)},
     )
+

@@ -130,3 +130,4 @@ async def get_project_activity(
             activities=[ActivityResponse.model_validate(a) for a in activities]
         ),
     )
+

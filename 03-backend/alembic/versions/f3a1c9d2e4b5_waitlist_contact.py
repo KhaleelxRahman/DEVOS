@@ -44,3 +44,4 @@ def downgrade() -> None:
     op.drop_table('contact_messages')
     op.drop_index('ix_waitlist_entries_email', table_name='waitlist_entries')
     op.drop_table('waitlist_entries')
+

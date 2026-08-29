@@ -56,3 +56,4 @@ async def submit_contact(payload: ContactRequest, db: AsyncSession = Depends(get
     )
     await db.commit()
     return ApiResponse(success=True, data=ContactResponse(status="received"))
+

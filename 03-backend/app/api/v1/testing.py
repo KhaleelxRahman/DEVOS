@@ -39,3 +39,4 @@ async def run_job(
         metadata={"job": job_id, "status": result["status"], "duration_ms": result["duration_ms"]},
     )
     return ApiResponse(success=True, data=result)
+

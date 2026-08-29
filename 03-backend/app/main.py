@@ -13,7 +13,7 @@ from app.core.errors import (
     generic_exception_handler,
     validation_exception_handler,
 )
-from app.core.logging import logger
+from app.core.app_logging import logger
 from app.db.base import Base
 from app.db.session import engine
 from app.schemas.common import ApiResponse, HealthResponse
@@ -72,3 +72,4 @@ async def health_check_v1():
 
 # Mount API v1
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+

@@ -180,3 +180,4 @@ async def delete_entry(
     await db.commit()
     return ApiResponse(success=True, data={"deleted": file_path})
 
+

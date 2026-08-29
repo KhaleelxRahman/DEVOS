@@ -24,3 +24,4 @@ class UserResponse(BaseModel):
 class AuthResponseData(BaseModel):
     user: UserResponse
     token: str
+

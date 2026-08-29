@@ -131,3 +131,4 @@ class TerminalService:
             raise
         except Exception as e:
             raise AppException(f"Failed to execute command: {e!s}", code="TERMINAL_ERROR", status_code=500)
+

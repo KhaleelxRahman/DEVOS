@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter
+from fastapi import APIRouter
 from app.schemas.common import ApiResponse
 from app.schemas.public import (
     WaitlistJoinRequest,
@@ -27,3 +27,4 @@ async def submit_contact(payload: ContactRequest):
             message="Your message has been received.",
         ),
     )
+

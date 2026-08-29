@@ -19,3 +19,4 @@ class FileContentResponse(BaseModel):
     content: str
     language: str | None = None
     size: int
+

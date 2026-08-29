@@ -78,3 +78,4 @@ class ContextService:
             "current_file": active_file_data.model_dump() if active_file_data else None,
             "git_status": git_status.model_dump() if git_status else None,
         }
+

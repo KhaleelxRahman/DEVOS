@@ -23,3 +23,4 @@ async def list_user_activity(
             activities=[ActivityResponse.model_validate(a) for a in activities]
         ),
     )
+

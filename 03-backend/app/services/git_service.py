@@ -229,3 +229,4 @@ class GitService:
     def _validate_relative_path(path: str) -> None:
         if not path or os.path.isabs(path) or ".." in path.split("/") or path.startswith("-"):
             raise AppException("Invalid file path", code="GIT_ERROR", status_code=400)
+

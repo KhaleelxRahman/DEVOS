@@ -156,3 +156,4 @@ async def push(
         db, user_id=current_user.id, project_id=project_id, activity_type="git.push",
     )
     return ApiResponse(success=True, data=GitOperationResponse(message=output or "Pushed"))
+

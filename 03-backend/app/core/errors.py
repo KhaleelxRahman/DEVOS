@@ -114,3 +114,4 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
             },
         },
     )
+

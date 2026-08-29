@@ -45,3 +45,4 @@ def rate_limit(limit: int, window_seconds: int, bucket: str):
         key = f"{bucket}:{_client_ip(request)}"
         rate_limiter.check(key, limit, window_seconds)
     return dependency
+
