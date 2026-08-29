@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 
 const SITE = 'DEVOS v1.0.0';
+const SITE_URL = 'https://devos-ebon.vercel.app';
+const OG_IMAGE = `${SITE_URL}/favicon.svg`;
 
 export interface SeoOptions {
   title: string;
@@ -33,13 +35,17 @@ function upsertCanonical(href: string) {
 export function useSeo({ title, description, canonicalPath, noindex }: SeoOptions) {
   useEffect(() => {
     const fullTitle = title.includes(SITE) ? title : `${SITE} — ${title}`;
+    const path = canonicalPath || window.location.pathname;
     document.title = fullTitle;
     upsertMeta('name', 'description', description || '');
     upsertMeta('property', 'og:description', description || '');
     upsertMeta('name', 'twitter:description', description || '');
     upsertMeta('property', 'og:title', fullTitle);
     upsertMeta('name', 'twitter:title', fullTitle);
+    upsertMeta('property', 'og:url', `${SITE_URL}${path}`);
+    upsertMeta('property', 'og:image', OG_IMAGE);
+    upsertMeta('name', 'twitter:image', OG_IMAGE);
     upsertMeta('name', 'robots', noindex ? 'noindex,nofollow' : 'index,follow');
-    upsertCanonical(`${window.location.origin}${canonicalPath || window.location.pathname}`);
+    upsertCanonical(`${SITE_URL}${path}`);
   }, [title, description, canonicalPath, noindex]);
 }

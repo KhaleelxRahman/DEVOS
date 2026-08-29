@@ -7,4 +7,4 @@ Disallow: /workspace
 Disallow: /settings
 Disallow: /api
 
-Sitemap: /sitemap.xml
+Sitemap: https://devos-ebon.vercel.app/sitemap.xml
