@@ -46,3 +46,4 @@ class ConversationResponse(BaseModel):
     updated_at: datetime | None = None
 
     model_config = {"from_attributes": True}
+

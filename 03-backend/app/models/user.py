@@ -39,3 +39,4 @@ class User(Base, TimestampMixin):
     github_connection: Mapped[Optional["GitHubConnection"]] = relationship(
         "GitHubConnection", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
+

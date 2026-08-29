@@ -37,3 +37,4 @@ class ActivityService:
         stmt = select(Activity).where(Activity.project_id == project_id).order_by(Activity.created_at.desc()).limit(limit)
         result = await db.execute(stmt)
         return list(result.scalars().all())
+

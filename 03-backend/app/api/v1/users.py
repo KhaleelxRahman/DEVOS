@@ -13,3 +13,4 @@ async def get_profile(current_user: User = Depends(get_current_user)):
         success=True,
         data=UserResponse.model_validate(current_user),
     )
+

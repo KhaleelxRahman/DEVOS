@@ -42,3 +42,4 @@ def decode_access_token(token: str) -> str | None:
         return payload.get("sub")
     except Exception:
         return None
+

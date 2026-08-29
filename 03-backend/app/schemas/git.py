@@ -47,3 +47,4 @@ class GitCheckoutRequest(BaseModel):
 class GitOperationResponse(BaseModel):
     success: bool = True
     message: str = ""
+

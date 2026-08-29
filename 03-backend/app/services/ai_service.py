@@ -237,3 +237,4 @@ class AIService:
         location = f" (from `{file_path}`)" if file_path else ""
         prompt = f"{header}{location}\n\n```{language or ''}\n{code[:12000]}\n```"
         return await self.chat(prompt, context)
+

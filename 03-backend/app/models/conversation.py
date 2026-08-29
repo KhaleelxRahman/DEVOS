@@ -40,3 +40,4 @@ class Conversation(Base, TimestampMixin):
     messages: Mapped[list["ConversationMessage"]] = relationship(
         "ConversationMessage", back_populates="conversation", cascade="all, delete-orphan"
     )
+

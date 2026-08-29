@@ -42,3 +42,4 @@ class Project(Base, TimestampMixin):
     activities: Mapped[list["Activity"]] = relationship(
         "Activity", back_populates="project", cascade="all, delete-orphan"
     )
+

@@ -52,3 +52,4 @@ class AuthService:
 
         token = create_access_token(subject=user.id)
         return user, token
+

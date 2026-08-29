@@ -34,3 +34,4 @@ class GitHubConnection(Base, TimestampMixin):
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="github_connection")
+

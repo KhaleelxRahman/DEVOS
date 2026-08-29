@@ -61,3 +61,4 @@ class ConversationService:
         )
         result = await db.execute(stmt)
         return list(result.scalars().all())
+
