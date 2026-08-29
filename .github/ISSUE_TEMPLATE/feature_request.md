@@ -1,14 +1,12 @@
 ---
-name: Feature request
-about: Propose an improvement
-title: "[Feature]: "
+name: Feature Request
+about: Suggest a new feature
+title: "[FEATURE] "
 labels: enhancement
 ---
 
-## Problem
+## Feature
 
-## Proposed solution
+## Why
 
-## Alternatives considered
-
-## Additional context
+## Acceptance Criteria
