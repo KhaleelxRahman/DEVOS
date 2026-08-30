@@ -31,7 +31,7 @@ class GitService:
     async def _run_git_cmd(project_id: str, args: list[str], auto_init: bool = True) -> tuple[int, str, str]:
         GitService._ensure_git_available()
         project_dir = ProjectService.get_project_storage_path(project_id)
-        
+
         # Ensure git repo initialized
         if auto_init and not os.path.exists(os.path.join(project_dir, ".git")):
             init_proc = await asyncio.create_subprocess_exec(
@@ -74,7 +74,7 @@ class GitService:
 
         # Get status porcelain
         _code, status_out, _ = await GitService._run_git_cmd(project_id, ["status", "--porcelain"])
-        
+
         modified = []
         added = []
         deleted = []
@@ -227,6 +227,23 @@ class GitService:
 
     @staticmethod
     def _validate_relative_path(path: str) -> None:
-        if not path or os.path.isabs(path) or ".." in path.split("/") or path.startswith("-"):
-            raise AppException("Invalid file path", code="GIT_ERROR", status_code=400)
+        """Validate a git‑related file path.
++
++        The path must be a relative POSIX‑style path without any of the following:
++        * absolute components (os.path.isabs)
++        * parent directory traversals ("..")
++        * null bytes (potential injection vector)
++        * leading dash (prevents treating the argument as a git option)
++
++        Raises:
++            AppException: with code "GIT_ERROR" and HTTP 400 when invalid.
++        """
++        if (
++            not path
++            or os.path.isabs(path)
++            or ".." in path.split("/")
++            or "\x00" in path
++            or path.startswith("-")
++        ):
++            raise AppException("Invalid file path", code="GIT_ERROR", status_code=400)
 
