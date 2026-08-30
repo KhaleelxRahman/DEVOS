@@ -4,8 +4,14 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
+# Rate limiting imports
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
 import app.models
 from app.api.v1.router import api_v1_router
+from app.core.app_logging import logger
 from app.core.config import settings
 from app.core.errors import (
     AppException,
@@ -13,7 +19,6 @@ from app.core.errors import (
     generic_exception_handler,
     validation_exception_handler,
 )
-from app.core.app_logging import logger
 from app.db.base import Base
 from app.db.session import engine
 from app.schemas.common import ApiResponse, HealthResponse
@@ -38,6 +43,12 @@ app = FastAPI(
     redoc_url=f"{settings.API_V1_STR}/redoc",
 )
 
+# Rate limiting setup
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
 # CORS Configuration
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
@@ -53,6 +64,7 @@ app.add_exception_handler(AppException, app_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, generic_exception_handler)
 
+
 # Health Check Endpoint
 @app.get("/health", response_model=ApiResponse[HealthResponse], tags=["health"])
 async def health_check():
@@ -65,6 +77,7 @@ async def health_check():
         ),
     )
 
+
 @app.get("/api/v1/health", response_model=ApiResponse[HealthResponse], tags=["health"])
 async def health_check_v1():
     return await health_check()
@@ -72,4 +85,3 @@ async def health_check_v1():
 
 # Mount API v1
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
-

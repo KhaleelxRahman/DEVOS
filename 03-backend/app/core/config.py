@@ -18,9 +18,6 @@ class Settings(BaseSettings):
 
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
         "https://devos-ebon.vercel.app",
     ]
 
@@ -74,16 +71,21 @@ def _validate_production_safety(s: "Settings") -> "Settings":
     if "https://devos-ebon.vercel.app" not in s.BACKEND_CORS_ORIGINS:
         s.BACKEND_CORS_ORIGINS.append("https://devos-ebon.vercel.app")
     problems: list[str] = []
-    if "insecure" in s.AUTH_SECRET or "change-in-production" in s.AUTH_SECRET or len(s.AUTH_SECRET) < 32:
+    if (
+        "insecure" in s.AUTH_SECRET
+        or "change-in-production" in s.AUTH_SECRET
+        or len(s.AUTH_SECRET) < 32
+    ):
         problems.append("AUTH_SECRET must be a unique random value of at least 32 characters")
     if "*" in s.BACKEND_CORS_ORIGINS:
         problems.append("BACKEND_CORS_ORIGINS must not contain '*' in production")
     if not s.DATABASE_URL.startswith("postgresql"):
-        problems.append("DATABASE_URL must be a PostgreSQL DSN in production (postgresql+asyncpg://...)")
+        problems.append(
+            "DATABASE_URL must be a PostgreSQL DSN in production (postgresql+asyncpg://...)"
+        )
     if problems:
         raise ValueError("Insecure production configuration: " + "; ".join(problems))
     return s
 
 
 settings = _validate_production_safety(Settings())
-
