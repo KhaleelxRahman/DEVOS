@@ -85,3 +85,4 @@ async def health_check_v1():
 
 # Mount API v1
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+
