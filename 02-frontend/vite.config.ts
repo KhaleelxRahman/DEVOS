@@ -4,6 +4,19 @@ import path from 'node:path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build:{
+    sourcemap:false,
+    cssCodeSplit:true,
+    chunkSizeWarningLimit:600,
+    rollupOptions:{
+      output:{
+        manualChunks:{
+          vendor:['react','react-dom','react-router-dom'],
+          icons:['lucide-react']
+        }
+      }
+    }
+  },
   plugins: [react()],
   resolve: {
     alias: {
@@ -34,3 +47,4 @@ export default defineConfig({
     },
   },
 });
+
