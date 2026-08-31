@@ -103,7 +103,7 @@ async def delete_project(
 @router.get("/{project_id}/context", response_model=ApiResponse[dict])
 async def get_project_context(
     project_id: str,
-    current_file: str = None,
+    current_file: str | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
