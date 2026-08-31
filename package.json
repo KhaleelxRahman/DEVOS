@@ -1,4 +1,11 @@
 {
+  "name": "devos-workspace",
+  "private": true,
+  "version": "1.0.0",
+  "description": "DEVOS v1.0.0 monorepo root — e2e specs live in 04-tests/e2e, run via the Playwright config in 02-frontend.",
+  "scripts": {
+    "test:e2e": "playwright test --config 02-frontend/playwright.config.ts"
+  },
   "devDependencies": {
     "@playwright/test": "^1.62.1"
   }

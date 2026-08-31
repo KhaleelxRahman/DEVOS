@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = 5173;
 
 export default defineConfig({
-  testDir: "../04-tests/e2e",
+  testDir: "./tests",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -26,3 +26,4 @@ export default defineConfig({
     timeout: 120_000,
   },
 });
+

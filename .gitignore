@@ -27,3 +27,7 @@ htmlcov/
 05-qa-agent/videos/
 05-qa-agent/traces/
 playwright-report/
+
+test-results/
+playwright-report/
+playwright/.cache/
