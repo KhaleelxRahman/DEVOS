@@ -138,3 +138,49 @@ export async function mockWorkspaceApi(page: Page): Promise<void> {
     route.fulfill(ok({ connected: false, username: null }))
   );
 }
+
+/** Mock GET /api/v1/github/connection with a connected account. */
+export async function mockGithubConnected(
+  page: Page,
+  username = "octocat"
+): Promise<void> {
+  await page.route("**/api/v1/github/connection", (route) =>
+    route.fulfill(ok({ connected: true, username }))
+  );
+}
+
+/** Mock POST /api/v1/github/connect with the server's authorize URL. */
+export async function mockGithubConnectAuthorized(page: Page): Promise<void> {
+  await page.route("**/api/v1/github/connect", (route) =>
+    route.fulfill(
+      ok({
+        authorization_url:
+          "https://github.com/login/oauth/authorize?client_id=x&state=s",
+      })
+    )
+  );
+}
+
+/** Mock POST /api/v1/github/connect when OAuth is not configured (503). */
+export async function mockGithubConnectNotConfigured(page: Page): Promise<void> {
+  await page.route("**/api/v1/github/connect", (route) =>
+    route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: false,
+        error: {
+          code: "GITHUB_NOT_CONFIGURED",
+          message: "GitHub OAuth is not configured on this deployment",
+        },
+      }),
+    })
+  );
+}
+
+/** Mock GET /api/v1/github/repositories with an empty list. */
+export async function mockGithubReposEmpty(page: Page): Promise<void> {
+  await page.route("**/api/v1/github/repositories", (route) =>
+    route.fulfill(ok({ connected: true, repositories: [] }))
+  );
+}

@@ -42,7 +42,7 @@ export const WorkspacePage: React.FC = () => {
         // send the user back to the project list with a friendly message.
         if (cancelled) return;
         localStorage.removeItem('devos_active_project_id');
-        toast('That project is no longer available. Choose another project.', 'info');
+        toast('Project no longer exists.', 'info');
         navigate('/app/projects', { replace: true });
       });
     return () => {

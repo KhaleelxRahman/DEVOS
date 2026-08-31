@@ -253,3 +253,17 @@ async def test_github_documented_routes_and_oauth_state(client, monkeypatch):
         "/api/v1/github/callback?code=example&state=invalid"
     )
     assert invalid_callback.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_github_connect_unconfigured_returns_503(client, monkeypatch):
+    """Without GITHUB_CLIENT_ID the connect endpoint must fail gracefully
+    with 503 GITHUB_NOT_CONFIGURED so the UI can explain what to configure."""
+    headers, _project_id, _root = await _setup(client)
+
+    monkeypatch.setattr("app.api.v1.github.settings.GITHUB_CLIENT_ID", "")
+    connect = await client.post("/api/v1/github/connect", headers=headers)
+    assert connect.status_code == 503
+    body = connect.json()
+    assert body["success"] is False
+    assert body["error"]["code"] == "GITHUB_NOT_CONFIGURED"

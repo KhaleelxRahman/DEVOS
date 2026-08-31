@@ -37,7 +37,7 @@ test.describe("Workspace — stale project recovery (BUG-001)", () => {
     // Redirected to the project list instead of a broken state.
     await expect(page).toHaveURL(/\/app\/projects$/);
     await expect(page.getByRole("heading", { name: "Projects" }).first()).toBeVisible();
-    await expect(page.getByText(/no longer available/i)).toBeVisible();
+    await expect(page.getByText('Project no longer exists.')).toBeVisible();
 
     // No unexpected JS errors — the mocked 404 resource log is expected.
     expect(pageErrors).toEqual([]);
@@ -66,10 +66,16 @@ test.describe("Workspace — stale project recovery (BUG-001)", () => {
     page,
   }) => {
     await mockWorkspaceApi(page);
-    await page.addInitScript(() => localStorage.setItem("devos_token", "e2e-token"));
+    await mockProjectGetNotFound(page, STALE_PROJECT_ID);
+
+    // The route is protected — authenticate like a signed-in user.
+    await page.addInitScript(() => {
+      localStorage.setItem("devos_token", "e2e-token");
+    });
 
     await page.goto(`/app/projects/${STALE_PROJECT_ID}`);
     await expect(page).toHaveURL(/\/app\/projects$/);
     await expect(page.getByRole("heading", { name: "Projects" }).first()).toBeVisible();
+    await expect(page.getByText('Project no longer exists.')).toBeVisible();
   });
 });
