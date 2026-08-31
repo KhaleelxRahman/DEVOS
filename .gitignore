@@ -21,3 +21,8 @@ htmlcov/
 *.log
 .vercel
 .env*
+05-qa-agent/test-results/
+05-qa-agent/screenshots/
+05-qa-agent/videos/
+05-qa-agent/traces/
+playwright-report/
