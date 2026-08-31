@@ -1,15 +1,15 @@
 {
-  "files.exclude": {
-    "**/.dist": true,
-    "**/.vercel": true,
-    "**/.pytest_cache": true,
-    "**/.ruff_cache": true,
-    "**/__pycache__": true,
-    "**/node_modules": true
-  },
-  "explorer.compactFolders": true,
-  "explorer.sortOrder": "type",
-  "editor.formatOnSave": true,
-  "files.trimTrailingWhitespace": true,
-  "files.insertFinalNewline": true
+    "files.insertFinalNewline":  true,
+    "editor.formatOnSave":  true,
+    "explorer.sortOrder":  "type",
+    "files.exclude":  {
+                          "**/.ruff_cache":  true,
+                          "**/node_modules":  true,
+                          "**/.vercel":  true,
+                          "**/.dist":  true,
+                          "**/__pycache__":  true,
+                          "**/.pytest_cache":  true
+                      },
+    "explorer.compactFolders":  true,
+    "files.trimTrailingWhitespace":  true
 }
