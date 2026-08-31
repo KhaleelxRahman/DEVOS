@@ -1,4 +1,4 @@
-# DEVOS v1.0.0 — Security Audit Report
+﻿# DEVOS v1.0.0 — Security Audit Report
 
 **Date:** 2026-08-30
 **Phase:** Phase 1 — Security Fortress
@@ -24,7 +24,7 @@ DEVOS v1.0.0 implements defense-in-depth security across the full stack. All cri
 | Cross-Origin-Opener-Policy | vercel.json | `same-origin` | ✅ |
 | Referrer-Policy | vercel.json | `strict-origin-when-cross-origin` | ✅ |
 | Strict-Transport-Security | vercel.json | `max-age=63072000; includeSubDomains; preload` | ✅ |
-| Permissions-Policy | vercel.json | `camera=(), microphone=(), geolocation=(), interest-cohort=()` | ✅ |
+| Permissions-Policy | vercel.json | `camera=(), microphone=(), geolocation=()` | ✅ |
 
 ---
 
@@ -136,3 +136,4 @@ All Phase 1 security controls are now in place. The application has:
 - ✅ Documented security architecture
 
 **Phase 1 Status: COMPLETE**
+
