@@ -1,0 +1,1069 @@
+{
+  "total_files": 266,
+  "files": [
+    {
+      "path": ".editorconfig",
+      "size": 297
+    },
+    {
+      "path": ".env.example",
+      "size": 1209
+    },
+    {
+      "path": ".gitattributes",
+      "size": 296
+    },
+    {
+      "path": ".gitignore",
+      "size": 308
+    },
+    {
+      "path": ".markdownlintignore",
+      "size": 85
+    },
+    {
+      "path": "DEVOS v1.0.0.code-workspace",
+      "size": 119
+    },
+    {
+      "path": "LICENSE",
+      "size": 1101
+    },
+    {
+      "path": "package-lock.json",
+      "size": 2155
+    },
+    {
+      "path": "package.json",
+      "size": 65
+    },
+    {
+      "path": "pyproject.toml",
+      "size": 110
+    },
+    {
+      "path": "pytest.ini",
+      "size": 132
+    },
+    {
+      "path": "README.md",
+      "size": 5197
+    },
+    {
+      "path": ".github\\CODEOWNERS",
+      "size": 19
+    },
+    {
+      "path": ".github\\CODE_OF_CONDUCT.md",
+      "size": 461
+    },
+    {
+      "path": ".github\\CONTRIBUTING.md",
+      "size": 493
+    },
+    {
+      "path": ".github\\dependabot.yml",
+      "size": 317
+    },
+    {
+      "path": ".github\\FUNDING.yml",
+      "size": 66
+    },
+    {
+      "path": ".github\\PULL_REQUEST_TEMPLATE.md",
+      "size": 109
+    },
+    {
+      "path": ".github\\SECURITY.md",
+      "size": 355
+    },
+    {
+      "path": ".github\\SUPPORT.md",
+      "size": 395
+    },
+    {
+      "path": ".vercel\\project.json",
+      "size": 110
+    },
+    {
+      "path": ".vercel\\README.txt",
+      "size": 520
+    },
+    {
+      "path": ".vercel\\repo.json",
+      "size": 214
+    },
+    {
+      "path": ".vscode\\extensions.json",
+      "size": 169
+    },
+    {
+      "path": ".vscode\\launch.json",
+      "size": 41
+    },
+    {
+      "path": ".vscode\\settings.json",
+      "size": 429
+    },
+    {
+      "path": ".vscode\\tasks.json",
+      "size": 32
+    },
+    {
+      "path": "01-docs\\README.md",
+      "size": 926
+    },
+    {
+      "path": "02-frontend\\.env.example",
+      "size": 816
+    },
+    {
+      "path": "02-frontend\\.env.production",
+      "size": 66
+    },
+    {
+      "path": "02-frontend\\.vercelignore",
+      "size": 32
+    },
+    {
+      "path": "02-frontend\\index.html",
+      "size": 2763
+    },
+    {
+      "path": "02-frontend\\lighthouserc.json",
+      "size": 284
+    },
+    {
+      "path": "02-frontend\\package-lock.json",
+      "size": 67450
+    },
+    {
+      "path": "02-frontend\\package.json",
+      "size": 732
+    },
+    {
+      "path": "02-frontend\\playwright.config.ts",
+      "size": 185
+    },
+    {
+      "path": "02-frontend\\tsconfig.json",
+      "size": 656
+    },
+    {
+      "path": "02-frontend\\tsconfig.node.json",
+      "size": 233
+    },
+    {
+      "path": "02-frontend\\vercel.json",
+      "size": 145
+    },
+    {
+      "path": "02-frontend\\vite.config.ts",
+      "size": 957
+    },
+    {
+      "path": "03-backend\\.env.example",
+      "size": 364
+    },
+    {
+      "path": "03-backend\\.env.render.example",
+      "size": 96
+    },
+    {
+      "path": "03-backend\\.gitignore",
+      "size": 66
+    },
+    {
+      "path": "03-backend\\alembic.ini",
+      "size": 1292
+    },
+    {
+      "path": "03-backend\\Procfile",
+      "size": 55
+    },
+    {
+      "path": "03-backend\\pyproject.toml",
+      "size": 288
+    },
+    {
+      "path": "03-backend\\requirements.txt",
+      "size": 4474
+    },
+    {
+      "path": "03-backend\\ruff.toml",
+      "size": 63
+    },
+    {
+      "path": "04-tests\\conftest.py",
+      "size": 932
+    },
+    {
+      "path": "config\\package-lock.json",
+      "size": 34469
+    },
+    {
+      "path": "config\\package.json",
+      "size": 644
+    },
+    {
+      "path": "config\\render.yaml",
+      "size": 210
+    },
+    {
+      "path": "config\\ruff.toml",
+      "size": 87
+    },
+    {
+      "path": "04-tests\\api\\test_auth.py",
+      "size": 4316
+    },
+    {
+      "path": "04-tests\\api\\test_files_terminal.py",
+      "size": 5174
+    },
+    {
+      "path": "04-tests\\api\\test_git_ai_testing.py",
+      "size": 10078
+    },
+    {
+      "path": "04-tests\\api\\test_health.py",
+      "size": 553
+    },
+    {
+      "path": "04-tests\\api\\test_projects.py",
+      "size": 3373
+    },
+    {
+      "path": "04-tests\\api\\test_public_and_files.py",
+      "size": 8862
+    },
+    {
+      "path": "04-tests\\e2e\\home.spec.ts",
+      "size": 168
+    },
+    {
+      "path": "04-tests\\scripts\\verify_pages.js",
+      "size": 820
+    },
+    {
+      "path": "04-tests\\unit\\test_ai_service.py",
+      "size": 2670
+    },
+    {
+      "path": "04-tests\\unit\\test_core.py",
+      "size": 2887
+    },
+    {
+      "path": "03-backend\\alembic\\env.py",
+      "size": 2220
+    },
+    {
+      "path": "03-backend\\alembic\\script.py.mako",
+      "size": 635
+    },
+    {
+      "path": "03-backend\\app\\main.py",
+      "size": 2685
+    },
+    {
+      "path": "03-backend\\data\\devos.db",
+      "size": 86016
+    },
+    {
+      "path": "03-backend\\logs\\devos.log",
+      "size": 2
+    },
+    {
+      "path": "03-backend\\logs\\error.log",
+      "size": 2
+    },
+    {
+      "path": "03-backend\\prompts\\system_prompt.txt",
+      "size": 147
+    },
+    {
+      "path": "03-backend\\scripts\\build_context.py",
+      "size": 741
+    },
+    {
+      "path": "03-backend\\app\\api\\deps.py",
+      "size": 902
+    },
+    {
+      "path": "03-backend\\app\\core\\app_logging.py",
+      "size": 543
+    },
+    {
+      "path": "03-backend\\app\\core\\config.py",
+      "size": 138
+    },
+    {
+      "path": "03-backend\\app\\core\\errors.py",
+      "size": 3756
+    },
+    {
+      "path": "03-backend\\app\\core\\logging_config.json",
+      "size": 96
+    },
+    {
+      "path": "03-backend\\app\\core\\openai_client.py",
+      "size": 91
+    },
+    {
+      "path": "03-backend\\app\\core\\openapi.py",
+      "size": 183
+    },
+    {
+      "path": "03-backend\\app\\core\\rate_limit.py",
+      "size": 1622
+    },
+    {
+      "path": "03-backend\\app\\core\\security.py",
+      "size": 663
+    },
+    {
+      "path": "03-backend\\app\\core\\security_headers.json",
+      "size": 150
+    },
+    {
+      "path": "03-backend\\app\\core\\terminal_history.json",
+      "size": 4
+    },
+    {
+      "path": "03-backend\\app\\core\\terminal_policy.json",
+      "size": 234
+    },
+    {
+      "path": "03-backend\\app\\db\\base.py",
+      "size": 83
+    },
+    {
+      "path": "03-backend\\app\\db\\session.py",
+      "size": 379
+    },
+    {
+      "path": "03-backend\\app\\models\\activity.py",
+      "size": 1450
+    },
+    {
+      "path": "03-backend\\app\\models\\conversation.py",
+      "size": 1391
+    },
+    {
+      "path": "03-backend\\app\\models\\github_connection.py",
+      "size": 1249
+    },
+    {
+      "path": "03-backend\\app\\models\\message.py",
+      "size": 1197
+    },
+    {
+      "path": "03-backend\\app\\models\\project.py",
+      "size": 1740
+    },
+    {
+      "path": "03-backend\\app\\models\\user.py",
+      "size": 1526
+    },
+    {
+      "path": "03-backend\\app\\models\\waitlist.py",
+      "size": 1392
+    },
+    {
+      "path": "03-backend\\app\\models\\__init__.py",
+      "size": 525
+    },
+    {
+      "path": "03-backend\\app\\prompts\\system_prompt.md",
+      "size": 209
+    },
+    {
+      "path": "03-backend\\app\\schemas\\activity.py",
+      "size": 541
+    },
+    {
+      "path": "03-backend\\app\\schemas\\ai.py",
+      "size": 1315
+    },
+    {
+      "path": "03-backend\\app\\schemas\\auth.py",
+      "size": 271
+    },
+    {
+      "path": "03-backend\\app\\schemas\\common.py",
+      "size": 388
+    },
+    {
+      "path": "03-backend\\app\\schemas\\file.py",
+      "size": 472
+    },
+    {
+      "path": "03-backend\\app\\schemas\\git.py",
+      "size": 921
+    },
+    {
+      "path": "03-backend\\app\\schemas\\project.py",
+      "size": 1038
+    },
+    {
+      "path": "03-backend\\app\\schemas\\public.py",
+      "size": 332
+    },
+    {
+      "path": "03-backend\\app\\schemas\\public_forms.py",
+      "size": 1361
+    },
+    {
+      "path": "03-backend\\app\\schemas\\terminal.py",
+      "size": 277
+    },
+    {
+      "path": "03-backend\\app\\schemas\\__init__.py",
+      "size": 1294
+    },
+    {
+      "path": "03-backend\\app\\services\\activity_service.py",
+      "size": 1354
+    },
+    {
+      "path": "03-backend\\app\\services\\ai_service.py",
+      "size": 9131
+    },
+    {
+      "path": "03-backend\\app\\services\\auth_service.py",
+      "size": 2026
+    },
+    {
+      "path": "03-backend\\app\\services\\context_service.py",
+      "size": 3224
+    },
+    {
+      "path": "03-backend\\app\\services\\conversation_service.py",
+      "size": 2488
+    },
+    {
+      "path": "03-backend\\app\\services\\file_service.py",
+      "size": 10788
+    },
+    {
+      "path": "03-backend\\app\\services\\github_service.py",
+      "size": 5904
+    },
+    {
+      "path": "03-backend\\app\\services\\git_service.py",
+      "size": 10135
+    },
+    {
+      "path": "03-backend\\app\\services\\project_service.py",
+      "size": 3356
+    },
+    {
+      "path": "03-backend\\app\\services\\terminal_service.py",
+      "size": 6615
+    },
+    {
+      "path": "03-backend\\app\\services\\testing_service.py",
+      "size": 3492
+    },
+    {
+      "path": "03-backend\\app\\services\\usage_logger.py",
+      "size": 191
+    },
+    {
+      "path": "03-backend\\app\\services\\__init__.py",
+      "size": 873
+    },
+    {
+      "path": "03-backend\\app\\integrations\\github\\oauth.py",
+      "size": 231
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\activity.py",
+      "size": 970
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\ai.py",
+      "size": 5918
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\auth.py",
+      "size": 558
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\files.py",
+      "size": 7052
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\git.py",
+      "size": 5789
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\github.py",
+      "size": 3505
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\health.py",
+      "size": 189
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\projects.py",
+      "size": 4480
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\public.py",
+      "size": 864
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\public_forms.py",
+      "size": 2276
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\router.py",
+      "size": 1274
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\terminal.py",
+      "size": 2248
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\testing.py",
+      "size": 1534
+    },
+    {
+      "path": "03-backend\\app\\api\\v1\\users.py",
+      "size": 511
+    },
+    {
+      "path": "03-backend\\alembic\\versions\\20bcc654f259_initial_schema.py",
+      "size": 6235
+    },
+    {
+      "path": "03-backend\\alembic\\versions\\f3a1c9d2e4b5_waitlist_contact.py",
+      "size": 1643
+    },
+    {
+      "path": "02-frontend\\public\\apple-touch-icon-180.png",
+      "size": 1032
+    },
+    {
+      "path": "02-frontend\\public\\favicon-16.png",
+      "size": 182
+    },
+    {
+      "path": "02-frontend\\public\\favicon-32.png",
+      "size": 262
+    },
+    {
+      "path": "02-frontend\\public\\favicon.svg",
+      "size": 462
+    },
+    {
+      "path": "02-frontend\\public\\icon-192.png",
+      "size": 1146
+    },
+    {
+      "path": "02-frontend\\public\\icon-512.png",
+      "size": 3475
+    },
+    {
+      "path": "02-frontend\\public\\manifest.webmanifest",
+      "size": 673
+    },
+    {
+      "path": "02-frontend\\public\\robots.txt",
+      "size": 197
+    },
+    {
+      "path": "02-frontend\\public\\sitemap.xml",
+      "size": 594
+    },
+    {
+      "path": "02-frontend\\scripts\\generate-sitemap.mjs",
+      "size": 551
+    },
+    {
+      "path": "02-frontend\\src\\App.tsx",
+      "size": 4633
+    },
+    {
+      "path": "02-frontend\\src\\main.tsx",
+      "size": 382
+    },
+    {
+      "path": "02-frontend\\src\\vite-env.d.ts",
+      "size": 38
+    },
+    {
+      "path": "02-frontend\\src\\api\\client.ts",
+      "size": 3698
+    },
+    {
+      "path": "02-frontend\\src\\api\\index.ts",
+      "size": 7523
+    },
+    {
+      "path": "02-frontend\\src\\context\\AuthContext.tsx",
+      "size": 1654
+    },
+    {
+      "path": "02-frontend\\src\\context\\ProjectContext.tsx",
+      "size": 969
+    },
+    {
+      "path": "02-frontend\\src\\hooks\\useAuth.ts",
+      "size": 310
+    },
+    {
+      "path": "02-frontend\\src\\hooks\\useProject.ts",
+      "size": 333
+    },
+    {
+      "path": "02-frontend\\src\\hooks\\useSeo.ts",
+      "size": 1945
+    },
+    {
+      "path": "02-frontend\\src\\lib\\analytics.ts",
+      "size": 2510
+    },
+    {
+      "path": "02-frontend\\src\\lib\\consent.ts",
+      "size": 1442
+    },
+    {
+      "path": "02-frontend\\src\\pages\\AboutPage.tsx",
+      "size": 1025
+    },
+    {
+      "path": "02-frontend\\src\\pages\\ContactPage.tsx",
+      "size": 1274
+    },
+    {
+      "path": "02-frontend\\src\\pages\\DashboardPage.tsx",
+      "size": 4534
+    },
+    {
+      "path": "02-frontend\\src\\pages\\DocumentationPage.tsx",
+      "size": 1477
+    },
+    {
+      "path": "02-frontend\\src\\pages\\FAQPage.tsx",
+      "size": 2420
+    },
+    {
+      "path": "02-frontend\\src\\pages\\HelpPage.tsx",
+      "size": 1234
+    },
+    {
+      "path": "02-frontend\\src\\pages\\LoginPage.tsx",
+      "size": 3608
+    },
+    {
+      "path": "02-frontend\\src\\pages\\NotFoundPage.tsx",
+      "size": 1298
+    },
+    {
+      "path": "02-frontend\\src\\pages\\PrivacyPage.tsx",
+      "size": 929
+    },
+    {
+      "path": "02-frontend\\src\\pages\\ProjectsPage.tsx",
+      "size": 6965
+    },
+    {
+      "path": "02-frontend\\src\\pages\\RegisterPage.tsx",
+      "size": 3930
+    },
+    {
+      "path": "02-frontend\\src\\pages\\SettingsPage.tsx",
+      "size": 9561
+    },
+    {
+      "path": "02-frontend\\src\\pages\\TermsPage.tsx",
+      "size": 864
+    },
+    {
+      "path": "02-frontend\\src\\pages\\WorkspacePage.tsx",
+      "size": 6032
+    },
+    {
+      "path": "02-frontend\\src\\styles\\components.css",
+      "size": 5807
+    },
+    {
+      "path": "02-frontend\\src\\styles\\globals.css",
+      "size": 1143
+    },
+    {
+      "path": "02-frontend\\src\\styles\\layout.css",
+      "size": 4725
+    },
+    {
+      "path": "02-frontend\\src\\styles\\site.css",
+      "size": 8282
+    },
+    {
+      "path": "02-frontend\\src\\styles\\tokens.css",
+      "size": 2720
+    },
+    {
+      "path": "02-frontend\\src\\types\\activity.ts",
+      "size": 181
+    },
+    {
+      "path": "02-frontend\\src\\types\\ai.ts",
+      "size": 455
+    },
+    {
+      "path": "02-frontend\\src\\types\\api.ts",
+      "size": 237
+    },
+    {
+      "path": "02-frontend\\src\\types\\auth.ts",
+      "size": 350
+    },
+    {
+      "path": "02-frontend\\src\\types\\file.ts",
+      "size": 278
+    },
+    {
+      "path": "02-frontend\\src\\types\\git.ts",
+      "size": 393
+    },
+    {
+      "path": "02-frontend\\src\\types\\index.ts",
+      "size": 199
+    },
+    {
+      "path": "02-frontend\\src\\types\\lucide-react.d.ts",
+      "size": 32
+    },
+    {
+      "path": "02-frontend\\src\\types\\project.ts",
+      "size": 610
+    },
+    {
+      "path": "02-frontend\\src\\types\\terminal.ts",
+      "size": 324
+    },
+    {
+      "path": "02-frontend\\src\\pages\\site\\AboutPage.tsx",
+      "size": 3372
+    },
+    {
+      "path": "02-frontend\\src\\pages\\site\\ContactPage.tsx",
+      "size": 5384
+    },
+    {
+      "path": "02-frontend\\src\\pages\\site\\FaqPage.tsx",
+      "size": 3305
+    },
+    {
+      "path": "02-frontend\\src\\pages\\site\\HomePage.tsx",
+      "size": 4913
+    },
+    {
+      "path": "02-frontend\\src\\pages\\site\\PrivacyPage.tsx",
+      "size": 2936
+    },
+    {
+      "path": "02-frontend\\src\\pages\\site\\TermsPage.tsx",
+      "size": 2566
+    },
+    {
+      "path": "02-frontend\\src\\pages\\site\\ThankYouPage.tsx",
+      "size": 1475
+    },
+    {
+      "path": "02-frontend\\src\\pages\\site\\WaitlistPage.tsx",
+      "size": 3634
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\Badge.tsx",
+      "size": 467
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\Breadcrumbs.tsx",
+      "size": 1339
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\Button.tsx",
+      "size": 953
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\Card.tsx",
+      "size": 922
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\EmptyState.tsx",
+      "size": 1194
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\index.ts",
+      "size": 182
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\Input.tsx",
+      "size": 911
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\Modal.tsx",
+      "size": 2654
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\Spinner.tsx",
+      "size": 311
+    },
+    {
+      "path": "02-frontend\\src\\components\\common\\Toast.tsx",
+      "size": 2535
+    },
+    {
+      "path": "02-frontend\\src\\components\\layout\\AppShell.tsx",
+      "size": 1148
+    },
+    {
+      "path": "02-frontend\\src\\components\\layout\\Sidebar.tsx",
+      "size": 1765
+    },
+    {
+      "path": "02-frontend\\src\\components\\layout\\TopBar.tsx",
+      "size": 1746
+    },
+    {
+      "path": "02-frontend\\src\\components\\site\\CookieConsentBanner.tsx",
+      "size": 1796
+    },
+    {
+      "path": "02-frontend\\src\\components\\site\\SiteFooter.tsx",
+      "size": 1641
+    },
+    {
+      "path": "02-frontend\\src\\components\\site\\SiteLayout.tsx",
+      "size": 811
+    },
+    {
+      "path": "02-frontend\\src\\components\\site\\SiteNavbar.tsx",
+      "size": 4180
+    },
+    {
+      "path": "02-frontend\\src\\components\\workspace\\AIPanel.tsx",
+      "size": 8555
+    },
+    {
+      "path": "02-frontend\\src\\components\\workspace\\CodeViewer.tsx",
+      "size": 6215
+    },
+    {
+      "path": "02-frontend\\src\\components\\workspace\\FileExplorer.tsx",
+      "size": 10796
+    },
+    {
+      "path": "02-frontend\\src\\components\\workspace\\GitPanel.tsx",
+      "size": 8813
+    },
+    {
+      "path": "02-frontend\\src\\components\\workspace\\TerminalPanel.tsx",
+      "size": 4301
+    },
+    {
+      "path": "02-frontend\\src\\components\\workspace\\TestingPanel.tsx",
+      "size": 3562
+    },
+    {
+      "path": "01-docs\\ai\\AI_ASSISTANT.md",
+      "size": 206
+    },
+    {
+      "path": "01-docs\\ai\\AI_FOUNDATION.md",
+      "size": 257
+    },
+    {
+      "path": "01-docs\\ai\\RAG_LITE.md",
+      "size": 197
+    },
+    {
+      "path": "01-docs\\architecture\\03_ARCHITECTURE.md",
+      "size": 13961
+    },
+    {
+      "path": "01-docs\\architecture\\08_DATABASE_SCHEMA.md",
+      "size": 12447
+    },
+    {
+      "path": "01-docs\\architecture\\09_AI_CONTEXT_ENGINE.md",
+      "size": 10832
+    },
+    {
+      "path": "01-docs\\architecture\\14_AUTHORIZATION_MATRIX.md",
+      "size": 3172
+    },
+    {
+      "path": "01-docs\\architecture\\API.md",
+      "size": 522
+    },
+    {
+      "path": "01-docs\\architecture\\API_SPECIFICATION.md",
+      "size": 14100
+    },
+    {
+      "path": "01-docs\\architecture\\ARCHITECTURE.md",
+      "size": 553
+    },
+    {
+      "path": "01-docs\\assets\\devos-banner.svg",
+      "size": 902
+    },
+    {
+      "path": "01-docs\\audit\\PRODUCTION_AUDIT.md",
+      "size": 284
+    },
+    {
+      "path": "01-docs\\auth\\AUTHENTICATION.md",
+      "size": 138
+    },
+    {
+      "path": "01-docs\\deployment\\DEPLOYMENT.md",
+      "size": 560
+    },
+    {
+      "path": "01-docs\\deployment\\DEPLOYMENT_CHECKLIST.md",
+      "size": 1423
+    },
+    {
+      "path": "01-docs\\deployment\\LIVE_DEPLOYMENT_STATUS.md",
+      "size": 481
+    },
+    {
+      "path": "01-docs\\deployment\\PRODUCTION_DEPLOYMENT.md",
+      "size": 333
+    },
+    {
+      "path": "01-docs\\deployment\\ROLLBACK_PLAN.md",
+      "size": 495
+    },
+    {
+      "path": "01-docs\\getting-started\\01_PRD.md",
+      "size": 21693
+    },
+    {
+      "path": "01-docs\\getting-started\\02_REQUIREMENTS.md",
+      "size": 21339
+    },
+    {
+      "path": "01-docs\\getting-started\\04_UI_UX.md",
+      "size": 20858
+    },
+    {
+      "path": "01-docs\\getting-started\\05_DEVELOPMENT_PLAN.md",
+      "size": 17063
+    },
+    {
+      "path": "01-docs\\getting-started\\10_TESTING_QA.md",
+      "size": 8588
+    },
+    {
+      "path": "01-docs\\getting-started\\12_HACKATHON_DEMO.md",
+      "size": 9612
+    },
+    {
+      "path": "01-docs\\getting-started\\13_USER_MANUAL.md",
+      "size": 4508
+    },
+    {
+      "path": "01-docs\\github\\CI_CD_CHECKLIST.md",
+      "size": 520
+    },
+    {
+      "path": "01-docs\\github\\GITHUB_INTEGRATION.md",
+      "size": 287
+    },
+    {
+      "path": "01-docs\\help\\FAQ.md",
+      "size": 490
+    },
+    {
+      "path": "01-docs\\help\\TROUBLESHOOTING.md",
+      "size": 641
+    },
+    {
+      "path": "01-docs\\monitoring\\MONITORING_GUIDE.md",
+      "size": 252
+    },
+    {
+      "path": "01-docs\\performance\\PERFORMANCE_GUIDE.md",
+      "size": 316
+    },
+    {
+      "path": "01-docs\\performance\\PRODUCTION_OPTIMIZATION.md",
+      "size": 290
+    },
+    {
+      "path": "01-docs\\portfolio\\DEMO_CHECKLIST.md",
+      "size": 133
+    },
+    {
+      "path": "01-docs\\portfolio\\GITHUB_BADGES.md",
+      "size": 100
+    },
+    {
+      "path": "01-docs\\portfolio\\PORTFOLIO_GUIDE.md",
+      "size": 295
+    },
+    {
+      "path": "01-docs\\production\\PRODUCTION_CHECKLIST.md",
+      "size": 400
+    },
+    {
+      "path": "01-docs\\releases\\CHANGELOG.md",
+      "size": 397
+    },
+    {
+      "path": "01-docs\\releases\\PHASE_TRACKER.md",
+      "size": 278
+    },
+    {
+      "path": "01-docs\\releases\\RELEASE_NOTES.md",
+      "size": 688
+    },
+    {
+      "path": "01-docs\\releases\\v1.0.0_RELEASE.md",
+      "size": 280
+    },
+    {
+      "path": "01-docs\\security\\SECURITY.md",
+      "size": 442
+    },
+    {
+      "path": "01-docs\\workspace\\WORKSPACE_ENGINE.md",
+      "size": 272
+    },
+    {
+      "path": ".github\\ISSUE_TEMPLATE\\bug_report.md",
+      "size": 185
+    },
+    {
+      "path": ".github\\ISSUE_TEMPLATE\\feature_request.md",
+      "size": 144
+    },
+    {
+      "path": ".github\\workflows\\ci.yml",
+      "size": 639
+    },
+    {
+      "path": ".github\\workflows\\codeql.yml",
+      "size": 483
+    },
+    {
+      "path": ".github\\workflows\\devos-ci.yml",
+      "size": 698
+    },
+    {
+      "path": ".github\\workflows\\release.yml",
+      "size": 287
+    },
+    {
+      "path": ".github\\workflows\\security.yml",
+      "size": 931
+    }
+  ]
+}
