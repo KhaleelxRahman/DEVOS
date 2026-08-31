@@ -9,3 +9,8 @@ __pycache__/
 *.pyc
 
 02-frontend/dist/
+02-frontend/.vercel/
+03-backend/logs/
+03-backend/__pycache__/
+03-backend/.ruff_cache/
+**/__pycache__/
