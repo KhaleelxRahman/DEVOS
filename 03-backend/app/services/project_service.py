@@ -1,5 +1,6 @@
 import os
 import shutil
+import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,6 +40,13 @@ class ProjectService:
 
     @staticmethod
     async def get_by_id(db: AsyncSession, project_id: str) -> Project | None:
+        # Project ids are UUIDs; malformed ids can never match a row, so fail
+        # fast with a clean "not found" instead of relying on DB-specific
+        # behaviour for arbitrary strings.
+        try:
+            uuid.UUID(str(project_id))
+        except (TypeError, ValueError):
+            return None
         stmt = select(Project).where(Project.id == project_id)
         result = await db.execute(stmt)
         return result.scalars().first()

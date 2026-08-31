@@ -26,12 +26,29 @@ export const WorkspacePage: React.FC = () => {
     if (activeProject) return;
     const projectId = localStorage.getItem('devos_active_project_id');
     if (!projectId) return;
+    let cancelled = false;
     projectsApi.get(projectId)
       .then((res) => {
-        if (res.success && res.data) setActiveProject(res.data);
+        if (cancelled) return;
+        if (res.success && res.data) {
+          setActiveProject(res.data);
+        } else {
+          throw new Error('Project unavailable');
+        }
       })
-      .catch(() => localStorage.removeItem('devos_active_project_id'));
-  }, [activeProject, setActiveProject]);
+      .catch(() => {
+        // BUG-001: a stale stored project id (deleted project, cleared data,
+        // or another account) must never leave a broken state — clear it and
+        // send the user back to the project list with a friendly message.
+        if (cancelled) return;
+        localStorage.removeItem('devos_active_project_id');
+        toast('That project is no longer available. Choose another project.', 'info');
+        navigate('/app/projects', { replace: true });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeProject, setActiveProject, navigate, toast]);
 
   if (!activeProject) {
     return (

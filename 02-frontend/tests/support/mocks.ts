@@ -68,6 +68,48 @@ export async function mockRegisterFailure(
   );
 }
 
+/** A representative project used by workspace E2E tests. */
+export const sampleProject = {
+  id: "11111111-1111-4111-8111-111111111111",
+  user_id: authedUser.id,
+  name: "Demo Project",
+  description: "An E2E sample project",
+  technologies: [] as string[],
+  repository_url: null,
+  repository_provider: null,
+  repository_id: null,
+  default_branch: "main",
+  created_at: "2026-01-01T00:00:00Z",
+  updated_at: null,
+};
+
+/** Mock GET /api/v1/projects/:projectId to return a specific project. */
+export async function mockProjectGetSuccess(
+  page: Page,
+  projectId: string,
+  project = { ...sampleProject, id: projectId }
+): Promise<void> {
+  await page.route(`**/api/v1/projects/${projectId}`, (route) =>
+    route.fulfill(ok(project))
+  );
+}
+
+/** Mock GET /api/v1/projects/:projectId to fail (e.g. stale/deleted project). */
+export async function mockProjectGetNotFound(
+  page: Page,
+  projectId: string,
+  code = "PROJECT_NOT_FOUND",
+  message = "Project not found"
+): Promise<void> {
+  await page.route(`**/api/v1/projects/${projectId}`, (route) =>
+    route.fulfill({
+      status: 404,
+      contentType: "application/json",
+      body: JSON.stringify({ success: false, error: { code, message } }),
+    })
+  );
+}
+
 /**
  * Mock every other authenticated API endpoint the app may call after login
  * (projects, activity, …) so workspace pages render without a live backend.

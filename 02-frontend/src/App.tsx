@@ -91,6 +91,9 @@ export const App: React.FC = () => {
                 <Route index element={<Navigate to="/app/dashboard" replace />} />
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="projects" element={<ProjectsPage />} />
+                {/* Legacy/deep project-details links must not 404 — route them
+                    to the project list (BUG-001). */}
+                <Route path="projects/:projectId" element={<Navigate to="/app/projects" replace />} />
                 <Route path="workspace" element={<WorkspacePage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
