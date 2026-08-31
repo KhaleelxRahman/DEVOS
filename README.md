@@ -133,7 +133,7 @@ Read [CONTRIBUTING.md](./.github/CONTRIBUTING.md), open an issue using the provi
 
 ## Support
 
-- Email: [mdkhaleelurrahman51@gmail.com](mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS v1.0.0%20Support)
+- Email: [mdkhaleelurrahman51@gmail.com](mailto:<mdkhaleelurrahman51@gmail.com>?subject=DEVOS v1.0.0%20Support)
 - Phone: [+91 78428 35936](tel:+917842835936)
 
 ## License

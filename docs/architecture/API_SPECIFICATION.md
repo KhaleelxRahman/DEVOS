@@ -5,7 +5,6 @@ Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
-
 1. PURPOSE
 
 This document defines the API architecture and contracts for DEVOS v1.0.0.
@@ -20,8 +19,7 @@ Backend Services
 ↓
 Database / Git / GitHub / AI / Terminal
 
-
-2. API PRINCIPLES
+1. API PRINCIPLES
 
 The API must be:
 
@@ -36,12 +34,11 @@ The API must be:
 
 Frontend components must not directly depend on backend implementation details.
 
-
-3. BASE URL
+1. BASE URL
 
 Development:
 
-http://localhost:8000
+<http://localhost:8000>
 
 Production:
 
@@ -53,8 +50,7 @@ Recommended:
 
 /api/v1
 
-
-4. RESPONSE FORMAT
+1. RESPONSE FORMAT
 
 Successful response:
 
@@ -62,7 +58,6 @@ Successful response:
   "success": true,
   "data": {}
 }
-
 
 Error response:
 
@@ -74,8 +69,7 @@ Error response:
   }
 }
 
-
-5. HTTP STATUS CODES
+1. HTTP STATUS CODES
 
 200
 Successful request
@@ -113,8 +107,7 @@ Internal server error
 503
 Service unavailable
 
-
-6. AUTHENTICATION
+1. AUTHENTICATION
 
 Protected APIs require authentication.
 
@@ -125,11 +118,9 @@ Example:
 Authorization:
 Bearer <token>
 
-
 If cookie-based authentication is used, the API must enforce appropriate session and CSRF protections.
 
-
-7. AUTHORIZATION
+1. AUTHORIZATION
 
 Authentication alone is insufficient.
 
@@ -143,8 +134,7 @@ Project ownership verified
 ↓
 Operation allowed
 
-
-8. AUTH ENDPOINTS
+1. AUTH ENDPOINTS
 
 POST /api/v1/auth/register
 
@@ -156,10 +146,9 @@ Request:
 
 {
   "name": "Developer",
-  "email": "developer@example.com",
+  "email": "<developer@example.com>",
   "password": "secure-password"
 }
-
 
 Response:
 
@@ -169,23 +158,21 @@ Response:
     "user": {
       "id": "user-id",
       "name": "Developer",
-      "email": "developer@example.com"
+      "email": "<developer@example.com>"
     }
   }
 }
 
-
-9. LOGIN
+1. LOGIN
 
 POST /api/v1/auth/login
 
 Request:
 
 {
-  "email": "developer@example.com",
+  "email": "<developer@example.com>",
   "password": "secure-password"
 }
-
 
 Response:
 
@@ -195,13 +182,12 @@ Response:
     "user": {
       "id": "user-id",
       "name": "Developer",
-      "email": "developer@example.com"
+      "email": "<developer@example.com>"
     }
   }
 }
 
-
-10. LOGOUT
+ 1. LOGOUT
 
 POST /api/v1/auth/logout
 
@@ -216,8 +202,7 @@ Response:
   "message": "Logged out successfully"
 }
 
-
-11. CURRENT USER
+ 1. CURRENT USER
 
 GET /api/v1/auth/me
 
@@ -225,8 +210,7 @@ Purpose:
 
 Return authenticated user information.
 
-
-12. USER PROFILE
+ 1. USER PROFILE
 
 GET /api/v1/users/me
 
@@ -237,8 +221,7 @@ Return:
 • Email
 • Created date
 
-
-13. UPDATE PROFILE
+ 1. UPDATE PROFILE
 
 PATCH /api/v1/users/me
 
@@ -248,8 +231,7 @@ Request:
   "name": "Updated Name"
 }
 
-
-14. PROJECT ENDPOINTS
+ 1. PROJECT ENDPOINTS
 
 POST /api/v1/projects
 
@@ -267,8 +249,7 @@ Request:
   ]
 }
 
-
-15. LIST PROJECTS
+ 1. LIST PROJECTS
 
 GET /api/v1/projects
 
@@ -283,8 +264,7 @@ Example:
   }
 }
 
-
-16. GET PROJECT
+ 1. GET PROJECT
 
 GET /api/v1/projects/{project_id}
 
@@ -296,8 +276,7 @@ Return:
 • Created date
 • Updated date
 
-
-17. UPDATE PROJECT
+ 1. UPDATE PROJECT
 
 PATCH /api/v1/projects/{project_id}
 
@@ -308,8 +287,7 @@ Request:
   "description": "Updated description"
 }
 
-
-18. DELETE PROJECT
+ 1. DELETE PROJECT
 
 DELETE /api/v1/projects/{project_id}
 
@@ -319,8 +297,7 @@ Requirements:
 • Verify ownership
 • Delete or archive project according to implementation policy
 
-
-19. ACTIVE PROJECT
+ 1. ACTIVE PROJECT
 
 GET /api/v1/projects/{project_id}/context
 
@@ -328,8 +305,7 @@ Purpose:
 
 Return the basic project context required by the workspace and AI systems.
 
-
-20. PROJECT ACTIVITY
+ 1. PROJECT ACTIVITY
 
 GET /api/v1/projects/{project_id}/activity
 
@@ -340,8 +316,7 @@ Optional query parameters:
 ?page=1
 &limit=20
 
-
-21. FILE ENDPOINTS
+ 1. FILE ENDPOINTS
 
 GET /api/v1/projects/{project_id}/files
 
@@ -349,8 +324,7 @@ Purpose:
 
 Return project file tree.
 
-
-22. FILE TREE RESPONSE
+ 1. FILE TREE RESPONSE
 
 Example:
 
@@ -371,8 +345,7 @@ Example:
   }
 }
 
-
-23. GET FILE
+ 1. GET FILE
 
 GET /api/v1/projects/{project_id}/files/{file_path}
 
@@ -380,8 +353,7 @@ Purpose:
 
 Return the contents of an authorized project file.
 
-
-24. FILE SECURITY
+ 1. FILE SECURITY
 
 The backend must:
 
@@ -390,8 +362,7 @@ The backend must:
 • Restrict access to project directory
 • Block sensitive files where appropriate
 
-
-25. FILE SEARCH
+ 1. FILE SEARCH
 
 GET /api/v1/projects/{project_id}/files/search?q=component
 
@@ -401,8 +372,7 @@ Search project files.
 
 The implementation must avoid scanning unnecessary data repeatedly.
 
-
-26. GIT ENDPOINTS
+ 1. GIT ENDPOINTS
 
 GET /api/v1/projects/{project_id}/git/status
 
@@ -414,15 +384,13 @@ Return:
 • Deleted files
 • Untracked files
 
-
-27. GIT DIFF
+ 1. GIT DIFF
 
 GET /api/v1/projects/{project_id}/git/diff
 
 Return the current project changes.
 
-
-28. GIT COMMITS
+ 1. GIT COMMITS
 
 GET /api/v1/projects/{project_id}/git/commits
 
@@ -431,8 +399,7 @@ Optional:
 ?page=1
 &limit=20
 
-
-29. GIT COMMIT
+ 1. GIT COMMIT
 
 POST /api/v1/projects/{project_id}/git/commit
 
@@ -442,8 +409,7 @@ Request:
   "message": "feat: improve workspace"
 }
 
-
-30. GIT PUSH
+ 1. GIT PUSH
 
 POST /api/v1/projects/{project_id}/git/push
 
@@ -453,8 +419,7 @@ Push authorized local changes.
 
 Must require authentication and project authorization.
 
-
-31. GIT PULL
+ 1. GIT PULL
 
 POST /api/v1/projects/{project_id}/git/pull
 
@@ -464,8 +429,7 @@ Pull authorized repository changes.
 
 Conflicts must be handled safely.
 
-
-32. GITHUB ENDPOINTS
+ 1. GITHUB ENDPOINTS
 
 POST /api/v1/github/connect
 
@@ -473,8 +437,7 @@ Purpose:
 
 Start GitHub connection flow.
 
-
-33. GITHUB CALLBACK
+ 1. GITHUB CALLBACK
 
 GET /api/v1/github/callback
 
@@ -484,8 +447,7 @@ Handle OAuth callback when OAuth is used.
 
 Never expose tokens to the frontend unnecessarily.
 
-
-34. GITHUB CONNECTION
+ 1. GITHUB CONNECTION
 
 GET /api/v1/github/connection
 
@@ -494,8 +456,7 @@ Return:
 • Connected status
 • Account information where appropriate
 
-
-35. GITHUB DISCONNECT
+ 1. GITHUB DISCONNECT
 
 DELETE /api/v1/github/connection
 
@@ -503,8 +464,7 @@ Purpose:
 
 Disconnect GitHub integration.
 
-
-36. GITHUB REPOSITORIES
+ 1. GITHUB REPOSITORIES
 
 GET /api/v1/github/repositories
 
@@ -512,8 +472,7 @@ Return repositories accessible to the authenticated user according to granted pe
 
 The legacy alias `/api/v1/github/repos` remains supported for existing clients.
 
-
-37. CONNECT REPOSITORY
+ 1. CONNECT REPOSITORY
 
 POST /api/v1/projects/{project_id}/github/repository
 
@@ -523,8 +482,7 @@ Request:
   "repository_id": "repository-id"
 }
 
-
-38. AI ENDPOINTS
+ 1. AI ENDPOINTS
 
 POST /api/v1/projects/{project_id}/ai/chat
 
@@ -532,8 +490,7 @@ Purpose:
 
 Send a project-aware AI request.
 
-
-39. AI REQUEST
+ 1. AI REQUEST
 
 Example:
 
@@ -542,8 +499,7 @@ Example:
   "conversation_id": "conversation-id"
 }
 
-
-40. AI RESPONSE
+ 1. AI RESPONSE
 
 Example:
 
@@ -558,8 +514,7 @@ Example:
   }
 }
 
-
-41. AI CONTEXT
+ 1. AI CONTEXT
 
 Backend should construct context from:
 
@@ -572,8 +527,7 @@ Backend should construct context from:
 • Recent activity
 • Conversation history
 
-
-42. AI CONTEXT OPTIONS
+ 1. AI CONTEXT OPTIONS
 
 The frontend may provide contextual hints such as:
 
@@ -581,30 +535,25 @@ The frontend may provide contextual hints such as:
   "current_file": "src/App.tsx"
 }
 
-
 The backend remains responsible for validating and selecting actual context.
 
-
-43. AI CONVERSATIONS
+ 1. AI CONVERSATIONS
 
 GET /api/v1/projects/{project_id}/ai/conversations
 
 Return conversation summaries.
 
-
-44. GET CONVERSATION
+ 1. GET CONVERSATION
 
 GET /api/v1/projects/{project_id}/ai/conversations/{conversation_id}
 
 Return conversation messages.
 
-
-45. DELETE CONVERSATION
+ 1. DELETE CONVERSATION
 
 DELETE /api/v1/projects/{project_id}/ai/conversations/{conversation_id}
 
-
-46. AI SECURITY
+ 1. AI SECURITY
 
 AI requests must:
 
@@ -615,8 +564,7 @@ AI requests must:
 • Validate input
 • Handle provider errors safely
 
-
-47. TERMINAL ENDPOINTS
+ 1. TERMINAL ENDPOINTS
 
 POST /api/v1/projects/{project_id}/terminal/execute
 
@@ -624,8 +572,7 @@ Purpose:
 
 Execute an approved development command inside the authorized project environment.
 
-
-48. TERMINAL REQUEST
+ 1. TERMINAL REQUEST
 
 Example:
 
@@ -637,8 +584,7 @@ Example:
   ]
 }
 
-
-49. TERMINAL RESPONSE
+ 1. TERMINAL RESPONSE
 
 Example:
 
@@ -651,8 +597,7 @@ Example:
   }
 }
 
-
-50. TERMINAL SECURITY
+ 1. TERMINAL SECURITY
 
 Terminal requests must enforce:
 
@@ -664,8 +609,7 @@ Terminal requests must enforce:
 • Resource limits
 • Output limits
 
-
-51. TERMINAL HISTORY
+ 1. TERMINAL HISTORY
 
 GET /api/v1/projects/{project_id}/terminal/history
 
@@ -673,22 +617,19 @@ Return recent safe command metadata.
 
 Do not store sensitive command arguments unnecessarily.
 
-
-52. ACTIVITY ENDPOINTS
+ 1. ACTIVITY ENDPOINTS
 
 GET /api/v1/activity
 
 Return authenticated user's recent activity.
 
-
-53. PROJECT ACTIVITY
+ 1. PROJECT ACTIVITY
 
 GET /api/v1/projects/{project_id}/activity
 
 Return project-specific activity.
 
-
-54. ACTIVITY TYPES
+ 1. ACTIVITY TYPES
 
 Possible values:
 
@@ -704,8 +645,7 @@ git.push
 git.pull
 file.opened
 
-
-55. HEALTH ENDPOINT
+ 1. HEALTH ENDPOINT
 
 GET /health
 
@@ -721,8 +661,7 @@ Example:
   "service": "DEVOS v1.0.0 API"
 }
 
-
-56. API VALIDATION
+ 1. API VALIDATION
 
 Every endpoint must validate:
 
@@ -733,8 +672,7 @@ Every endpoint must validate:
 • Required fields
 • Data types
 
-
-57. PAGINATION
+ 1. PAGINATION
 
 List endpoints should support pagination where necessary.
 
@@ -743,8 +681,7 @@ Recommended:
 ?page=1
 &limit=20
 
-
-58. SEARCH
+ 1. SEARCH
 
 Search endpoints should support:
 
@@ -752,8 +689,7 @@ Search endpoints should support:
 
 Search input must be validated and safely handled.
 
-
-59. API RATE LIMITING
+ 1. API RATE LIMITING
 
 Rate limits should apply to:
 
@@ -763,8 +699,7 @@ Rate limits should apply to:
 • Terminal requests
 • GitHub requests
 
-
-60. API IDEMPOTENCY
+ 1. API IDEMPOTENCY
 
 Where repeated requests could cause duplicate operations, consider idempotency.
 
@@ -774,8 +709,7 @@ Especially:
 • Repository operations
 • Resource creation
 
-
-61. API TIMEOUTS
+ 1. API TIMEOUTS
 
 Long-running services must use controlled timeouts.
 
@@ -785,8 +719,7 @@ Examples:
 • Git operations
 • Terminal commands
 
-
-62. ERROR CODES
+ 1. ERROR CODES
 
 Use predictable application error codes.
 
@@ -805,13 +738,11 @@ TERMINAL_BLOCKED
 TERMINAL_TIMEOUT
 VALIDATION_ERROR
 
-
-63. ERROR RESPONSE RULE
+ 1. ERROR RESPONSE RULE
 
 Do not expose internal stack traces in production API responses.
 
-
-64. API DOCUMENTATION
+ 1. API DOCUMENTATION
 
 FastAPI should expose appropriate API documentation during development.
 
@@ -821,8 +752,7 @@ OpenAPI
 Swagger UI
 ReDoc
 
-
-65. API VERSIONING
+ 1. API VERSIONING
 
 Current:
 
@@ -834,8 +764,7 @@ Future versions:
 
 Avoid breaking existing API contracts without versioning.
 
-
-66. SERVICE ARCHITECTURE
+ 1. SERVICE ARCHITECTURE
 
 Recommended backend structure:
 
@@ -871,8 +800,7 @@ app/
 
   database/
 
-
-67. FRONTEND API LAYER
+ 1. FRONTEND API LAYER
 
 Frontend should use a centralized API client.
 
@@ -888,8 +816,7 @@ api/
   ai
   terminal
 
-
-68. FRONTEND RULE
+ 1. FRONTEND RULE
 
 React components should NOT contain repeated raw fetch logic.
 
@@ -901,8 +828,7 @@ API Service
 ↓
 Backend
 
-
-69. API STATE HANDLING
+ 1. API STATE HANDLING
 
 Frontend should represent:
 
@@ -911,8 +837,7 @@ Success
 Error
 Empty
 
-
-70. API RETRY
+ 1. API RETRY
 
 Retry only appropriate temporary failures.
 
@@ -922,8 +847,7 @@ Do NOT blindly retry:
 • Validation failures
 • Permission failures
 
-
-71. API LOGGING
+ 1. API LOGGING
 
 Backend may log:
 
@@ -940,8 +864,7 @@ Never log:
 • API keys
 • Private secrets
 
-
-72. API TESTING
+ 1. API TESTING
 
 Every critical API should have automated tests.
 
@@ -955,8 +878,7 @@ AI
 Git
 Terminal
 
-
-73. API ACCEPTANCE CRITERIA
+ 1. API ACCEPTANCE CRITERIA
 
 API is acceptable when:
 
@@ -971,8 +893,7 @@ API is acceptable when:
 ✓ Git endpoints work
 ✓ API documentation is available
 
-
-74. MVP API PRIORITY
+ 1. MVP API PRIORITY
 
 P0:
 
@@ -994,8 +915,7 @@ P2:
 
 Advanced integrations
 
-
-75. API DESIGN PRINCIPLE
+ 1. API DESIGN PRINCIPLE
 
 APIs should be:
 
@@ -1005,8 +925,7 @@ SIMPLE
 → TESTABLE
 → EXTENSIBLE
 
-
-76. FINAL API PRINCIPLE
+ 1. FINAL API PRINCIPLE
 
 DEVOS v1.0.0 frontend should never need to know how the backend performs an operation.
 
@@ -1025,6 +944,5 @@ The backend owns:
 • Business logic
 • Security
 • External integrations
-
 
 END OF 07_API_SPECIFICATION.md

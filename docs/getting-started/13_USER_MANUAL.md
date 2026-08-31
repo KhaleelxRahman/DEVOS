@@ -105,7 +105,6 @@ repositories or users are ever returned.
 | AI always says "Mock" | Set `GEMINI_API_KEY` or `OPENAI_API_KEY` |
 | DB errors after switching to Postgres | Run `alembic upgrade head` |
 
-
 ## 8. Public Website
 
 The marketing site lives at `/` (home), `/about`, `/faq`, `/contact`,

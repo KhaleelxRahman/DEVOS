@@ -71,3 +71,4 @@ coverage/
 # Runtime artifacts
 projects_storage/
 .vercel/
+.markdownlintignore

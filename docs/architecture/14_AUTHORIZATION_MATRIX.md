@@ -22,10 +22,10 @@ reflects these rules.
 | `GET/POST /api/v1/projects` | Own projects | List/create |
 | `GET/PATCH/DELETE /api/v1/projects/{id}` | Owner only | 404/403 for other users |
 | `GET /api/v1/projects/{id}/files*` | Owner only | Tree/content/search; sensitive files (.env, keys) never served |
-| `POST /api/v1/projects/{id}/files/file|folder|upload|rename` | Owner only | Path traversal blocked; name validation; upload limits (10MB/file, 20/batch); executable extensions blocked |
+| `POST /api/v1/projects/{id}/files/file | folder | upload | rename` | Owner only | Path traversal blocked; name validation; upload limits (10MB/file, 20/batch); executable extensions blocked |
 | `PUT/DELETE /api/v1/projects/{id}/files/{path}` | Owner only | Save/delete; project root cannot be deleted/renamed |
 | `POST /api/v1/projects/{id}/terminal/execute` | Owner only | Rate limit 30/min/IP; allowlisted commands only; cwd locked to project workspace |
-| `POST /api/v1/projects/{id}/ai/chat|actions` | Owner only | Rate limit 20/min/IP; context sanitized & secrets masked |
+| `POST /api/v1/projects/{id}/ai/chat | actions` | Owner only | Rate limit 20/min/IP; context sanitized & secrets masked |
 | `GET/POST /api/v1/projects/{id}/git/*` | Owner only | Git operations in project workspace |
 | `GET/POST /api/v1/projects/{id}/testing/*` | Owner only | Test job execution |
 | `GET /api/v1/projects/{id}/activity` | Owner only | Project activity feed |

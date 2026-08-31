@@ -5,7 +5,6 @@ Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
-
 1. PURPOSE
 
 This document defines the security requirements for DEVOS v1.0.0.
@@ -23,8 +22,7 @@ DEVOS v1.0.0 handles:
 
 Security must therefore be treated as a core product requirement.
 
-
-2. SECURITY PRINCIPLE
+1. SECURITY PRINCIPLE
 
 SECURE BY DEFAULT
 
@@ -39,8 +37,7 @@ DEVOS v1.0.0 must:
 • Fail safely
 • Avoid exposing sensitive information
 
-
-3. SECURITY PRIORITIES
+1. SECURITY PRIORITIES
 
 Priority order:
 
@@ -55,8 +52,7 @@ Priority order:
 9. Database security
 10. Logging and monitoring
 
-
-4. AUTHENTICATION
+11. AUTHENTICATION
 
 Authentication must support:
 
@@ -68,8 +64,7 @@ Authentication must support:
 
 Passwords must never be stored as plaintext.
 
-
-5. PASSWORD SECURITY
+1. PASSWORD SECURITY
 
 Use a strong password hashing algorithm.
 
@@ -88,8 +83,7 @@ Never:
 • Return passwords through APIs
 • Store passwords in frontend state unnecessarily
 
-
-6. PASSWORD VALIDATION
+1. PASSWORD VALIDATION
 
 Require reasonable password rules.
 
@@ -100,8 +94,7 @@ Validation should happen:
 
 Backend validation is authoritative.
 
-
-7. SESSION SECURITY
+1. SESSION SECURITY
 
 Sessions/tokens must be securely handled.
 
@@ -115,8 +108,7 @@ Requirements:
 
 Avoid exposing authentication secrets to JavaScript when secure HTTP-only cookies are practical.
 
-
-8. AUTHORIZATION
+1. AUTHORIZATION
 
 Authentication answers:
 
@@ -126,8 +118,7 @@ Authorization answers:
 
 "Are you allowed to access this?"
 
-
-9. PROJECT OWNERSHIP
+1. PROJECT OWNERSHIP
 
 Every project must belong to a user.
 
@@ -140,8 +131,7 @@ Every project request must verify ownership.
 
 Never trust a project ID supplied by the client.
 
-
-10. IDOR PROTECTION
+ 1. IDOR PROTECTION
 
 Prevent insecure direct object references.
 
@@ -153,8 +143,7 @@ A user must NOT be able to access:
 • Another user's activity
 • Another user's repository information
 
-
-11. API SECURITY
+ 1. API SECURITY
 
 All protected APIs must verify authentication.
 
@@ -165,8 +154,7 @@ Validate:
 • Path parameters
 • Headers where relevant
 
-
-12. INPUT VALIDATION
+ 1. INPUT VALIDATION
 
 Never trust frontend validation.
 
@@ -182,8 +170,7 @@ Examples:
 • AI messages
 • Repository identifiers
 
-
-13. OUTPUT VALIDATION
+ 1. OUTPUT VALIDATION
 
 Backend responses should avoid accidentally exposing:
 
@@ -193,8 +180,7 @@ Backend responses should avoid accidentally exposing:
 • Internal filesystem paths
 • Authentication information
 
-
-14. ERROR HANDLING
+ 1. ERROR HANDLING
 
 Users should receive safe errors.
 
@@ -206,8 +192,7 @@ Bad:
 
 "PostgreSQL connection failed at internal-host:5432 using password..."
 
-
-15. SECRET MANAGEMENT
+ 1. SECRET MANAGEMENT
 
 Secrets must be stored in environment variables or an appropriate secret-management system.
 
@@ -219,8 +204,7 @@ AI_PROVIDER_KEY
 GITHUB_CLIENT_ID
 GITHUB_CLIENT_SECRET
 
-
-16. NEVER COMMIT SECRETS
+ 1. NEVER COMMIT SECRETS
 
 Never commit:
 
@@ -235,15 +219,13 @@ Use:
 
 .gitignore
 
-
-17. FRONTEND SECRET RULE
+ 1. FRONTEND SECRET RULE
 
 Never put private secrets in frontend code.
 
 Anything shipped to the browser should be considered potentially visible to users.
 
-
-18. GITHUB SECURITY
+ 1. GITHUB SECURITY
 
 GitHub integration must use secure authentication.
 
@@ -253,8 +235,7 @@ OAuth / appropriate GitHub authentication mechanisms
 
 Use minimum required permissions.
 
-
-19. GITHUB TOKEN STORAGE
+ 1. GITHUB TOKEN STORAGE
 
 Never store GitHub tokens:
 
@@ -263,22 +244,19 @@ Never store GitHub tokens:
 • In logs
 • In Git repositories
 
-
-20. GITHUB DISCONNECT
+ 1. GITHUB DISCONNECT
 
 Users must be able to disconnect their GitHub integration.
 
 Disconnect should invalidate or remove stored credentials appropriately.
 
-
-21. REPOSITORY ACCESS
+ 1. REPOSITORY ACCESS
 
 Only authorized users may access connected repository information.
 
 Repository operations must respect the permissions granted by the authenticated GitHub account.
 
-
-22. FILE SYSTEM SECURITY
+ 1. FILE SYSTEM SECURITY
 
 DEVOS v1.0.0 must restrict file access to the active project workspace.
 
@@ -290,15 +268,13 @@ Examples of dangerous input:
 ../../
 absolute system paths
 
-
-23. PATH VALIDATION
+ 1. PATH VALIDATION
 
 Normalize and validate paths before accessing files.
 
 The resolved path must remain inside the permitted project directory.
 
-
-24. SENSITIVE FILE PROTECTION
+ 1. SENSITIVE FILE PROTECTION
 
 Default sensitive files:
 
@@ -311,22 +287,19 @@ secrets.json
 
 Private configuration should not automatically enter AI context.
 
-
-25. FILE ACCESS
+ 1. FILE ACCESS
 
 Do not allow users to use the file explorer to access arbitrary operating-system files.
 
 Access should remain within the authorized project workspace.
 
-
-26. TERMINAL SECURITY
+ 1. TERMINAL SECURITY
 
 Terminal execution is one of the highest-risk components.
 
 Never expose unrestricted system execution to untrusted users.
 
-
-27. COMMAND RESTRICTION
+ 1. COMMAND RESTRICTION
 
 Use an appropriate command policy.
 
@@ -345,8 +318,7 @@ pytest
 
 Restrict or block dangerous system operations.
 
-
-28. DANGEROUS COMMANDS
+ 1. DANGEROUS COMMANDS
 
 Potentially dangerous operations must be restricted.
 
@@ -359,22 +331,19 @@ Credential extraction
 Network abuse
 Unauthorized system modification
 
-
-29. TERMINAL WORKING DIRECTORY
+ 1. TERMINAL WORKING DIRECTORY
 
 Every terminal session must start inside the authorized project directory.
 
 Users must not escape the project sandbox.
 
-
-30. TERMINAL TIMEOUT
+ 1. TERMINAL TIMEOUT
 
 Commands must have execution limits.
 
 Prevent processes from running indefinitely.
 
-
-31. TERMINAL RESOURCE LIMITS
+ 1. TERMINAL RESOURCE LIMITS
 
 Where practical, limit:
 
@@ -384,15 +353,13 @@ Where practical, limit:
 • Execution duration
 • Output size
 
-
-32. TERMINAL OUTPUT
+ 1. TERMINAL OUTPUT
 
 Limit excessive output.
 
 Prevent terminal commands from overwhelming the server or browser.
 
-
-33. TERMINAL PROCESS CONTROL
+ 1. TERMINAL PROCESS CONTROL
 
 Support:
 
@@ -404,15 +371,13 @@ Support:
 
 Future architecture may support isolated containers/sandboxes.
 
-
-34. AI SECURITY
+ 1. AI SECURITY
 
 AI requests may contain source code and project information.
 
 AI context must be carefully controlled.
 
-
-35. AI SECRET FILTERING
+ 1. AI SECRET FILTERING
 
 Before sending context to an AI provider:
 
@@ -425,8 +390,7 @@ Filter:
 • Authentication headers
 • Secret environment variables
 
-
-36. AI CONTEXT MINIMIZATION
+ 1. AI CONTEXT MINIMIZATION
 
 Do not send the entire repository automatically.
 
@@ -439,8 +403,7 @@ Benefits:
 • Better privacy
 • Better performance
 
-
-37. AI PROMPT INJECTION
+ 1. AI PROMPT INJECTION
 
 Treat repository content as untrusted input.
 
@@ -454,8 +417,7 @@ PROJECT CONTENT
 from
 USER REQUEST
 
-
-38. AI TOOL PERMISSIONS
+ 1. AI TOOL PERMISSIONS
 
 Future AI agents must not automatically receive unrestricted access.
 
@@ -470,15 +432,13 @@ Potential actions:
 
 Each action should require appropriate authorization.
 
-
-39. AI GENERATED CODE
+ 1. AI GENERATED CODE
 
 AI-generated code must be clearly treated as generated output.
 
 Users should review changes before committing.
 
-
-40. DATABASE SECURITY
+ 1. DATABASE SECURITY
 
 Use:
 
@@ -489,15 +449,13 @@ Use:
 
 Never construct unsafe SQL using raw user input.
 
-
-41. DATABASE CREDENTIALS
+ 1. DATABASE CREDENTIALS
 
 Database credentials must exist only in secure configuration.
 
 Never expose DATABASE_URL to the frontend.
 
-
-42. CORS
+ 1. CORS
 
 Configure CORS explicitly.
 
@@ -505,15 +463,13 @@ Do not use unrestricted origins in production.
 
 Allow only trusted frontend origins.
 
-
-43. HTTPS
+ 1. HTTPS
 
 Production deployment must use HTTPS.
 
 Never transmit authentication credentials over plain HTTP in production.
 
-
-44. SECURITY HEADERS
+ 1. SECURITY HEADERS
 
 Production should use appropriate security headers.
 
@@ -525,8 +481,7 @@ Examples:
 • Frame protection
 • Secure cookie attributes
 
-
-45. RATE LIMITING
+ 1. RATE LIMITING
 
 Protect sensitive endpoints from abuse.
 
@@ -538,8 +493,7 @@ Especially:
 • Terminal execution
 • GitHub operations
 
-
-46. AI RATE LIMITING
+ 1. AI RATE LIMITING
 
 AI requests can be expensive.
 
@@ -553,8 +507,7 @@ Future:
 
 Usage quotas
 
-
-47. TERMINAL RATE LIMITING
+ 1. TERMINAL RATE LIMITING
 
 Prevent rapid repeated command execution.
 
@@ -564,8 +517,7 @@ Potential limits:
 • Concurrent processes
 • Maximum execution duration
 
-
-48. AUTH RATE LIMITING
+ 1. AUTH RATE LIMITING
 
 Limit repeated login attempts.
 
@@ -575,22 +527,19 @@ Future:
 • Progressive delays
 • Additional verification
 
-
-49. CSRF
+ 1. CSRF
 
 If cookie-based authentication is used, implement appropriate CSRF protection.
 
 Use secure cookie configuration.
 
-
-50. XSS PROTECTION
+ 1. XSS PROTECTION
 
 Never directly inject untrusted HTML.
 
 Sanitize user-generated content where HTML rendering is required.
 
-
-51. AI MARKDOWN SECURITY
+ 1. AI MARKDOWN SECURITY
 
 AI responses may contain:
 
@@ -602,8 +551,7 @@ Render safely.
 
 Do not execute AI-generated HTML or scripts.
 
-
-52. COMMAND INJECTION
+ 1. COMMAND INJECTION
 
 Never build shell commands by blindly concatenating user input.
 
@@ -611,15 +559,13 @@ Use safe process execution mechanisms.
 
 Validate command and arguments separately.
 
-
-53. GIT SECURITY
+ 1. GIT SECURITY
 
 Never execute arbitrary Git commands directly from raw user input.
 
 Use controlled Git operations where possible.
 
-
-54. GITHUB WEBHOOK SECURITY
+ 1. GITHUB WEBHOOK SECURITY
 
 If webhooks are introduced later:
 
@@ -627,8 +573,7 @@ If webhooks are introduced later:
 • Reject unsigned requests
 • Prevent replay attacks where appropriate
 
-
-55. LOGGING SECURITY
+ 1. LOGGING SECURITY
 
 Logs may contain sensitive information.
 
@@ -640,8 +585,7 @@ Never log:
 • Session secrets
 • Private repository contents
 
-
-56. ERROR LOGGING
+ 1. ERROR LOGGING
 
 Log:
 
@@ -653,8 +597,7 @@ Log:
 
 Do not expose internal diagnostics to users.
 
-
-57. AUDIT ACTIVITY
+ 1. AUDIT ACTIVITY
 
 Record important actions.
 
@@ -668,8 +611,7 @@ Examples:
 • Terminal execution
 • Git commit
 
-
-58. AUDIT DATA
+ 1. AUDIT DATA
 
 Activity records should contain:
 
@@ -681,15 +623,13 @@ Activity records should contain:
 
 Never store sensitive credentials.
 
-
-59. DATA PRIVACY
+ 1. DATA PRIVACY
 
 DEVOS v1.0.0 should follow data minimization.
 
 Only store information required for the product.
 
-
-60. DATA RETENTION
+ 1. DATA RETENTION
 
 Define retention policies for:
 
@@ -700,8 +640,7 @@ Define retention policies for:
 
 Future versions should provide configurable retention.
 
-
-61. ACCOUNT DELETION
+ 1. ACCOUNT DELETION
 
 Future production version should support account deletion.
 
@@ -713,8 +652,7 @@ Deletion should address:
 • Activity
 • Connected integrations
 
-
-62. DEPENDENCY SECURITY
+ 1. DEPENDENCY SECURITY
 
 Keep dependencies updated.
 
@@ -726,8 +664,7 @@ Regularly review:
 • Authentication libraries
 • GitHub libraries
 
-
-63. DEPENDENCY POLICY
+ 1. DEPENDENCY POLICY
 
 Do not install packages without understanding:
 
@@ -737,8 +674,7 @@ Do not install packages without understanding:
 • Security history
 • Necessity
 
-
-64. SUPPLY CHAIN SECURITY
+ 1. SUPPLY CHAIN SECURITY
 
 Use lockfiles.
 
@@ -751,8 +687,7 @@ requirements lock strategy
 
 Avoid unnecessary dependencies.
 
-
-65. ENVIRONMENT SEPARATION
+ 1. ENVIRONMENT SEPARATION
 
 Maintain separate configuration for:
 
@@ -762,8 +697,7 @@ Production
 
 Never use production credentials locally.
 
-
-66. PRODUCTION CONFIGURATION
+ 1. PRODUCTION CONFIGURATION
 
 Production must have:
 
@@ -775,8 +709,7 @@ Production must have:
 • Monitoring
 • Rate limits
 
-
-67. BACKUP SECURITY
+ 1. BACKUP SECURITY
 
 Production database backups should be:
 
@@ -784,8 +717,7 @@ Production database backups should be:
 • Access-controlled
 • Tested periodically
 
-
-68. SECURITY TESTING
+ 1. SECURITY TESTING
 
 Test:
 
@@ -800,8 +732,7 @@ Rate limits
 Secret leakage
 AI context leakage
 
-
-69. SECURITY TEST CASES
+ 1. SECURITY TEST CASES
 
 Test that:
 
@@ -821,8 +752,7 @@ Test that:
 
 ✓ Unauthorized APIs return safe errors.
 
-
-70. INCIDENT RESPONSE
+ 1. INCIDENT RESPONSE
 
 If a security issue is discovered:
 
@@ -834,8 +764,7 @@ If a security issue is discovered:
 6. Rotate compromised credentials if necessary
 7. Document incident
 
-
-71. SECURITY PRIORITY LEVELS
+8. SECURITY PRIORITY LEVELS
 
 CRITICAL:
 
@@ -859,8 +788,7 @@ LOW:
 
 • Minor security UX issues
 
-
-72. SECURITY REVIEW BEFORE RELEASE
+ 1. SECURITY REVIEW BEFORE RELEASE
 
 Before deployment:
 
@@ -877,8 +805,7 @@ Before deployment:
 ✓ Dependencies reviewed
 ✓ Rate limits configured
 
-
-73. HACKATHON SECURITY PRIORITY
+ 1. HACKATHON SECURITY PRIORITY
 
 For the hackathon MVP, prioritize:
 
@@ -890,8 +817,7 @@ For the hackathon MVP, prioritize:
 6. AI context filtering
 7. Input validation
 
-
-74. SECURITY VS SPEED
+8. SECURITY VS SPEED
 
 Hackathon development should NOT remove essential security.
 
@@ -905,8 +831,7 @@ It is NOT acceptable to:
 • Skip authentication checks
 • Ignore project ownership
 
-
-75. FUTURE SECURITY
+ 1. FUTURE SECURITY
 
 Future versions may add:
 
@@ -920,8 +845,7 @@ Future versions may add:
 • Advanced audit logs
 • Organization-level security policies
 
-
-76. FINAL SECURITY PRINCIPLE
+ 1. FINAL SECURITY PRINCIPLE
 
 DEVOS v1.0.0 must treat:
 
@@ -939,8 +863,7 @@ as sensitive systems.
 
 Security must be built into the architecture rather than added at the end.
 
-
-77. FINAL STATEMENT
+ 1. FINAL STATEMENT
 
 DEVOS v1.0.0 should be:
 
@@ -952,6 +875,5 @@ SECURE
 → RELIABLE
 
 Never sacrifice fundamental security merely to make a feature appear complete.
-
 
 END OF 06_SECURITY.md

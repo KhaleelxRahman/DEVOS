@@ -20,8 +20,7 @@ It must NOT feel like:
 
 DEVOS v1.0.0 should feel like one unified developer command center.
 
-
-2. CORE UX PRINCIPLE
+1. CORE UX PRINCIPLE
 
 The PROJECT is the center of the DEVOS v1.0.0 experience.
 
@@ -39,8 +38,7 @@ Core experience:
 
 CREATE → CONNECT → CONTEXTUALIZE → BUILD → APPROVE → CONTINUE
 
-
-3. DESIGN PERSONALITY
+1. DESIGN PERSONALITY
 
 DEVOS v1.0.0 should communicate:
 
@@ -65,8 +63,7 @@ Avoid making DEVOS v1.0.0 look like:
 • Generic startup template
 • Social media application
 
-
-4. DESIGN PRINCIPLES
+1. DESIGN PRINCIPLES
 
 • Clarity
 • Information density
@@ -79,8 +76,7 @@ Avoid making DEVOS v1.0.0 look like:
 
 Every screen must have a clear purpose.
 
-
-5. VISUAL DIRECTION
+1. VISUAL DIRECTION
 
 DEVOS v1.0.0 should use a dark-first developer workspace.
 
@@ -104,8 +100,7 @@ Avoid:
 • Huge cards
 • Decorative clutter
 
-
-6. COLOR SYSTEM
+1. COLOR SYSTEM
 
 Use centralized design tokens.
 
@@ -133,8 +128,7 @@ Tokens:
 
 Do not hardcode random colors inside components.
 
-
-7. COLOR USAGE
+1. COLOR USAGE
 
 Background:
 Main application surface.
@@ -162,8 +156,7 @@ Informational messages.
 
 Never communicate important status using color alone.
 
-
-8. TYPOGRAPHY
+1. TYPOGRAPHY
 
 Use modern sans-serif typography for UI.
 
@@ -189,8 +182,7 @@ Display
 
 Avoid huge headings inside the workspace.
 
-
-9. SPACING
+1. SPACING
 
 Use a consistent spacing scale.
 
@@ -211,8 +203,7 @@ Recommended:
 
 Avoid arbitrary spacing.
 
-
-10. BORDER RADIUS
+ 1. BORDER RADIUS
 
 Use restrained radius.
 
@@ -233,8 +224,7 @@ Large containers:
 
 Use pills mainly for status badges and tags.
 
-
-11. SHADOWS
+ 1. SHADOWS
 
 Use shadows sparingly.
 
@@ -242,8 +232,7 @@ Prefer borders and surface contrast.
 
 Avoid large floating shadows everywhere.
 
-
-12. ICONOGRAPHY
+ 1. ICONOGRAPHY
 
 Use one consistent icon library.
 
@@ -256,8 +245,7 @@ Icons must:
 
 Do not use random emoji as primary UI icons.
 
-
-13. APPLICATION SHELL
+ 1. APPLICATION SHELL
 
 Main structure:
 
@@ -267,8 +255,7 @@ SIDEBAR + MAIN CONTENT
 
 The shell should remain consistent across the application.
 
-
-14. TOP BAR
+ 1. TOP BAR
 
 Include:
 
@@ -283,8 +270,7 @@ Example:
 
 DEVOS v1.0.0 | Project ▼ | Git Status | AI | Account
 
-
-15. SIDEBAR
+ 1. SIDEBAR
 
 MAIN:
 
@@ -303,8 +289,7 @@ SECONDARY:
 
 Do not add unnecessary navigation items.
 
-
-16. ACTIVE NAVIGATION
+ 1. ACTIVE NAVIGATION
 
 Clearly show the active item using:
 
@@ -315,8 +300,7 @@ Clearly show the active item using:
 
 Do not rely only on color.
 
-
-17. PROJECT SELECTOR
+ 1. PROJECT SELECTOR
 
 Show:
 
@@ -332,8 +316,7 @@ Actions:
 
 Changing projects must update project context.
 
-
-18. DASHBOARD
+ 1. DASHBOARD
 
 Dashboard should show:
 
@@ -347,8 +330,7 @@ Dashboard should show:
 
 Do not add meaningless analytics.
 
-
-19. QUICK ACTIONS
+ 1. QUICK ACTIONS
 
 Useful actions:
 
@@ -360,8 +342,7 @@ Useful actions:
 
 Every action must perform real functionality.
 
-
-20. PROJECTS PAGE
+ 1. PROJECTS PAGE
 
 Provide:
 
@@ -380,8 +361,7 @@ Display:
 • Repository status
 • Last updated
 
-
-21. PROJECT CREATION
+ 1. PROJECT CREATION
 
 Fields:
 
@@ -396,8 +376,7 @@ Create Project
 → Project Created
 → Open Workspace
 
-
-22. PROJECT DELETION
+ 1. PROJECT DELETION
 
 Deletion is destructive.
 
@@ -405,8 +384,7 @@ Require confirmation.
 
 Never silently delete a project.
 
-
-23. WORKSPACE
+ 1. WORKSPACE
 
 Workspace is the core DEVOS v1.0.0 interface.
 
@@ -422,8 +400,7 @@ TERMINAL
 +
 GIT
 
-
-24. WORKSPACE PRINCIPLE
+ 1. WORKSPACE PRINCIPLE
 
 Users should be able to:
 
@@ -436,8 +413,7 @@ Users should be able to:
 
 without unnecessary page switching.
 
-
-25. FILE EXPLORER
+ 1. FILE EXPLORER
 
 Support:
 
@@ -461,8 +437,7 @@ PROJECT
 ├── README.md
 └── package.json
 
-
-26. FILE SEARCH
+ 1. FILE SEARCH
 
 Support:
 
@@ -475,8 +450,7 @@ Support:
 Future:
 Content search and semantic search.
 
-
-27. CODE VIEWER
+ 1. CODE VIEWER
 
 MVP may use read-only code viewing.
 
@@ -492,8 +466,7 @@ Provide:
 
 Architecture should allow future editing.
 
-
-28. CODE EDITOR FUTURE
+ 1. CODE EDITOR FUTURE
 
 Future:
 
@@ -505,8 +478,7 @@ Future:
 
 Do not build full VS Code replacement in MVP.
 
-
-29. AI ASSISTANT
+ 1. AI ASSISTANT
 
 AI panel should provide:
 
@@ -519,8 +491,7 @@ AI panel should provide:
 • Clear conversation
 • Project actions
 
-
-30. AI MESSAGE DESIGN
+ 1. AI MESSAGE DESIGN
 
 User messages:
 Compact and visually distinct.
@@ -536,8 +507,7 @@ Support:
 
 Avoid huge message bubbles.
 
-
-31. AI CONTEXT INDICATOR
+ 1. AI CONTEXT INDICATOR
 
 Show what context is being used.
 
@@ -547,8 +517,7 @@ Context: 4 files • Git status • Current project
 
 Do not expose sensitive information.
 
-
-32. AI ACTIONS
+ 1. AI ACTIONS
 
 Possible actions:
 
@@ -560,8 +529,7 @@ Possible actions:
 
 Only show actions that actually work.
 
-
-33. AI LOADING
+ 1. AI LOADING
 
 Show:
 
@@ -570,8 +538,7 @@ Show:
 
 Do not fake AI processing.
 
-
-34. AI ERROR
+ 1. AI ERROR
 
 Example:
 
@@ -585,8 +552,7 @@ Actions:
 
 Do not expose unnecessary raw provider errors.
 
-
-35. TERMINAL
+ 1. TERMINAL
 
 Use:
 
@@ -602,8 +568,7 @@ $ npm run build
 
 Build completed successfully.
 
-
-36. TERMINAL STATES
+ 1. TERMINAL STATES
 
 Support:
 
@@ -614,8 +579,7 @@ Support:
 • Timeout
 • Cancelled
 
-
-37. GIT PANEL
+ 1. GIT PANEL
 
 Display:
 
@@ -636,8 +600,7 @@ M  src/App.tsx
 M  backend/main.py
 A  tests/test_auth.py
 
-
-38. GIT STATUS
+ 1. GIT STATUS
 
 Working tree clean:
 Success
@@ -650,8 +613,7 @@ Error
 
 Never rely only on color.
 
-
-39. DIFF VIEW
+ 1. DIFF VIEW
 
 Clearly distinguish:
 
@@ -661,8 +623,7 @@ Clearly distinguish:
 
 Keep diff readable in dark mode.
 
-
-40. ACTIVITY
+ 1. ACTIVITY
 
 Show useful activity:
 
@@ -675,8 +636,7 @@ Show useful activity:
 
 Avoid excessive activity noise.
 
-
-41. STATUS INDICATORS
+ 1. STATUS INDICATORS
 
 Possible:
 
@@ -687,8 +647,7 @@ Possible:
 
 Keep indicators subtle.
 
-
-42. BUTTON SYSTEM
+ 1. BUTTON SYSTEM
 
 Primary:
 Main action
@@ -709,8 +668,7 @@ Connect GitHub
 Cancel
 Delete Project
 
-
-43. BUTTON RULES
+ 1. BUTTON RULES
 
 Buttons need:
 
@@ -731,8 +689,7 @@ Prefer:
 "Connect Repository"
 "Run Command"
 
-
-44. INPUT SYSTEM
+ 1. INPUT SYSTEM
 
 Inputs should have:
 
@@ -745,8 +702,7 @@ Inputs should have:
 
 Never rely only on placeholder text.
 
-
-45. FORM VALIDATION
+ 1. FORM VALIDATION
 
 Validation should be:
 
@@ -763,8 +719,7 @@ Avoid:
 
 "400 Bad Request"
 
-
-46. MODALS
+ 1. MODALS
 
 Use for:
 
@@ -780,8 +735,7 @@ Primary Action
 Secondary Action
 Close
 
-
-47. TOASTS
+ 1. TOASTS
 
 Use for short feedback.
 
@@ -794,8 +748,7 @@ Examples:
 
 Critical information should not exist only in a toast.
 
-
-48. LOADING STATES
+ 1. LOADING STATES
 
 Every async operation needs a loading state.
 
@@ -806,15 +759,13 @@ Processing...
 Refreshing...
 Running...
 
-
-49. SKELETON STATES
+ 1. SKELETON STATES
 
 Use skeletons where the layout is known.
 
 Avoid excessive animation.
 
-
-50. EMPTY STATES
+ 1. EMPTY STATES
 
 Every empty state should explain:
 
@@ -830,8 +781,7 @@ Example:
 
 [Create Project]
 
-
-51. ERROR STATES
+ 1. ERROR STATES
 
 Explain:
 
@@ -847,8 +797,7 @@ Example:
 
 [Retry]
 
-
-52. RESPONSIVE DESIGN
+ 1. RESPONSIVE DESIGN
 
 Support:
 
@@ -867,8 +816,7 @@ Mobile should prioritize:
 • Activity
 • Project information
 
-
-53. RESPONSIVE BEHAVIOR
+ 1. RESPONSIVE BEHAVIOR
 
 Large screens:
 
@@ -891,8 +839,7 @@ Small screens:
 • Simplified file navigation
 • AI overlay/access
 
-
-54. PANEL RESIZING
+ 1. PANEL RESIZING
 
 Prioritize:
 
@@ -903,8 +850,7 @@ Prioritize:
 
 Do not allow panels to become unusably small.
 
-
-55. KEYBOARD UX
+ 1. KEYBOARD UX
 
 Important actions should support keyboard interaction.
 
@@ -927,8 +873,7 @@ Close modal/panel
 
 Shortcuts may be adjusted during implementation.
 
-
-56. COMMAND PALETTE
+ 1. COMMAND PALETTE
 
 Potential commands:
 
@@ -941,8 +886,7 @@ Potential commands:
 
 It should complement navigation, not replace it.
 
-
-57. ACCESSIBILITY
+ 1. ACCESSIBILITY
 
 Requirements:
 
@@ -955,13 +899,11 @@ Requirements:
 • No color-only status
 • Accessible modal behavior
 
-
-58. FOCUS STATES
+ 1. FOCUS STATES
 
 Every interactive element must have a visible keyboard focus state.
 
-
-59. MOTION
+ 1. MOTION
 
 Use subtle motion only when useful.
 
@@ -979,8 +921,7 @@ Avoid:
 • Decorative animations
 • Distracting backgrounds
 
-
-60. DATA RESPONSIVENESS
+ 1. DATA RESPONSIVENESS
 
 Tables/lists must remain usable on smaller screens.
 
@@ -992,8 +933,7 @@ Use:
 
 Do not force every desktop field onto mobile.
 
-
-61. DESIGN SYSTEM
+ 1. DESIGN SYSTEM
 
 Centralize:
 
@@ -1014,8 +954,7 @@ styles/
 ├── components
 └── layouts
 
-
-62. COMPONENT STATES
+ 1. COMPONENT STATES
 
 Every reusable component should define:
 
@@ -1028,8 +967,7 @@ Every reusable component should define:
 • Error
 • Success
 
-
-63. UI CONSISTENCY
+ 1. UI CONSISTENCY
 
 Similar actions must look and behave similarly.
 
@@ -1037,8 +975,7 @@ Example:
 
 All primary actions use the same primary button system.
 
-
-64. INFORMATION HIERARCHY
+ 1. INFORMATION HIERARCHY
 
 Every screen:
 
@@ -1050,8 +987,7 @@ Every screen:
 
 Do not give every element equal visual weight.
 
-
-65. DASHBOARD FLOW
+ 1. DASHBOARD FLOW
 
 Existing user:
 
@@ -1069,8 +1005,7 @@ Login
 → Create Project
 → Workspace
 
-
-66. WORKSPACE FLOW
+ 1. WORKSPACE FLOW
 
 Project selected
 → Workspace opens
@@ -1082,8 +1017,7 @@ Project selected
 → Git status updates
 → User reviews changes
 
-
-67. AI FLOW
+ 1. AI FLOW
 
 Open AI
 → Identify active project
@@ -1094,8 +1028,7 @@ Open AI
 → Optional real action
 → Project state updates
 
-
-68. GIT FLOW
+ 1. GIT FLOW
 
 Open Git
 → Fetch status
@@ -1106,8 +1039,7 @@ Open Git
 → Commit
 → Success/Error
 
-
-69. TERMINAL FLOW
+ 1. TERMINAL FLOW
 
 Open Terminal
 → Project working directory
@@ -1117,8 +1049,7 @@ Open Terminal
 → Status
 → History
 
-
-70. PROJECT CONTEXT UX
+ 1. PROJECT CONTEXT UX
 
 Show compact context information.
 
@@ -1136,8 +1067,7 @@ Files:
 Git:
 main • 3 changes
 
-
-71. TRUST & TRANSPARENCY
+ 1. TRUST & TRANSPARENCY
 
 Clearly communicate whether an operation is:
 
@@ -1149,8 +1079,7 @@ Clearly communicate whether an operation is:
 
 AI-generated changes must not appear as manually written code.
 
-
-72. DESTRUCTIVE ACTIONS
+ 1. DESTRUCTIVE ACTIONS
 
 Examples:
 
@@ -1161,8 +1090,7 @@ Examples:
 
 Require confirmation where appropriate.
 
-
-73. SUCCESS FEEDBACK
+ 1. SUCCESS FEEDBACK
 
 After successful operations:
 
@@ -1172,8 +1100,7 @@ After successful operations:
 
 Do not require manual page refresh.
 
-
-74. FAILURE RECOVERY
+ 1. FAILURE RECOVERY
 
 When something fails:
 
@@ -1183,8 +1110,7 @@ When something fails:
 4. Avoid losing project state.
 5. Log diagnostic information appropriately.
 
-
-75. PERFORMANCE UX
+6. PERFORMANCE UX
 
 Prioritize:
 
@@ -1197,8 +1123,7 @@ Prioritize:
 
 One slow panel must not freeze the entire application.
 
-
-76. NETWORK STATES
+ 1. NETWORK STATES
 
 Handle:
 
@@ -1210,8 +1135,7 @@ Handle:
 
 One unavailable service should not destroy the entire workspace.
 
-
-77. DEGRADED UX
+ 1. DEGRADED UX
 
 If AI is unavailable, users should still be able to:
 
@@ -1220,8 +1144,7 @@ If AI is unavailable, users should still be able to:
 • Inspect Git where available
 • Use other working features
 
-
-78. DESIGN ANTI-PATTERNS
+ 1. DESIGN ANTI-PATTERNS
 
 Never use:
 
@@ -1240,8 +1163,7 @@ Never use:
 • Fake Git data
 • Fake terminal output
 
-
-79. NO FAKE FUNCTIONALITY
+ 1. NO FAKE FUNCTIONALITY
 
 UI must reflect actual capabilities.
 
@@ -1257,8 +1179,7 @@ or an appropriate empty state.
 
 Never create buttons that do nothing.
 
-
-80. UI PERFORMANCE RULE
+ 1. UI PERFORMANCE RULE
 
 Avoid:
 
@@ -1268,8 +1189,7 @@ Avoid:
 • Expensive repeated rendering
 • Unnecessary global state
 
-
-81. MOBILE PRIORITY
+ 1. MOBILE PRIORITY
 
 Mobile priorities:
 
@@ -1281,8 +1201,7 @@ Mobile priorities:
 
 Full developer workspace remains desktop-first.
 
-
-82. DESKTOP PRIORITY
+ 1. DESKTOP PRIORITY
 
 Desktop priorities:
 
@@ -1293,8 +1212,7 @@ Desktop priorities:
 5. Terminal
 6. Git
 
-
-83. UI SECURITY
+7. UI SECURITY
 
 Never display:
 
@@ -1305,8 +1223,7 @@ Never display:
 
 Sensitive values must be masked or omitted.
 
-
-84. FORM SECURITY UX
+ 1. FORM SECURITY UX
 
 Authentication forms should:
 
@@ -1315,8 +1232,7 @@ Authentication forms should:
 • Prevent accidental duplicate submission
 • Avoid unnecessarily revealing sensitive authentication details
 
-
-85. AI SECURITY UX
+ 1. AI SECURITY UX
 
 Do not encourage users to paste secrets.
 
@@ -1324,8 +1240,7 @@ Where appropriate:
 
 "Do not include API keys or passwords in your message."
 
-
-86. GITHUB SECURITY UX
+ 1. GITHUB SECURITY UX
 
 When connecting GitHub:
 
@@ -1334,8 +1249,7 @@ When connecting GitHub:
 • Show connection status
 • Provide disconnect capability
 
-
-87. TERMINAL SECURITY UX
+ 1. TERMINAL SECURITY UX
 
 For restricted commands:
 
@@ -1343,8 +1257,7 @@ For restricted commands:
 
 Do not expose internal security implementation details.
 
-
-88. UI TESTING
+ 1. UI TESTING
 
 Test:
 
@@ -1362,8 +1275,7 @@ Test:
 • Empty states
 • Responsive behavior
 
-
-89. BROWSER COMPATIBILITY
+ 1. BROWSER COMPATIBILITY
 
 Support modern browsers:
 
@@ -1374,8 +1286,7 @@ Support modern browsers:
 
 Do not optimize for obsolete browsers unless required.
 
-
-90. UI DEFINITION OF DONE
+ 1. UI DEFINITION OF DONE
 
 UI/UX is complete when:
 
@@ -1394,8 +1305,7 @@ UI/UX is complete when:
 ✓ Accessibility fundamentals implemented
 ✓ No major visual inconsistencies
 
-
-91. FINAL UI/UX PRINCIPLE
+ 1. FINAL UI/UX PRINCIPLE
 
 DEVOS v1.0.0 should feel like:
 
@@ -1415,8 +1325,7 @@ CONTROL
 +
 INTELLIGENCE
 
-
-92. FINAL PRODUCT EXPERIENCE
+ 1. FINAL PRODUCT EXPERIENCE
 
 LOGIN
 ↓
@@ -1436,8 +1345,7 @@ COMMIT
 ↓
 CONTINUE
 
-
-93. DESIGN SYSTEM FINAL RULE
+ 1. DESIGN SYSTEM FINAL RULE
 
 Every visual decision should answer:
 
@@ -1445,8 +1353,7 @@ Every visual decision should answer:
 
 If not, remove it.
 
-
-94. FINAL UI/UX STATEMENT
+ 1. FINAL UI/UX STATEMENT
 
 DEVOS v1.0.0 must prioritize:
 
@@ -1465,6 +1372,5 @@ The project should remain the center of the experience.
 The AI should enhance the workflow rather than dominate the interface.
 
 The result should feel like one cohesive SaaS product.
-
 
 END OF 04_UI_UX.md

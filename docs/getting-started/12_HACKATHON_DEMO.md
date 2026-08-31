@@ -5,7 +5,6 @@ Product: DEVOS v1.0.0
 Version: 1.0
 Status: Hackathon Ready
 
-
 1. PURPOSE
 
 This document defines the hackathon demonstration strategy for DEVOS v1.0.0.
@@ -16,15 +15,13 @@ The objective is to prove the core product idea:
 
 A project-aware AI developer workspace can reduce context switching and help developers move from idea to working code faster.
 
-
-2. CORE HACKATHON MESSAGE
+1. CORE HACKATHON MESSAGE
 
 DEVOS v1.0.0 is not just another AI chatbot.
 
 DEVOS v1.0.0 understands the developer's project.
 
-
-3. CORE PRODUCT LOOP
+1. CORE PRODUCT LOOP
 
 CREATE
 
@@ -48,8 +45,7 @@ APPROVE
 
 CONTINUE
 
-
-4. DEMO STORY
+1. DEMO STORY
 
 Start with the problem.
 
@@ -67,8 +63,7 @@ This causes:
 • Repeated prompting
 • Fragmented workflow
 
-
-5. DEVOS v1.0.0 SOLUTION
+1. DEVOS v1.0.0 SOLUTION
 
 DEVOS v1.0.0 brings:
 
@@ -86,8 +81,7 @@ Context
 
 into one workspace.
 
-
-6. DEMO PROJECT
+1. DEMO PROJECT
 
 Prepare one stable project before the hackathon.
 
@@ -100,38 +94,31 @@ The project should contain:
 • Clear architecture
 • One intentionally understandable issue/task
 
-
-7. DEMO FLOW
+1. DEMO FLOW
 
 STEP 1
 
 Open DEVOS v1.0.0.
 
-
 STEP 2
 
 Login.
-
 
 STEP 3
 
 Open project.
 
-
 STEP 4
 
 Show workspace.
-
 
 STEP 5
 
 Show file explorer.
 
-
 STEP 6
 
 Open a relevant code file.
-
 
 STEP 7
 
@@ -139,11 +126,9 @@ Ask AI:
 
 "Explain how this feature works."
 
-
 STEP 8
 
 Show that AI uses project context.
-
 
 STEP 9
 
@@ -151,43 +136,35 @@ Ask:
 
 "Find a potential issue in this implementation."
 
-
 STEP 10
 
 Ask AI for a fix.
-
 
 STEP 11
 
 Use terminal.
 
-
 STEP 12
 
 Run a test/build command.
-
 
 STEP 13
 
 Show Git status.
 
-
 STEP 14
 
 Show changed files/diff.
-
 
 STEP 15
 
 Review changes.
 
-
 STEP 16
 
 Commit.
 
-
-8. DEMO TIME
+1. DEMO TIME
 
 Target:
 
@@ -195,8 +172,7 @@ Target:
 
 Do not spend the entire presentation navigating.
 
-
-9. DEMO STRUCTURE
+1. DEMO STRUCTURE
 
 30 seconds:
 
@@ -218,8 +194,7 @@ AI/context differentiation
 
 Future vision
 
-
-10. OPENING PITCH
+ 1. OPENING PITCH
 
 "Modern developers don't have a coding problem.
 
@@ -229,8 +204,7 @@ Their code is in one place, GitHub in another, terminal somewhere else, and AI h
 
 DEVOS v1.0.0 brings those workflows into one project-aware developer command center."
 
-
-11. DIFFERENTIATION
+ 1. DIFFERENTIATION
 
 Traditional AI chatbot:
 
@@ -250,8 +224,7 @@ AI
 →
 Development action
 
-
-12. KEY FEATURE TO EMPHASIZE
+ 1. KEY FEATURE TO EMPHASIZE
 
 Project-aware AI context.
 
@@ -260,30 +233,32 @@ Show:
 Current project
 
 +
+
 File tree
 
 +
+
 Current file
 
 +
+
 Relevant code
 
 +
+
 Git context
 
 →
 
 AI response
 
-
-13. JUDGE TAKEAWAY
+ 1. JUDGE TAKEAWAY
 
 Judges should remember:
 
 "DEVOS v1.0.0 understands the project, not just the prompt."
 
-
-14. VISUAL DEMO PRIORITY
+ 1. VISUAL DEMO PRIORITY
 
 Show visually:
 
@@ -293,8 +268,7 @@ Show visually:
 4. Terminal
 5. Git
 
-
-15. DO NOT DEMONSTRATE
+6. DO NOT DEMONSTRATE
 
 Avoid spending time on:
 
@@ -305,8 +279,7 @@ Avoid spending time on:
 • Complex configuration
 • Future features that do not work
 
-
-16. NO FAKE DEMO
+ 1. NO FAKE DEMO
 
 Never fake:
 
@@ -316,8 +289,7 @@ Never fake:
 • Repository data
 • Authentication
 
-
-17. DEMO DATA
+ 1. DEMO DATA
 
 Use prepared but real data.
 
@@ -328,8 +300,7 @@ The demo project should be:
 • Stable
 • Easy to understand
 
-
-18. DEMO FAILURE PLAN
+ 1. DEMO FAILURE PLAN
 
 Prepare fallback paths.
 
@@ -337,23 +308,19 @@ If AI fails:
 
 Show project context architecture and retry.
 
-
 If GitHub fails:
 
 Use local Git repository.
-
 
 If internet fails:
 
 Use local DEVOS v1.0.0 instance.
 
-
 If backend fails:
 
 Restart using prepared local environment.
 
-
-19. BACKUP
+ 1. BACKUP
 
 Maintain:
 
@@ -363,8 +330,7 @@ Maintain:
 • Environment backup
 • Demo project backup
 
-
-20. INTERNET PLAN
+ 1. INTERNET PLAN
 
 Do not depend entirely on venue internet.
 
@@ -374,8 +340,7 @@ Test:
 • Local development
 • Production URL
 
-
-21. PRESENTATION SLIDES
+ 1. PRESENTATION SLIDES
 
 Recommended:
 
@@ -409,8 +374,7 @@ Future roadmap
 Slide 10:
 Conclusion
 
-
-22. SLIDE 1
+ 1. SLIDE 1
 
 DEVOS v1.0.0
 
@@ -420,8 +384,7 @@ Tagline:
 
 "Your project. Your tools. One intelligent workspace."
 
-
-23. SLIDE 2 — PROBLEM
+ 1. SLIDE 2 — PROBLEM
 
 Modern development is fragmented.
 
@@ -439,13 +402,11 @@ APIs
 
 Too much context switching.
 
-
-24. SLIDE 3 — SOLUTION
+ 1. SLIDE 3 — SOLUTION
 
 DEVOS v1.0.0 combines essential developer workflows into one project-aware environment.
 
-
-25. SLIDE 4 — WORKFLOW
+ 1. SLIDE 4 — WORKFLOW
 
 CREATE
 → CONNECT
@@ -454,8 +415,7 @@ CREATE
 → APPROVE
 → CONTINUE
 
-
-26. SLIDE 5 — ARCHITECTURE
+ 1. SLIDE 5 — ARCHITECTURE
 
 Frontend:
 
@@ -481,8 +441,7 @@ Execution:
 
 Secure terminal foundation
 
-
-27. SLIDE 6 — AI CONTEXT
+ 1. SLIDE 6 — AI CONTEXT
 
 User question
 
@@ -510,15 +469,13 @@ AI
 
 Project-aware answer
 
-
-28. SLIDE 7 — LIVE DEMO
+ 1. SLIDE 7 — LIVE DEMO
 
 Show actual working workflow.
 
 Do not show screenshots if a live working demonstration is available.
 
-
-29. SLIDE 8 — IMPACT
+ 1. SLIDE 8 — IMPACT
 
 DEVOS v1.0.0 aims to reduce:
 
@@ -527,8 +484,7 @@ DEVOS v1.0.0 aims to reduce:
 • Tool fragmentation
 • Debugging friction
 
-
-30. SLIDE 9 — FUTURE
+ 1. SLIDE 9 — FUTURE
 
 Phase 2:
 
@@ -546,13 +502,11 @@ Phase 5:
 
 Enterprise developer ecosystem
 
-
-31. SLIDE 10 — CONCLUSION
+ 1. SLIDE 10 — CONCLUSION
 
 "DEVOS v1.0.0 turns the project itself into the AI's context."
 
-
-32. JUDGE QUESTIONS
+ 1. JUDGE QUESTIONS
 
 Be prepared to answer:
 
@@ -572,44 +526,37 @@ How is terminal execution secured?
 
 What makes DEVOS v1.0.0 scalable?
 
-
-33. ANSWER — WHY DEVOS v1.0.0?
+ 1. ANSWER — WHY DEVOS v1.0.0?
 
 "DEVOS v1.0.0 is not trying to replace every developer tool.
 
 It creates a project-aware command center that connects the essential workflow and gives AI the context required to help effectively."
 
-
-34. ANSWER — WHY NOT VS CODE?
+ 1. ANSWER — WHY NOT VS CODE?
 
 "VS Code is primarily an editor.
 
 DEVOS v1.0.0 focuses on the broader developer workflow: project context, AI, Git, terminal, files and development operations in one focused environment."
 
-
-35. ANSWER — WHY NOT AI CHATBOT?
+ 1. ANSWER — WHY NOT AI CHATBOT?
 
 "A normal chatbot receives a prompt.
 
 DEVOS v1.0.0 can build context from the active project, relevant files, Git state and recent development activity."
 
-
-36. ANSWER — AI CONTEXT
+ 1. ANSWER — AI CONTEXT
 
 "DEVOS v1.0.0 first identifies the active project and selects relevant context instead of blindly sending the entire repository."
 
-
-37. ANSWER — SECURITY
+ 1. ANSWER — SECURITY
 
 "Secrets are filtered from AI context, project ownership is enforced at the backend, and terminal operations are restricted."
 
-
-38. ANSWER — SCALABILITY
+ 1. ANSWER — SCALABILITY
 
 "The architecture separates frontend, backend services, AI provider, context engine and integrations, allowing advanced capabilities to be added without rebuilding the entire system."
 
-
-39. HACKATHON CHECKLIST
+ 1. HACKATHON CHECKLIST
 
 Before leaving for venue:
 
@@ -627,8 +574,7 @@ Before leaving for venue:
 ✓ Environment variables
 ✓ API provider working
 
-
-40. DEMO CHECKLIST
+ 1. DEMO CHECKLIST
 
 ✓ Login
 ✓ Project
@@ -640,13 +586,11 @@ Before leaving for venue:
 ✓ Git
 ✓ Commit
 
-
-41. FINAL PRODUCT CHECK
+ 1. FINAL PRODUCT CHECK
 
 Every demonstrated feature must actually work.
 
-
-42. GITHUB REPOSITORY
+ 1. GITHUB REPOSITORY
 
 Repository should contain:
 
@@ -657,8 +601,7 @@ Repository should contain:
 • Architecture information
 • Screenshots where useful
 
-
-43. README PRIORITY
+ 1. README PRIORITY
 
 README should clearly explain:
 
@@ -671,8 +614,7 @@ Setup
 Demo
 Future roadmap
 
-
-44. VIDEO
+ 1. VIDEO
 
 If a submission video is required:
 
@@ -690,15 +632,13 @@ AI context
 →
 Outcome
 
-
-45. VIDEO PRINCIPLE
+ 1. VIDEO PRINCIPLE
 
 Do not spend most of the video talking.
 
 Show the product working.
 
-
-46. HACKATHON BUILD PRIORITY
+ 1. HACKATHON BUILD PRIORITY
 
 P0:
 
@@ -720,8 +660,7 @@ P4:
 
 Advanced features
 
-
-47. TIME MANAGEMENT
+ 1. TIME MANAGEMENT
 
 If development time becomes limited:
 
@@ -735,13 +674,11 @@ Instead:
 • Improve presentation
 • Improve README
 
-
-48. FINAL DAY RULE
+ 1. FINAL DAY RULE
 
 Do not perform risky architectural rewrites immediately before submission.
 
-
-49. DEMO FREEZE
+ 1. DEMO FREEZE
 
 Before the final demo:
 
@@ -749,8 +686,7 @@ Create a stable version.
 
 Only fix critical issues afterward.
 
-
-50. FINAL MESSAGE
+ 1. FINAL MESSAGE
 
 DEVOS v1.0.0 should be presented as:
 
@@ -768,8 +704,7 @@ Not:
 
 A collection of random developer tools.
 
-
-51. FINAL HACKATHON PRINCIPLE
+ 1. FINAL HACKATHON PRINCIPLE
 
 SHOW THE PROBLEM.
 
@@ -780,6 +715,5 @@ SHOW THE WORKING PRODUCT.
 SHOW THE DIFFERENTIATION.
 
 SHOW THE FUTURE.
-
 
 END OF 12_HACKATHON_DEMO.md

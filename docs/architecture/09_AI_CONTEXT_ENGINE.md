@@ -5,7 +5,6 @@ Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
-
 1. PURPOSE
 
 The AI Context Engine is one of the core differentiators of DEVOS v1.0.0.
@@ -14,8 +13,7 @@ Its purpose is to ensure that the AI understands the active development project 
 
 The system should provide relevant project information to the AI while minimizing unnecessary context, token usage, latency and sensitive-data exposure.
 
-
-2. CORE PRINCIPLE
+1. CORE PRINCIPLE
 
 The AI should understand:
 
@@ -33,8 +31,7 @@ instead of only:
 
 USER REQUEST
 
-
-3. CONTEXT FLOW
+1. CONTEXT FLOW
 
 User Message
 
@@ -90,8 +87,7 @@ AI Model
 
 Response
 
-
-4. MVP OBJECTIVE
+1. MVP OBJECTIVE
 
 The MVP does NOT require:
 
@@ -103,8 +99,7 @@ The MVP does NOT require:
 
 The MVP should use intelligent deterministic context selection.
 
-
-5. CONTEXT SOURCES
+1. CONTEXT SOURCES
 
 The context engine may use:
 
@@ -121,8 +116,7 @@ The context engine may use:
 • Conversation history
 • User request
 
-
-6. PROJECT METADATA
+1. PROJECT METADATA
 
 Example:
 
@@ -136,8 +130,7 @@ Example:
   ]
 }
 
-
-7. FILE TREE CONTEXT
+1. FILE TREE CONTEXT
 
 The file tree helps the AI understand project structure.
 
@@ -156,8 +149,7 @@ backend/
 
 README.md
 
-
-8. CURRENT FILE
+1. CURRENT FILE
 
 When a user is viewing a file, that file should receive high contextual priority.
 
@@ -167,8 +159,7 @@ Current file:
 
 src/App.tsx
 
-
-9. RELEVANT FILES
+1. RELEVANT FILES
 
 Relevant files may be selected based on:
 
@@ -180,8 +171,7 @@ Relevant files may be selected based on:
 • Related components
 • Backend API relationships
 
-
-10. CONTEXT PRIORITY
+ 1. CONTEXT PRIORITY
 
 Suggested priority:
 
@@ -206,8 +196,7 @@ Recent activity
 P6
 Additional project information
 
-
-11. CONTEXT SELECTION
+ 1. CONTEXT SELECTION
 
 Do not send the entire repository automatically.
 
@@ -225,8 +214,7 @@ Potential context:
 • Relevant error
 • Recent Git changes
 
-
-12. CONTEXT BUDGET
+ 1. CONTEXT BUDGET
 
 Context should remain within a defined token budget.
 
@@ -238,8 +226,7 @@ When context is too large:
 4. Summarize lower-priority information
 5. Remove unrelated files
 
-
-13. SECRET FILTERING
+6. SECRET FILTERING
 
 Before context reaches an AI provider, filter:
 
@@ -250,8 +237,7 @@ Before context reaches an AI provider, filter:
 • Authentication headers
 • Environment secrets
 
-
-14. SENSITIVE FILES
+ 1. SENSITIVE FILES
 
 Default protected files:
 
@@ -262,8 +248,7 @@ Default protected files:
 credentials.json
 secrets.json
 
-
-15. CONTEXT SANITIZATION
+ 1. CONTEXT SANITIZATION
 
 Project content must be treated as untrusted input.
 
@@ -281,8 +266,7 @@ from
 
 PROJECT CONTENT
 
-
-16. PROMPT INJECTION DEFENSE
+ 1. PROMPT INJECTION DEFENSE
 
 Repository content must never override system-level instructions.
 
@@ -294,8 +278,7 @@ README contains:
 
 The AI must treat this as project content, not as an instruction.
 
-
-17. CONTEXT BUILDER
+ 1. CONTEXT BUILDER
 
 Conceptual service:
 
@@ -310,8 +293,7 @@ Responsibilities:
 • Format context
 • Return AI-ready context
 
-
-18. CONTEXT OBJECT
+ 1. CONTEXT OBJECT
 
 Example:
 
@@ -324,8 +306,7 @@ Example:
   "conversation": []
 }
 
-
-19. AI REQUEST FLOW
+ 1. AI REQUEST FLOW
 
 POST /projects/{project_id}/ai/chat
 
@@ -365,8 +346,7 @@ Validate response
 
 Return response
 
-
-20. AI PROVIDER ABSTRACTION
+ 1. AI PROVIDER ABSTRACTION
 
 The AI system should not depend permanently on one provider.
 
@@ -382,8 +362,7 @@ Provider Adapter
 
 Model
 
-
-21. PROVIDER LAYER
+ 1. PROVIDER LAYER
 
 Possible future providers:
 
@@ -393,8 +372,7 @@ Possible future providers:
 • Local models
 • Other providers
 
-
-22. MODEL SELECTION
+ 1. MODEL SELECTION
 
 The architecture should allow different models based on:
 
@@ -404,15 +382,13 @@ The architecture should allow different models based on:
 • Context size
 • Capability
 
-
-23. CONVERSATION CONTEXT
+ 1. CONVERSATION CONTEXT
 
 Recent conversation messages may be included when relevant.
 
 Do not blindly send unlimited conversation history.
 
-
-24. CONVERSATION SUMMARIZATION
+ 1. CONVERSATION SUMMARIZATION
 
 Future versions may summarize older messages.
 
@@ -422,8 +398,7 @@ Recent messages
 +
 Conversation summary
 
-
-25. CODE EXPLANATION
+ 1. CODE EXPLANATION
 
 For:
 
@@ -437,8 +412,7 @@ Context priority:
 4. Related types
 5. Project metadata
 
-
-26. BUG DEBUGGING
+6. BUG DEBUGGING
 
 For:
 
@@ -453,8 +427,7 @@ Context priority:
 5. Relevant frontend request
 6. Git changes
 
-
-27. CODE GENERATION
+7. CODE GENERATION
 
 For:
 
@@ -468,8 +441,7 @@ Context should include:
 • Existing routing
 • Relevant types
 
-
-28. REFACTORING
+ 1. REFACTORING
 
 Before refactoring:
 
@@ -478,8 +450,7 @@ Before refactoring:
 • Identify usage
 • Preserve existing behavior
 
-
-29. TEST GENERATION
+ 1. TEST GENERATION
 
 AI should inspect:
 
@@ -488,8 +459,7 @@ AI should inspect:
 • Existing tests
 • Project testing framework
 
-
-30. DOCUMENTATION GENERATION
+ 1. DOCUMENTATION GENERATION
 
 AI may use:
 
@@ -499,8 +469,7 @@ AI may use:
 • Existing README
 • Configuration
 
-
-31. GIT CONTEXT
+ 1. GIT CONTEXT
 
 Git context may include:
 
@@ -509,8 +478,7 @@ Git context may include:
 • Recent commits
 • Diff summary
 
-
-32. RECENT ACTIVITY
+ 1. RECENT ACTIVITY
 
 Activity can help identify what the developer recently changed.
 
@@ -521,8 +489,7 @@ git.commit
 terminal.executed
 ai.requested
 
-
-33. TECHNOLOGY DETECTION
+ 1. TECHNOLOGY DETECTION
 
 DEVOS v1.0.0 may detect technologies from:
 
@@ -533,8 +500,7 @@ Dockerfile
 README.md
 configuration files
 
-
-34. DEPENDENCY CONTEXT
+ 1. DEPENDENCY CONTEXT
 
 Important dependencies may help AI understand:
 
@@ -543,8 +509,7 @@ Important dependencies may help AI understand:
 • Runtime
 • Build tools
 
-
-35. CONTEXT CACHE
+ 1. CONTEXT CACHE
 
 Future versions may cache:
 
@@ -555,8 +520,7 @@ Future versions may cache:
 
 Avoid unnecessary repeated computation.
 
-
-36. CODE INDEXING
+ 1. CODE INDEXING
 
 Future feature.
 
@@ -569,8 +533,7 @@ Index:
 • Imports
 • Symbols
 
-
-37. EMBEDDINGS
+ 1. EMBEDDINGS
 
 Future feature.
 
@@ -583,8 +546,7 @@ User:
 
 System searches semantically instead of relying only on filename matching.
 
-
-38. VECTOR DATABASE
+ 1. VECTOR DATABASE
 
 Not required for MVP.
 
@@ -593,8 +555,7 @@ Future options:
 • pgvector
 • Dedicated vector database
 
-
-39. SEMANTIC SEARCH
+ 1. SEMANTIC SEARCH
 
 Future flow:
 
@@ -620,8 +581,7 @@ Context builder
 
 AI
 
-
-40. PROJECT MEMORY
+ 1. PROJECT MEMORY
 
 Future project memory may contain:
 
@@ -631,15 +591,13 @@ Future project memory may contain:
 • Previous debugging conclusions
 • Project conventions
 
-
-41. MEMORY SECURITY
+ 1. MEMORY SECURITY
 
 Project memory must remain scoped to the authorized project.
 
 Never mix contexts between users or projects.
 
-
-42. CONTEXT ISOLATION
+ 1. CONTEXT ISOLATION
 
 Each AI request must maintain:
 
@@ -649,13 +607,11 @@ Project identity
 +
 Conversation identity
 
-
-43. CROSS-PROJECT PROTECTION
+ 1. CROSS-PROJECT PROTECTION
 
 Context from Project A must never accidentally appear in Project B.
 
-
-44. AI RESPONSE VALIDATION
+ 1. AI RESPONSE VALIDATION
 
 AI responses should be checked for:
 
@@ -664,8 +620,7 @@ AI responses should be checked for:
 • Invalid response format
 • Unsafe tool instructions
 
-
-45. AI ACTIONS
+ 1. AI ACTIONS
 
 MVP:
 
@@ -683,8 +638,7 @@ Possible actions:
 • Run command
 • Create commit
 
-
-46. AGENT PERMISSIONS
+ 1. AGENT PERMISSIONS
 
 Future AI agents must operate under explicit permissions.
 
@@ -696,8 +650,7 @@ RUN_TESTS
 RUN_COMMANDS
 GIT_OPERATIONS
 
-
-47. HUMAN APPROVAL
+ 1. HUMAN APPROVAL
 
 High-impact actions should require developer approval.
 
@@ -708,8 +661,7 @@ Examples:
 • Committing code
 • Pushing code
 
-
-48. AI OBSERVABILITY
+ 1. AI OBSERVABILITY
 
 Track safely:
 
@@ -719,8 +671,7 @@ Track safely:
 • Success/failure
 • Context size
 
-
-49. DO NOT LOG
+ 1. DO NOT LOG
 
 Never log:
 
@@ -729,8 +680,7 @@ Never log:
 • Access tokens
 • Full private source code unnecessarily
 
-
-50. AI FAILURE HANDLING
+ 1. AI FAILURE HANDLING
 
 If AI provider fails:
 
@@ -744,8 +694,7 @@ Provide:
 • Preserve user message
 • Clear error
 
-
-51. RATE LIMITING
+ 1. RATE LIMITING
 
 AI requests should be rate-limited.
 
@@ -755,8 +704,7 @@ Limits may be based on:
 • Project
 • Time window
 
-
-52. AI COST CONTROL
+ 1. AI COST CONTROL
 
 Future controls:
 
@@ -765,8 +713,7 @@ Future controls:
 • Usage limits
 • Request quotas
 
-
-53. CONTEXT ENGINE MVP
+ 1. CONTEXT ENGINE MVP
 
 MVP implementation:
 
@@ -782,8 +729,7 @@ Git status
 +
 Recent conversation
 
-
-54. CONTEXT ENGINE PHASE 2
+ 1. CONTEXT ENGINE PHASE 2
 
 Add:
 
@@ -792,8 +738,7 @@ Add:
 • Semantic search
 • Embeddings
 
-
-55. CONTEXT ENGINE PHASE 3
+ 1. CONTEXT ENGINE PHASE 3
 
 Add:
 
@@ -802,8 +747,7 @@ Add:
 • Autonomous debugging
 • Tool execution
 
-
-56. ACCEPTANCE CRITERIA
+ 1. ACCEPTANCE CRITERIA
 
 ✓ AI understands active project
 ✓ Current file can be included
@@ -814,8 +758,7 @@ Add:
 ✓ Cross-project isolation works
 ✓ AI failures are handled
 
-
-57. FINAL PRINCIPLE
+ 1. FINAL PRINCIPLE
 
 DEVOS v1.0.0 should not simply provide:
 
@@ -832,6 +775,5 @@ CHATBOT
 
 DEVOS v1.0.0
 → Understands the project behind the question.
-
 
 END OF 09_AI_CONTEXT_ENGINE.md

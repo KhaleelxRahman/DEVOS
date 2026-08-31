@@ -5,13 +5,11 @@ Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
-
 1. PURPOSE
 
 This document defines how DEVOS v1.0.0 moves from local development to production.
 
-
-2. DEPLOYMENT ARCHITECTURE
+1. DEPLOYMENT ARCHITECTURE
 
 Recommended:
 
@@ -32,8 +30,7 @@ Backend also connects to:
 • Project workspace
 • Terminal service
 
-
-3. DEVELOPMENT ENVIRONMENT
+1. DEVELOPMENT ENVIRONMENT
 
 Frontend:
 
@@ -47,8 +44,7 @@ Database:
 
 PostgreSQL
 
-
-4. LOCAL DEVELOPMENT
+1. LOCAL DEVELOPMENT
 
 Required:
 
@@ -61,15 +57,13 @@ Optional:
 
 • Docker
 
-
-5. ENVIRONMENT VARIABLES
+1. ENVIRONMENT VARIABLES
 
 Frontend should only contain public configuration.
 
 Backend contains private secrets.
 
-
-6. BACKEND VARIABLES
+1. BACKEND VARIABLES
 
 Examples:
 
@@ -79,8 +73,7 @@ AI_PROVIDER_KEY
 GITHUB_CLIENT_ID
 GITHUB_CLIENT_SECRET
 
-
-7. FRONTEND VARIABLES
+1. FRONTEND VARIABLES
 
 Only public configuration.
 
@@ -101,8 +94,7 @@ name is changed, update both values and the GitHub OAuth application's callback
 URL (`GITHUB_REDIRECT_URI`) accordingly. On Vercel, configure
 `VITE_API_BASE_URL` in the project environment before building.
 
-
-8. SECRET RULE
+1. SECRET RULE
 
 Never commit:
 
@@ -112,8 +104,7 @@ real API keys
 tokens
 passwords
 
-
-9. GITIGNORE
+1. GITIGNORE
 
 Ensure:
 
@@ -124,8 +115,7 @@ node_modules/
 dist/
 build/
 
-
-10. PRODUCTION FRONTEND
+ 1. PRODUCTION FRONTEND
 
 Production frontend should:
 
@@ -135,8 +125,7 @@ Production frontend should:
 • Avoid development debugging
 • Handle API failures
 
-
-11. PRODUCTION BACKEND
+ 1. PRODUCTION BACKEND
 
 Backend should:
 
@@ -147,8 +136,7 @@ Backend should:
 • Enable logging
 • Provide health check
 
-
-12. DATABASE DEPLOYMENT
+ 1. DATABASE DEPLOYMENT
 
 Use managed PostgreSQL where possible.
 
@@ -159,8 +147,7 @@ Requirements:
 • Encryption
 • Restricted access
 
-
-13. DATABASE MIGRATIONS
+ 1. DATABASE MIGRATIONS
 
 Before deployment:
 
@@ -169,20 +156,17 @@ Before deployment:
 3. Verify schema
 4. Start application
 
-
-14. CORS
+5. CORS
 
 Production CORS must allow only trusted frontend origins.
 
-
-15. HTTPS
+ 1. HTTPS
 
 Production must use HTTPS.
 
 Secure cookies should be enabled when cookie-based authentication is used.
 
-
-16. HEALTH CHECK
+ 1. HEALTH CHECK
 
 Endpoint:
 
@@ -196,8 +180,7 @@ Expected:
   "service": "DEVOS v1.0.0 API"
 }
 
-
-17. DEPLOYMENT ORDER
+ 1. DEPLOYMENT ORDER
 
 Recommended:
 
@@ -208,8 +191,7 @@ Recommended:
 5. Health check
 6. End-to-end verification
 
-
-18. BACKEND STARTUP
+7. BACKEND STARTUP
 
 Verify:
 
@@ -219,8 +201,7 @@ Verify:
 ✓ Routes available
 ✓ Health endpoint works
 
-
-19. FRONTEND STARTUP
+ 1. FRONTEND STARTUP
 
 Verify:
 
@@ -230,8 +211,7 @@ Verify:
 ✓ Dashboard
 ✓ Workspace
 
-
-20. DEPLOYMENT CHECKLIST
+ 1. DEPLOYMENT CHECKLIST
 
 Before production:
 
@@ -245,22 +225,19 @@ Before production:
 ✓ Health check works
 ✓ Authentication works
 
-
-21. AI PROVIDER
+ 1. AI PROVIDER
 
 Production AI integration must use backend-side credentials.
 
 Never expose provider API keys to frontend.
 
-
-22. GITHUB DEPLOYMENT
+ 1. GITHUB DEPLOYMENT
 
 GitHub credentials must remain server-side.
 
 OAuth callbacks must use production URLs.
 
-
-23. TERMINAL DEPLOYMENT
+ 1. TERMINAL DEPLOYMENT
 
 The terminal is a high-risk component.
 
@@ -272,15 +249,13 @@ Container
 or
 Sandboxed execution environment
 
-
-24. MVP TERMINAL
+ 1. MVP TERMINAL
 
 If secure isolation is unavailable:
 
 Limit terminal functionality rather than exposing unrestricted host execution.
 
-
-25. LOGGING
+ 1. LOGGING
 
 Production logs should contain:
 
@@ -290,8 +265,7 @@ Production logs should contain:
 • Duration
 • Safe errors
 
-
-26. DO NOT LOG
+ 1. DO NOT LOG
 
 Never log:
 
@@ -301,8 +275,7 @@ Never log:
 • Secrets
 • Private repository content unnecessarily
 
-
-27. MONITORING
+ 1. MONITORING
 
 Future:
 
@@ -312,8 +285,7 @@ Future:
 • AI monitoring
 • Terminal monitoring
 
-
-28. BACKUPS
+ 1. BACKUPS
 
 Database backups should be:
 
@@ -321,8 +293,7 @@ Database backups should be:
 • Encrypted
 • Tested
 
-
-29. ROLLBACK
+ 1. ROLLBACK
 
 Deployment should support rollback.
 
@@ -332,8 +303,7 @@ Previous application version
 +
 Database migration rollback strategy
 
-
-30. ZERO-DOWNTIME FUTURE
+ 1. ZERO-DOWNTIME FUTURE
 
 As DEVOS v1.0.0 grows:
 
@@ -342,8 +312,7 @@ As DEVOS v1.0.0 grows:
 • Load balancing
 • Multiple backend instances
 
-
-31. DOMAIN
+ 1. DOMAIN
 
 Production should use a professional domain.
 
@@ -351,8 +320,7 @@ Example:
 
 devos.example.com
 
-
-32. FRONTEND DEPLOYMENT
+ 1. FRONTEND DEPLOYMENT
 
 Recommended platforms may include:
 
@@ -361,8 +329,7 @@ Recommended platforms may include:
 • Cloudflare Pages
 • Other production hosting
 
-
-33. BACKEND DEPLOYMENT
+ 1. BACKEND DEPLOYMENT
 
 Possible:
 
@@ -372,8 +339,7 @@ Possible:
 • AWS
 • Other container/server platforms
 
-
-34. DATABASE HOSTING
+ 1. DATABASE HOSTING
 
 Possible:
 
@@ -383,8 +349,7 @@ Possible:
 • AWS RDS
 • Other managed PostgreSQL providers
 
-
-35. PLATFORM SELECTION
+ 1. PLATFORM SELECTION
 
 Do not choose hosting based only on popularity.
 
@@ -398,8 +363,7 @@ Evaluate:
 • Logs
 • Scaling
 
-
-36. CI/CD
+ 1. CI/CD
 
 Future deployment pipeline:
 
@@ -415,8 +379,7 @@ Deploy
 ↓
 Health check
 
-
-37. DEPLOYMENT BRANCH
+ 1. DEPLOYMENT BRANCH
 
 Recommended:
 
@@ -424,8 +387,7 @@ main
 
 Production deployment should come from a controlled branch.
 
-
-38. RELEASE TAGGING
+ 1. RELEASE TAGGING
 
 Future:
 
@@ -433,8 +395,7 @@ v1.0.0
 v1.1.0
 v2.0.0
 
-
-39. ENVIRONMENT SEPARATION
+ 1. ENVIRONMENT SEPARATION
 
 Development:
 
@@ -448,8 +409,7 @@ Production:
 
 Real users
 
-
-40. STAGING
+ 1. STAGING
 
 Before production release:
 
@@ -464,8 +424,7 @@ Test:
 • Git
 • Terminal
 
-
-41. PRODUCTION SECURITY
+ 1. PRODUCTION SECURITY
 
 Verify:
 
@@ -478,8 +437,7 @@ Verify:
 ✓ Secure terminal
 ✓ Secure GitHub tokens
 
-
-42. PERFORMANCE
+ 1. PERFORMANCE
 
 Production should optimize:
 
@@ -489,8 +447,7 @@ Production should optimize:
 • File loading
 • AI requests
 
-
-43. SCALING
+ 1. SCALING
 
 Future architecture may support:
 
@@ -504,8 +461,7 @@ Managed PostgreSQL
 +
 Queue workers
 
-
-44. BACKGROUND JOBS
+ 1. BACKGROUND JOBS
 
 Future jobs:
 
@@ -514,8 +470,7 @@ Future jobs:
 • Documentation generation
 • Repository synchronization
 
-
-45. DEPLOYMENT FAILURE
+ 1. DEPLOYMENT FAILURE
 
 If deployment fails:
 
@@ -525,8 +480,7 @@ If deployment fails:
 4. Verify database
 5. Roll back if necessary
 
-
-46. POST-DEPLOYMENT CHECK
+6. POST-DEPLOYMENT CHECK
 
 Immediately verify:
 
@@ -538,8 +492,7 @@ Immediately verify:
 ✓ Git
 ✓ Health
 
-
-47. HACKATHON DEPLOYMENT
+ 1. HACKATHON DEPLOYMENT
 
 Before venue/demo:
 
@@ -550,8 +503,7 @@ Before venue/demo:
 • Test demo project
 • Prepare local fallback
 
-
-48. HACKATHON FALLBACK
+ 1. HACKATHON FALLBACK
 
 If internet or deployment fails:
 
@@ -559,8 +511,7 @@ Maintain a local development version that demonstrates the core workflow.
 
 Do not rely exclusively on the live deployment.
 
-
-49. RELEASE DEFINITION
+ 1. RELEASE DEFINITION
 
 A release is ready when:
 
@@ -576,8 +527,7 @@ DEMO
 
 are verified.
 
-
-50. FINAL DEPLOYMENT PRINCIPLE
+ 1. FINAL DEPLOYMENT PRINCIPLE
 
 Deploy:
 
@@ -589,9 +539,7 @@ REPEATABLE
 →
 MONITORED
 
-
 END OF 11_DEPLOYMENT.md
-
 
 ---
 
@@ -603,7 +551,7 @@ pre-filled with invented credentials or URLs.
 ## A.1 Database (Supabase PostgreSQL)
 
 1. Create a Supabase project (supabase.com) — requires the user's account.
-2. From Project Settings → Database, copy the **connection string** and
+2. From Project Settings → Database, copy the __connection string__ and
    convert it to an async SQLAlchemy DSN:
    `postgresql+asyncpg://<user>:<password>@<host>:5432/postgres`
 3. Store it as `DATABASE_URL` in the backend host's environment/secret
@@ -630,7 +578,7 @@ pre-filled with invented credentials or URLs.
 
 ## A.3 Frontend (Vercel — `02-frontend/vercel.json` included)
 
-1. Import the repo in Vercel, set **Root Directory** to `02-frontend`.
+1. Import the repo in Vercel, set __Root Directory__ to `02-frontend`.
 2. The included `vercel.json` sets the Vite build, `dist` output, and an SPA
    rewrite to `/index.html` (leaving `/api`, `/robots.txt`, `/sitemap.xml`,
    `/favicon*`, `/assets` untouched).

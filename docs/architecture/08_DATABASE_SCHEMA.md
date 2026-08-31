@@ -7,7 +7,6 @@ Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
-
 1. PURPOSE
 
 This document defines the database architecture for DEVOS v1.0.0.
@@ -23,8 +22,7 @@ The database must store the minimum information required for:
 
 The schema must remain simple for the MVP while allowing future expansion.
 
-
-2. DATABASE TECHNOLOGY
+1. DATABASE TECHNOLOGY
 
 Preferred database:
 
@@ -39,8 +37,7 @@ Production:
 
 • Managed PostgreSQL recommended
 
-
-3. DATABASE PRINCIPLES
+1. DATABASE PRINCIPLES
 
 The database must be:
 
@@ -52,8 +49,7 @@ The database must be:
 • Migration-based
 • Indexed for common queries
 
-
-4. CORE ENTITIES
+1. CORE ENTITIES
 
 MVP entities:
 
@@ -74,13 +70,11 @@ Future entities may include:
 • Organization
 • AgentTask
 
-
-5. USER TABLE
+1. USER TABLE
 
 Table:
 
 users
-
 
 Fields:
 
@@ -94,13 +88,11 @@ Primary Key:
 
 YES
 
-
 name
 
 Type:
 
 VARCHAR
-
 
 email
 
@@ -112,7 +104,6 @@ Constraints:
 
 UNIQUE
 NOT NULL
-
 
 password_hash
 
@@ -128,13 +119,11 @@ Used when password authentication is implemented.
 
 Never store plaintext passwords.
 
-
 created_at
 
 Type:
 
 TIMESTAMP WITH TIME ZONE
-
 
 updated_at
 
@@ -142,8 +131,7 @@ Type:
 
 TIMESTAMP WITH TIME ZONE
 
-
-6. USER INDEXES
+1. USER INDEXES
 
 Recommended:
 
@@ -153,13 +141,11 @@ Index:
 
 created_at
 
-
-7. PROJECT TABLE
+1. PROJECT TABLE
 
 Table:
 
 projects
-
 
 Fields:
 
@@ -173,7 +159,6 @@ Primary Key:
 
 YES
 
-
 user_id
 
 Type:
@@ -183,7 +168,6 @@ UUID
 Foreign Key:
 
 users.id
-
 
 name
 
@@ -195,7 +179,6 @@ Required:
 
 YES
 
-
 description
 
 Type:
@@ -205,7 +188,6 @@ TEXT
 Nullable:
 
 YES
-
 
 technologies
 
@@ -221,7 +203,6 @@ Example:
   "PostgreSQL"
 ]
 
-
 repository_url
 
 Type:
@@ -231,7 +212,6 @@ TEXT
 Nullable:
 
 YES
-
 
 repository_provider
 
@@ -243,7 +223,6 @@ Example:
 
 github
 
-
 repository_id
 
 Type:
@@ -253,7 +232,6 @@ VARCHAR
 Nullable:
 
 YES
-
 
 default_branch
 
@@ -265,13 +243,11 @@ Nullable:
 
 YES
 
-
 created_at
 
 Type:
 
 TIMESTAMP WITH TIME ZONE
-
 
 updated_at
 
@@ -279,8 +255,7 @@ Type:
 
 TIMESTAMP WITH TIME ZONE
 
-
-8. PROJECT RELATIONSHIP
+1. PROJECT RELATIONSHIP
 
 User:
 
@@ -289,30 +264,26 @@ User:
 Many
 Projects
 
-
 A user can own multiple projects.
 
 A project belongs to exactly one user in the MVP.
 
-
-9. PROJECT OWNERSHIP
+1. PROJECT OWNERSHIP
 
 Every project query must verify:
 
 authenticated_user.id
 ==
-project.user_id
 
+project.user_id
 
 Never rely only on the project ID.
 
-
-10. CONVERSATION TABLE
+ 1. CONVERSATION TABLE
 
 Table:
 
 conversations
-
 
 Fields:
 
@@ -325,7 +296,6 @@ UUID
 Primary Key:
 
 YES
-
 
 project_id
 
@@ -337,7 +307,6 @@ Foreign Key:
 
 projects.id
 
-
 user_id
 
 Type:
@@ -348,13 +317,11 @@ Foreign Key:
 
 users.id
 
-
 title
 
 Type:
 
 VARCHAR
-
 
 created_at
 
@@ -362,15 +329,13 @@ Type:
 
 TIMESTAMP WITH TIME ZONE
 
-
 updated_at
 
 Type:
 
 TIMESTAMP WITH TIME ZONE
 
-
-11. CONVERSATION RELATIONSHIP
+ 1. CONVERSATION RELATIONSHIP
 
 Project:
 
@@ -379,7 +344,6 @@ Project:
 Many
 Conversations
 
-
 User:
 
 1
@@ -387,13 +351,11 @@ User:
 Many
 Conversations
 
-
-12. CONVERSATION MESSAGE TABLE
+ 1. CONVERSATION MESSAGE TABLE
 
 Table:
 
 conversation_messages
-
 
 Fields:
 
@@ -407,7 +369,6 @@ Primary Key:
 
 YES
 
-
 conversation_id
 
 Type:
@@ -417,7 +378,6 @@ UUID
 Foreign Key:
 
 conversations.id
-
 
 role
 
@@ -431,13 +391,11 @@ user
 assistant
 system
 
-
 content
 
 Type:
 
 TEXT
-
 
 created_at
 
@@ -445,23 +403,19 @@ Type:
 
 TIMESTAMP WITH TIME ZONE
 
-
-13. MESSAGE ORDER
+ 1. MESSAGE ORDER
 
 Messages should be retrieved using:
 
 created_at ASC
 
-
 For large conversations, pagination may be introduced later.
 
-
-14. ACTIVITY TABLE
+ 1. ACTIVITY TABLE
 
 Table:
 
 activities
-
 
 Fields:
 
@@ -475,7 +429,6 @@ Primary Key:
 
 YES
 
-
 user_id
 
 Type:
@@ -485,7 +438,6 @@ UUID
 Foreign Key:
 
 users.id
-
 
 project_id
 
@@ -501,13 +453,11 @@ Nullable:
 
 YES
 
-
 activity_type
 
 Type:
 
 VARCHAR
-
 
 metadata
 
@@ -515,15 +465,13 @@ Type:
 
 JSONB
 
-
 created_at
 
 Type:
 
 TIMESTAMP WITH TIME ZONE
 
-
-15. ACTIVITY TYPES
+ 1. ACTIVITY TYPES
 
 Possible values:
 
@@ -544,8 +492,7 @@ git.commit
 git.push
 git.pull
 
-
-16. ACTIVITY METADATA
+ 1. ACTIVITY METADATA
 
 Metadata must contain only safe information.
 
@@ -555,7 +502,6 @@ Example:
   "filename": "src/App.tsx"
 }
 
-
 Never store:
 
 • API keys
@@ -563,13 +509,11 @@ Never store:
 • Access tokens
 • Private secrets
 
-
-17. GITHUB CONNECTION TABLE
+ 1. GITHUB CONNECTION TABLE
 
 Table:
 
 github_connections
-
 
 Fields:
 
@@ -583,7 +527,6 @@ Primary Key:
 
 YES
 
-
 user_id
 
 Type:
@@ -594,20 +537,17 @@ Foreign Key:
 
 users.id
 
-
 github_user_id
 
 Type:
 
 VARCHAR
 
-
 github_username
 
 Type:
 
 VARCHAR
-
 
 access_token
 
@@ -619,7 +559,6 @@ Security:
 
 Encrypted at rest where possible.
 
-
 refresh_token
 
 Type:
@@ -629,7 +568,6 @@ TEXT
 Nullable:
 
 YES
-
 
 token_expires_at
 
@@ -641,13 +579,11 @@ Nullable:
 
 YES
 
-
 created_at
 
 Type:
 
 TIMESTAMP WITH TIME ZONE
-
 
 updated_at
 
@@ -655,8 +591,7 @@ Type:
 
 TIMESTAMP WITH TIME ZONE
 
-
-18. GITHUB TOKEN SECURITY
+ 1. GITHUB TOKEN SECURITY
 
 Tokens must:
 
@@ -666,13 +601,11 @@ Tokens must:
 • Be encrypted/protected where supported
 • Be deleted when integration is disconnected
 
-
-19. OPTIONAL REPOSITORY TABLE
+ 1. OPTIONAL REPOSITORY TABLE
 
 Future architecture may introduce:
 
 repositories
-
 
 Fields:
 
@@ -687,8 +620,7 @@ default_branch
 created_at
 updated_at
 
-
-20. WHY REPOSITORY CAN BE SEPARATE
+ 1. WHY REPOSITORY CAN BE SEPARATE
 
 A project may eventually connect to:
 
@@ -699,13 +631,11 @@ A project may eventually connect to:
 
 Keeping repository information separate makes multi-provider support easier.
 
-
-21. PROJECT CONTEXT TABLE
+ 1. PROJECT CONTEXT TABLE
 
 Future entity:
 
 project_context
-
 
 Possible fields:
 
@@ -717,8 +647,7 @@ metadata
 created_at
 updated_at
 
-
-22. CONTEXT TYPES
+ 1. CONTEXT TYPES
 
 Possible:
 
@@ -730,13 +659,11 @@ git_status
 dependency
 documentation
 
-
-23. AI USAGE TABLE
+ 1. AI USAGE TABLE
 
 Future entity:
 
 ai_usage
-
 
 Possible fields:
 
@@ -750,7 +677,6 @@ output_tokens
 latency_ms
 created_at
 
-
 This allows future:
 
 • Usage analytics
@@ -758,13 +684,11 @@ This allows future:
 • Rate limiting
 • Billing
 
-
-24. AGENT TASK TABLE
+ 1. AGENT TASK TABLE
 
 Future entity:
 
 agent_tasks
-
 
 Possible fields:
 
@@ -777,7 +701,6 @@ result
 created_at
 updated_at
 
-
 Possible statuses:
 
 pending
@@ -786,8 +709,7 @@ completed
 failed
 cancelled
 
-
-25. FUTURE TEAM MODEL
+ 1. FUTURE TEAM MODEL
 
 Do not implement for MVP.
 
@@ -798,8 +720,7 @@ organization_members
 teams
 team_projects
 
-
-26. RELATIONSHIP OVERVIEW
+ 1. RELATIONSHIP OVERVIEW
 
 USER
 │
@@ -816,8 +737,7 @@ USER
 │
 └── FUTURE AI USAGE
 
-
-27. FOREIGN KEY RULES
+ 1. FOREIGN KEY RULES
 
 Use foreign keys wherever appropriate.
 
@@ -841,8 +761,7 @@ activities.project_id
 activities.user_id
 → users.id
 
-
-28. DELETE BEHAVIOR
+ 1. DELETE BEHAVIOR
 
 User deletion behavior must be explicitly defined.
 
@@ -856,8 +775,7 @@ Deleting a project should delete its dependent:
 
 Use controlled cascading relationships where appropriate.
 
-
-29. SOFT DELETE
+ 1. SOFT DELETE
 
 Soft deletion may be introduced later.
 
@@ -865,11 +783,9 @@ Example:
 
 deleted_at
 
-
 For MVP, hard deletion is acceptable where data dependencies are properly handled.
 
-
-30. TIMESTAMPS
+ 1. TIMESTAMPS
 
 Use:
 
@@ -880,8 +796,7 @@ Recommended fields:
 created_at
 updated_at
 
-
-31. UUID POLICY
+ 1. UUID POLICY
 
 Use UUIDs for externally exposed primary identifiers.
 
@@ -891,8 +806,7 @@ Benefits:
 • Distributed-system friendly
 • Better future scalability
 
-
-32. DATABASE INDEXING
+ 1. DATABASE INDEXING
 
 Recommended indexes:
 
@@ -916,8 +830,7 @@ activities.created_at
 
 github_connections.user_id
 
-
-33. COMPOSITE INDEXES
+ 1. COMPOSITE INDEXES
 
 Where useful:
 
@@ -925,11 +838,9 @@ Where useful:
 
 (user_id, created_at)
 
-
 This improves activity and conversation retrieval.
 
-
-34. UNIQUE CONSTRAINTS
+ 1. UNIQUE CONSTRAINTS
 
 Recommended:
 
@@ -939,28 +850,25 @@ github_connections.user_id UNIQUE
 
 Project repository identifiers may require provider-specific uniqueness.
 
-
-35. EMAIL NORMALIZATION
+ 1. EMAIL NORMALIZATION
 
 Emails should be normalized before storage.
 
 Example:
 
-Developer@Example.com
+<Developer@Example.com>
 
 →
 
-developer@example.com
+<developer@example.com>
 
-
-36. DATABASE VALIDATION
+ 1. DATABASE VALIDATION
 
 Backend validation must occur before database writes.
 
 Database constraints should provide an additional safety layer.
 
-
-37. MIGRATIONS
+ 1. MIGRATIONS
 
 Use database migrations.
 
@@ -968,22 +876,19 @@ Recommended:
 
 Alembic for FastAPI/PostgreSQL.
 
-
-38. MIGRATION RULE
+ 1. MIGRATION RULE
 
 Never manually modify production schema without a migration.
 
 Every schema change must be reproducible.
 
-
-39. SEED DATA
+ 1. SEED DATA
 
 Development may include safe seed data.
 
 Production must never contain test credentials or fake user passwords.
 
-
-40. DATABASE TRANSACTIONS
+ 1. DATABASE TRANSACTIONS
 
 Use transactions for operations involving multiple related records.
 
@@ -995,8 +900,7 @@ Create activity
 
 Both should succeed or fail consistently.
 
-
-41. CONCURRENCY
+ 1. CONCURRENCY
 
 Important updates should avoid accidental overwrites.
 
@@ -1006,8 +910,7 @@ Future versions may use:
 • Updated-at checks
 • Version fields
 
-
-42. DATABASE SECURITY
+ 1. DATABASE SECURITY
 
 Database credentials must remain server-side.
 
@@ -1017,8 +920,7 @@ DATABASE_URL
 database passwords
 database hosts where unnecessary
 
-
-43. BACKUP
+ 1. BACKUP
 
 Production PostgreSQL should have:
 
@@ -1027,8 +929,7 @@ Production PostgreSQL should have:
 • Access controls
 • Restore testing
 
-
-44. PERFORMANCE
+ 1. PERFORMANCE
 
 Avoid:
 
@@ -1037,8 +938,7 @@ Avoid:
 • Loading huge conversation histories
 • Loading unnecessary project metadata
 
-
-45. PAGINATION
+ 1. PAGINATION
 
 Use pagination for potentially large datasets.
 
@@ -1050,8 +950,7 @@ Conversations
 Messages
 Commits
 
-
-46. DATA RETENTION
+ 1. DATA RETENTION
 
 Future retention policies may apply to:
 
@@ -1060,36 +959,31 @@ Future retention policies may apply to:
 • AI usage records
 • Audit information
 
-
-47. PRIVACY
+ 1. PRIVACY
 
 Only store information necessary for DEVOS v1.0.0 functionality.
 
 Project source code should not be permanently duplicated in the database unless explicitly required.
 
-
-48. FILE STORAGE
+ 1. FILE STORAGE
 
 MVP project files should preferably remain in the authorized project workspace/storage layer.
 
 Do not store entire repositories inside PostgreSQL.
 
-
-49. AI CONTEXT STORAGE
+ 1. AI CONTEXT STORAGE
 
 Store conversation metadata and messages as required.
 
 Do not automatically store every temporary context payload permanently.
 
-
-50. DATABASE ERROR HANDLING
+ 1. DATABASE ERROR HANDLING
 
 Do not expose raw database exceptions to users.
 
 Convert internal failures into safe application errors.
 
-
-51. DATABASE TESTING
+ 1. DATABASE TESTING
 
 Test:
 
@@ -1104,8 +998,7 @@ Test:
 ✓ GitHub connection
 ✓ Foreign key behavior
 
-
-52. DATA INTEGRITY
+ 1. DATA INTEGRITY
 
 The database must prevent:
 
@@ -1114,8 +1007,7 @@ The database must prevent:
 • Invalid relationships
 • Unauthorized ownership changes
 
-
-53. MVP DATABASE PRIORITY
+ 1. MVP DATABASE PRIORITY
 
 P0:
 
@@ -1136,8 +1028,7 @@ project_context
 ai_usage
 agent_tasks
 
-
-54. FUTURE SCALABILITY
+ 1. FUTURE SCALABILITY
 
 The schema should allow future:
 
@@ -1149,8 +1040,7 @@ The schema should allow future:
 • Cloud environments
 • Integrations
 
-
-55. DATABASE DEFINITION OF DONE
+ 1. DATABASE DEFINITION OF DONE
 
 ✓ PostgreSQL configured
 ✓ Migrations configured
@@ -1164,8 +1054,7 @@ The schema should allow future:
 ✓ GitHub credentials protected
 ✓ Tests pass
 
-
-56. FINAL DATABASE PRINCIPLE
+ 1. FINAL DATABASE PRINCIPLE
 
 Keep the MVP database:
 
@@ -1178,6 +1067,5 @@ SIMPLE
 Do not create database tables merely because future features may exist.
 
 Only create future tables when they become necessary.
-
 
 END OF 08_DATABASE_SCHEMA.mdt

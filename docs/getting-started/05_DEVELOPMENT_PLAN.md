@@ -5,7 +5,6 @@ Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
-
 1. PURPOSE
 
 This document defines the implementation roadmap for DEVOS v1.0.0.
@@ -21,8 +20,7 @@ WORKING FUNCTIONALITY
 → POLISH
 → PRODUCTION READINESS
 
-
-2. DEVELOPMENT PRINCIPLE
+1. DEVELOPMENT PRINCIPLE
 
 Do not build the entire product at once.
 
@@ -38,8 +36,7 @@ Every major implementation must be:
 • Verified
 • Documented
 
-
-3. DEVELOPMENT ORDER
+1. DEVELOPMENT ORDER
 
 Phase 0
 Repository Audit
@@ -89,8 +86,7 @@ Testing
 Phase 15
 Deployment Readiness
 
-
-4. PHASE 0 — REPOSITORY AUDIT
+1. PHASE 0 — REPOSITORY AUDIT
 
 Before modifying the repository:
 
@@ -122,8 +118,7 @@ RULE:
 
 Do not rewrite working code without justification.
 
-
-5. PHASE 1 — FOUNDATION
+1. PHASE 1 — FOUNDATION
 
 Objectives:
 
@@ -155,8 +150,7 @@ Database:
 
 • PostgreSQL preferred
 
-
-6. PHASE 1 DEFINITION OF DONE
+1. PHASE 1 DEFINITION OF DONE
 
 ✓ Frontend starts
 ✓ Backend starts
@@ -166,8 +160,7 @@ Database:
 ✓ API errors are handled
 ✓ Basic UI system exists
 
-
-7. PHASE 2 — AUTHENTICATION
+1. PHASE 2 — AUTHENTICATION
 
 Implement:
 
@@ -194,8 +187,7 @@ Test:
 • Logout
 • Protected route access
 
-
-8. PHASE 2 DEFINITION OF DONE
+1. PHASE 2 DEFINITION OF DONE
 
 ✓ User can register
 ✓ User can login
@@ -205,8 +197,7 @@ Test:
 ✓ Invalid credentials handled
 ✓ Authentication errors handled
 
-
-9. PHASE 3 — PROJECT MANAGEMENT
+1. PHASE 3 — PROJECT MANAGEMENT
 
 Implement:
 
@@ -226,8 +217,7 @@ User
 
 Each project must belong to the authenticated user.
 
-
-10. PROJECT VALIDATION
+ 1. PROJECT VALIDATION
 
 Validate:
 
@@ -238,8 +228,7 @@ Validate:
 
 Never allow one user to access another user's project.
 
-
-11. PHASE 3 DEFINITION OF DONE
+ 1. PHASE 3 DEFINITION OF DONE
 
 ✓ Project CRUD works
 ✓ Data persists
@@ -248,8 +237,7 @@ Never allow one user to access another user's project.
 ✓ Project can be opened
 ✓ Project can be deleted safely
 
-
-12. PHASE 4 — DASHBOARD
+ 1. PHASE 4 — DASHBOARD
 
 Dashboard should display:
 
@@ -263,8 +251,7 @@ Dashboard should display:
 
 Avoid meaningless metrics.
 
-
-13. DASHBOARD QUICK ACTIONS
+ 1. DASHBOARD QUICK ACTIONS
 
 Implement:
 
@@ -274,8 +261,7 @@ Implement:
 • Ask AI
 • Open Terminal
 
-
-14. PHASE 4 DEFINITION OF DONE
+ 1. PHASE 4 DEFINITION OF DONE
 
 ✓ Dashboard loads
 ✓ Recent projects appear
@@ -285,8 +271,7 @@ Implement:
 ✓ Loading state works
 ✓ Error state works
 
-
-15. PHASE 5 — DEVELOPER WORKSPACE
+ 1. PHASE 5 — DEVELOPER WORKSPACE
 
 Build the central workspace.
 
@@ -304,8 +289,7 @@ Components:
 
 The workspace must feel like one integrated product.
 
-
-16. WORKSPACE PRIORITY
+ 1. WORKSPACE PRIORITY
 
 Desktop layout:
 
@@ -323,8 +307,7 @@ Git:
 
 Integrated into workspace/status area.
 
-
-17. PHASE 5 DEFINITION OF DONE
+ 1. PHASE 5 DEFINITION OF DONE
 
 ✓ Workspace opens
 ✓ Active project loads
@@ -333,8 +316,7 @@ Integrated into workspace/status area.
 ✓ Project context remains available
 ✓ Responsive behavior exists
 
-
-18. PHASE 6 — FILE EXPLORER
+ 1. PHASE 6 — FILE EXPLORER
 
 Implement:
 
@@ -350,8 +332,7 @@ MVP:
 
 Read-only file/code viewing is acceptable.
 
-
-19. FILE SECURITY
+ 1. FILE SECURITY
 
 Do not expose:
 
@@ -363,8 +344,7 @@ Do not expose:
 
 unless explicitly designed and securely handled.
 
-
-20. PHASE 6 DEFINITION OF DONE
+ 1. PHASE 6 DEFINITION OF DONE
 
 ✓ File tree loads
 ✓ Folders expand
@@ -374,8 +354,7 @@ unless explicitly designed and securely handled.
 ✓ Errors handled
 ✓ Sensitive files protected
 
-
-21. PHASE 7 — TERMINAL FOUNDATION
+ 1. PHASE 7 — TERMINAL FOUNDATION
 
 Implement:
 
@@ -390,8 +369,7 @@ Implement:
 
 Security must be enforced on backend.
 
-
-22. TERMINAL SECURITY
+ 1. TERMINAL SECURITY
 
 Never expose unrestricted arbitrary system execution.
 
@@ -403,8 +381,7 @@ Use:
 • Resource limits where practical
 • Working-directory restrictions
 
-
-23. PHASE 7 DEFINITION OF DONE
+ 1. PHASE 7 DEFINITION OF DONE
 
 ✓ Terminal opens
 ✓ Correct project directory
@@ -414,8 +391,7 @@ Use:
 ✓ History available
 ✓ Unsafe commands restricted
 
-
-24. PHASE 8 — GIT FOUNDATION
+ 1. PHASE 8 — GIT FOUNDATION
 
 Implement:
 
@@ -432,8 +408,7 @@ Later:
 • Pull
 • Advanced GitHub
 
-
-25. GIT STATUS
+ 1. GIT STATUS
 
 Display:
 
@@ -450,8 +425,7 @@ Clean state:
 
 Working tree clean.
 
-
-26. PHASE 8 DEFINITION OF DONE
+ 1. PHASE 8 DEFINITION OF DONE
 
 ✓ Git repository detected
 ✓ Branch displayed
@@ -461,8 +435,7 @@ Working tree clean.
 ✓ Commit foundation works
 ✓ Git errors handled
 
-
-27. PHASE 9 — GITHUB INTEGRATION
+ 1. PHASE 9 — GITHUB INTEGRATION
 
 Implement only the MVP foundation.
 
@@ -479,8 +452,7 @@ Security:
 • Secure token storage
 • Minimum required permissions
 
-
-28. PHASE 9 DEFINITION OF DONE
+ 1. PHASE 9 DEFINITION OF DONE
 
 ✓ Repository can be connected
 ✓ Repository information loads
@@ -489,8 +461,7 @@ Security:
 ✓ Errors handled
 ✓ Credentials protected
 
-
-29. PHASE 10 — AI ASSISTANT
+ 1. PHASE 10 — AI ASSISTANT
 
 AI capabilities:
 
@@ -506,8 +477,7 @@ AI capabilities:
 • Generate documentation
 • Git assistance
 
-
-30. AI SERVICE ARCHITECTURE
+ 1. AI SERVICE ARCHITECTURE
 
 Frontend:
 
@@ -523,8 +493,7 @@ Context Builder
 ↓
 Model Provider
 
-
-31. AI PROVIDER ABSTRACTION
+ 1. AI PROVIDER ABSTRACTION
 
 Do not tightly couple the application to one AI provider.
 
@@ -536,8 +505,7 @@ AIService
 → Provider
 → Model
 
-
-32. PHASE 10 DEFINITION OF DONE
+ 1. PHASE 10 DEFINITION OF DONE
 
 ✓ User can send message
 ✓ AI responds
@@ -546,8 +514,7 @@ AIService
 ✓ Conversation persists appropriately
 ✓ Active project context available
 
-
-33. PHASE 11 — PROJECT CONTEXT ENGINE
+ 1. PHASE 11 — PROJECT CONTEXT ENGINE
 
 This is a core DEVOS v1.0.0 differentiator.
 
@@ -563,8 +530,7 @@ Context sources:
 • Recent activity
 • Conversation history
 
-
-34. CONTEXT PIPELINE
+ 1. CONTEXT PIPELINE
 
 USER QUESTION
 
@@ -608,8 +574,7 @@ AI MODEL
 
 RESPONSE
 
-
-35. CONTEXT SELECTION
+ 1. CONTEXT SELECTION
 
 Do NOT send the entire repository to the AI.
 
@@ -624,8 +589,7 @@ Potential strategy:
 5. Relevant Git information
 6. Recent conversation
 
-
-36. SECRET PROTECTION
+7. SECRET PROTECTION
 
 Never send automatically:
 
@@ -638,8 +602,7 @@ Never send automatically:
 
 Sensitive files must be filtered.
 
-
-37. PHASE 11 DEFINITION OF DONE
+ 1. PHASE 11 DEFINITION OF DONE
 
 ✓ Project metadata available
 ✓ File tree available
@@ -650,8 +613,7 @@ Sensitive files must be filtered.
 ✓ Sensitive information filtered
 ✓ AI receives relevant context
 
-
-38. PHASE 12 — FULL INTEGRATION
+ 1. PHASE 12 — FULL INTEGRATION
 
 Test complete workflow:
 
@@ -669,8 +631,7 @@ Register
 → Commit
 → Continue
 
-
-39. INTEGRATION TEST
+ 1. INTEGRATION TEST
 
 Scenario:
 
@@ -685,8 +646,7 @@ Scenario:
 9. Review diff
 10. Commit
 
-
-40. PHASE 12 DEFINITION OF DONE
+11. PHASE 12 DEFINITION OF DONE
 
 ✓ Complete workflow works
 ✓ No major broken navigation
@@ -694,8 +654,7 @@ Scenario:
 ✓ Project context remains available
 ✓ Errors recover correctly
 
-
-41. PHASE 13 — SECURITY & RELIABILITY
+ 1. PHASE 13 — SECURITY & RELIABILITY
 
 Review:
 
@@ -709,8 +668,7 @@ Environment variables
 File access
 Project ownership
 
-
-42. SECURITY CHECKLIST
+ 1. SECURITY CHECKLIST
 
 ✓ No hardcoded secrets
 ✓ .env protected
@@ -722,8 +680,7 @@ Project ownership
 ✓ Restricted terminal
 ✓ Sensitive files filtered
 
-
-43. RELIABILITY CHECKLIST
+ 1. RELIABILITY CHECKLIST
 
 Every major API needs:
 
@@ -735,8 +692,7 @@ Every major API needs:
 
 Frontend must gracefully handle backend failure.
 
-
-44. PHASE 14 — UI/UX POLISH
+ 1. PHASE 14 — UI/UX POLISH
 
 Review:
 
@@ -752,8 +708,7 @@ Review:
 • Error states
 • Accessibility
 
-
-45. UI QUALITY STANDARD
+ 1. UI QUALITY STANDARD
 
 DEVOS v1.0.0 should feel:
 
@@ -771,8 +726,7 @@ Avoid:
 • Fake functionality
 • Inconsistent components
 
-
-46. PHASE 15 — TESTING
+ 1. PHASE 15 — TESTING
 
 Testing levels:
 
@@ -783,8 +737,7 @@ Authentication tests
 UI tests
 End-to-end tests
 
-
-47. CRITICAL TESTS
+ 1. CRITICAL TESTS
 
 Authentication:
 
@@ -821,8 +774,7 @@ Terminal:
 • Timeout
 • Error
 
-
-48. PERFORMANCE CHECK
+ 1. PERFORMANCE CHECK
 
 Measure:
 
@@ -835,8 +787,7 @@ Measure:
 
 Optimize only where necessary.
 
-
-49. DOCUMENTATION
+ 1. DOCUMENTATION
 
 Maintain:
 
@@ -857,8 +808,7 @@ Document:
 • Security
 • Deployment
 
-
-50. ENVIRONMENT MANAGEMENT
+ 1. ENVIRONMENT MANAGEMENT
 
 Use environment variables.
 
@@ -872,8 +822,7 @@ GITHUB_CLIENT_SECRET
 
 Never commit real secrets.
 
-
-51. GIT WORKFLOW
+ 1. GIT WORKFLOW
 
 Use meaningful commits.
 
@@ -887,8 +836,7 @@ fix: handle project loading error
 fix: secure terminal execution
 refactor: improve API service layer
 
-
-52. BRANCHING
+ 1. BRANCHING
 
 Recommended:
 
@@ -902,15 +850,13 @@ feature/workspace
 feature/ai-context
 feature/github
 
-
-53. IMPLEMENTATION RULE
+ 1. IMPLEMENTATION RULE
 
 Do not combine too many unrelated features in one change.
 
 Prefer small, testable increments.
 
-
-54. CHANGE VALIDATION
+ 1. CHANGE VALIDATION
 
 After every meaningful change:
 
@@ -921,8 +867,7 @@ After every meaningful change:
 5. Check UI.
 6. Check existing functionality.
 
-
-55. BUG FIXING PROCESS
+7. BUG FIXING PROCESS
 
 When a bug appears:
 
@@ -933,15 +878,13 @@ When a bug appears:
 5. Check regression
 6. Document if important
 
-
-56. NO BLIND REWRITES
+7. NO BLIND REWRITES
 
 Never replace a working architecture simply because another approach looks cleaner.
 
 Change architecture only when there is a clear benefit.
 
-
-57. MVP PRIORITY
+ 1. MVP PRIORITY
 
 Priority 1:
 
@@ -964,8 +907,7 @@ Polish
 Performance
 Advanced integrations
 
-
-58. MVP CUT RULE
+ 1. MVP CUT RULE
 
 If time becomes limited:
 
@@ -984,8 +926,7 @@ Simplify:
 • Terminal
 • Advanced Git
 
-
-59. HACKATHON DEMO PATH
+ 1. HACKATHON DEMO PATH
 
 Recommended demonstration:
 
@@ -1001,8 +942,7 @@ Recommended demonstration:
 10. Review workflow
 11. Explain context engine
 
-
-60. DEMO PRINCIPLE
+12. DEMO PRINCIPLE
 
 Do not demonstrate every feature.
 
@@ -1012,8 +952,7 @@ The judges should understand:
 
 "DEVOS v1.0.0 knows the project, not just the question."
 
-
-61. PRODUCTION READINESS
+ 1. PRODUCTION READINESS
 
 Before release:
 
@@ -1028,8 +967,7 @@ Before release:
 ✓ UI responsive
 ✓ Documentation complete
 
-
-62. DEPLOYMENT PREPARATION
+ 1. DEPLOYMENT PREPARATION
 
 Prepare:
 
@@ -1042,8 +980,7 @@ HTTPS
 Logging
 Health checks
 
-
-63. HEALTH CHECK
+ 1. HEALTH CHECK
 
 Backend should provide a health endpoint.
 
@@ -1053,8 +990,7 @@ GET /health
 
 Response should clearly indicate service availability.
 
-
-64. LOGGING
+ 1. LOGGING
 
 Log useful diagnostics:
 
@@ -1071,8 +1007,7 @@ Never log:
 • API keys
 • Sensitive user data
 
-
-65. MONITORING FUTURE
+ 1. MONITORING FUTURE
 
 Future:
 
@@ -1082,8 +1017,7 @@ Future:
 • AI latency monitoring
 • Terminal reliability metrics
 
-
-66. FUTURE DEVELOPMENT
+ 1. FUTURE DEVELOPMENT
 
 After MVP validation:
 
@@ -1111,8 +1045,7 @@ Organizations
 Billing
 Marketplace
 
-
-67. DEVELOPMENT GOVERNANCE
+ 1. DEVELOPMENT GOVERNANCE
 
 Every feature must answer:
 
@@ -1123,8 +1056,7 @@ Every feature must answer:
 5. Can it be implemented safely?
 6. Can it be tested?
 
-
-68. FEATURE PRIORITY FRAMEWORK
+7. FEATURE PRIORITY FRAMEWORK
 
 P0:
 Critical MVP functionality
@@ -1140,8 +1072,7 @@ Future functionality
 
 Do not allow P2/P3 features to delay P0.
 
-
-69. DEFINITION OF MVP
+ 1. DEFINITION OF MVP
 
 DEVOS v1.0.0 MVP is complete when:
 
@@ -1159,8 +1090,7 @@ Register
 → Review changes
 → Continue development
 
-
-70. FINAL DEVELOPMENT PRINCIPLE
+ 1. FINAL DEVELOPMENT PRINCIPLE
 
 Build the smallest product that proves the DEVOS v1.0.0 vision.
 
@@ -1180,6 +1110,5 @@ PROJECT CONTEXT
 AI VALUE
 +
 PROFESSIONAL UX
-
 
 END OF 05_DEVELOPMENT_PLAN.md

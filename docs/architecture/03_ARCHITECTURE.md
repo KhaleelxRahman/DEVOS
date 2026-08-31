@@ -23,7 +23,7 @@ It covers:
 • Deployment
 • Scalability
 
-2. ARCHITECTURE PRINCIPLES
+1. ARCHITECTURE PRINCIPLES
 
 • Project-Centric Architecture
 • Separation of Concerns
@@ -43,8 +43,7 @@ Workspace
 ↓
 Files + Git + Terminal + AI
 
-
-3. HIGH-LEVEL ARCHITECTURE
+1. HIGH-LEVEL ARCHITECTURE
 
 DEVOS v1.0.0 UI
 ↓
@@ -65,8 +64,7 @@ Services
 ↓
 Database / Filesystem / External APIs
 
-
-4. TECHNOLOGY STACK
+1. TECHNOLOGY STACK
 
 Frontend:
 • React
@@ -90,8 +88,7 @@ External Services:
 • AI Provider
 • Project Filesystem
 
-
-5. REPOSITORY STRUCTURE
+1. REPOSITORY STRUCTURE
 
 DEVOS/
 ├── frontend/
@@ -132,8 +129,7 @@ DEVOS/
 ├── .gitignore
 └── README.md
 
-
-6. FRONTEND ARCHITECTURE
+1. FRONTEND ARCHITECTURE
 
 Pages
 ↓
@@ -155,8 +151,7 @@ Main pages:
 • Settings
 • Account
 
-
-7. FRONTEND COMPONENTS
+1. FRONTEND COMPONENTS
 
 Reusable components:
 
@@ -175,8 +170,7 @@ Reusable components:
 • Error States
 • Empty States
 
-
-8. FRONTEND STATE
+1. FRONTEND STATE
 
 Authentication:
 • Current User
@@ -204,8 +198,7 @@ Git:
 • Status
 • Changed Files
 
-
-9. API CLIENT
+1. API CLIENT
 
 Frontend
 ↓
@@ -219,8 +212,7 @@ API Client
 ↓
 FastAPI
 
-
-10. BACKEND ARCHITECTURE
+ 1. BACKEND ARCHITECTURE
 
 API Routes
 ↓
@@ -234,8 +226,7 @@ Services
 ↓
 Database / Filesystem / External APIs
 
-
-11. BACKEND SERVICES
+ 1. BACKEND SERVICES
 
 AuthService:
 • Registration
@@ -293,8 +284,7 @@ ActivityService:
 • Record activity
 • Retrieve activity
 
-
-12. DATABASE ARCHITECTURE
+ 1. DATABASE ARCHITECTURE
 
 User
 │
@@ -306,8 +296,7 @@ User can own multiple projects.
 
 Project can contain multiple conversations and activities.
 
-
-13. USER ENTITY
+ 1. USER ENTITY
 
 • id
 • name
@@ -318,8 +307,7 @@ Project can contain multiple conversations and activities.
 
 Passwords must NEVER be stored in plaintext.
 
-
-14. PROJECT ENTITY
+ 1. PROJECT ENTITY
 
 • id
 • user_id
@@ -331,8 +319,7 @@ Passwords must NEVER be stored in plaintext.
 • created_at
 • updated_at
 
-
-15. CONVERSATION ENTITY
+ 1. CONVERSATION ENTITY
 
 • id
 • project_id
@@ -341,8 +328,7 @@ Passwords must NEVER be stored in plaintext.
 • created_at
 • updated_at
 
-
-16. ACTIVITY ENTITY
+ 1. ACTIVITY ENTITY
 
 • id
 • project_id
@@ -351,8 +337,7 @@ Passwords must NEVER be stored in plaintext.
 • metadata
 • created_at
 
-
-17. FILESYSTEM ARCHITECTURE
+ 1. FILESYSTEM ARCHITECTURE
 
 Workspace
 ↓
@@ -362,8 +347,7 @@ Filesystem / Repository
 
 The frontend must NOT directly access the server filesystem.
 
-
-18. FILE SECURITY
+ 1. FILE SECURITY
 
 File access must be restricted to the authorized project.
 
@@ -375,8 +359,7 @@ Prevent:
 • ../../
 • Absolute system paths
 
-
-19. TERMINAL ARCHITECTURE
+ 1. TERMINAL ARCHITECTURE
 
 User Command
 ↓
@@ -398,8 +381,7 @@ Frontend Terminal
 
 The terminal must NEVER become an unrestricted remote shell.
 
-
-20. TERMINAL SECURITY
+ 1. TERMINAL SECURITY
 
 Use:
 
@@ -411,8 +393,7 @@ Use:
 
 Sensitive system operations must not be exposed.
 
-
-21. GIT ARCHITECTURE
+ 1. GIT ARCHITECTURE
 
 Frontend
 ↓
@@ -428,8 +409,7 @@ Project Repository
 
 Frontend must never execute raw Git commands directly.
 
-
-22. GITHUB ARCHITECTURE
+ 1. GITHUB ARCHITECTURE
 
 Frontend
 ↓
@@ -441,8 +421,7 @@ GitHub API
 
 Credentials must be securely handled.
 
-
-23. AI ARCHITECTURE
+ 1. AI ARCHITECTURE
 
 User
 ↓
@@ -464,8 +443,7 @@ Response
 ↓
 AI UI
 
-
-24. AI PROVIDER ABSTRACTION
+ 1. AI PROVIDER ABSTRACTION
 
 AIService
 ↓
@@ -476,8 +454,7 @@ AI Provider Interface
 
 DEVOS v1.0.0 must not be tightly coupled to one AI provider.
 
-
-25. AI CONTEXT ARCHITECTURE
+ 1. AI CONTEXT ARCHITECTURE
 
 Project Metadata
 +
@@ -497,8 +474,7 @@ Context Builder
 ↓
 AI Request
 
-
-26. CONTEXT PRIORITY
+ 1. CONTEXT PRIORITY
 
 Priority order:
 
@@ -511,8 +487,7 @@ Priority order:
 
 Never send the entire repository blindly to the AI.
 
-
-27. SECRET FILTERING
+ 1. SECRET FILTERING
 
 Before AI context is created, filter:
 
@@ -527,8 +502,7 @@ Before AI context is created, filter:
 
 Never expose secrets unnecessarily.
 
-
-28. FUTURE CONTEXT ENGINE
+ 1. FUTURE CONTEXT ENGINE
 
 Current Context Engine
 ↓
@@ -546,8 +520,7 @@ AI Agents
 
 These are NOT required for MVP.
 
-
-29. AUTHENTICATION FLOW
+ 1. AUTHENTICATION FLOW
 
 User
 ↓
@@ -563,8 +536,7 @@ Session / Token
 ↓
 Authenticated Application
 
-
-30. AUTHORIZATION FLOW
+ 1. AUTHORIZATION FLOW
 
 Request
 ↓
@@ -578,8 +550,7 @@ Execute Operation
 
 Authentication alone is NOT sufficient.
 
-
-31. GENERAL REQUEST FLOW
+ 1. GENERAL REQUEST FLOW
 
 User Action
 ↓
@@ -607,8 +578,7 @@ Frontend State
 ↓
 UI Update
 
-
-32. ERROR ARCHITECTURE
+ 1. ERROR ARCHITECTURE
 
 Frontend:
 • User-friendly errors
@@ -624,8 +594,7 @@ External Services:
 • Provider failure handling
 • Retry where appropriate
 
-
-33. LOGGING
+ 1. LOGGING
 
 Log important events:
 
@@ -643,8 +612,7 @@ Never log:
 • Authentication tokens
 • Private secrets
 
-
-34. CONFIGURATION
+ 1. CONFIGURATION
 
 Use environment variables.
 
@@ -658,8 +626,7 @@ GITHUB_CLIENT_SECRET
 
 Never commit real secrets.
 
-
-35. ENVIRONMENTS
+ 1. ENVIRONMENTS
 
 Support:
 
@@ -669,8 +636,7 @@ Support:
 
 Environment-specific configuration must not be hardcoded.
 
-
-36. DEPLOYMENT ARCHITECTURE
+ 1. DEPLOYMENT ARCHITECTURE
 
 Internet
 ↓
@@ -683,8 +649,7 @@ FastAPI Backend
 ├── AI Provider
 └── GitHub API
 
-
-37. DEVELOPMENT ENVIRONMENT
+ 1. DEVELOPMENT ENVIRONMENT
 
 Local environment should support:
 
@@ -695,8 +660,7 @@ Local environment should support:
 
 Services should be independently runnable.
 
-
-38. TESTING ARCHITECTURE
+ 1. TESTING ARCHITECTURE
 
 Unit Tests:
 • Services
@@ -718,8 +682,7 @@ Register
 → Ask AI
 → View Git
 
-
-39. SECURITY BOUNDARIES
+ 1. SECURITY BOUNDARIES
 
 Browser
 │
@@ -738,8 +701,7 @@ Services
 
 No untrusted frontend operation should directly access protected infrastructure.
 
-
-40. DATA OWNERSHIP
+ 1. DATA OWNERSHIP
 
 Every project must belong to an authorized user.
 
@@ -754,8 +716,7 @@ User B
 
 User A must NOT access Project C.
 
-
-41. SCALABILITY STRATEGY
+ 1. SCALABILITY STRATEGY
 
 Keep MVP simple.
 
@@ -772,8 +733,7 @@ Future scalability may introduce:
 
 Do not introduce these prematurely.
 
-
-42. REAL-TIME ARCHITECTURE
+ 1. REAL-TIME ARCHITECTURE
 
 Future real-time features may include:
 
@@ -784,8 +744,7 @@ Future real-time features may include:
 
 MVP may use standard HTTP APIs where real-time communication is unnecessary.
 
-
-43. WEBSOCKET FUTURE
+ 1. WEBSOCKET FUTURE
 
 Frontend
 ↕
@@ -797,8 +756,7 @@ Terminal / AI / Collaboration
 
 Introduce only when required.
 
-
-44. DEPENDENCY MANAGEMENT
+ 1. DEPENDENCY MANAGEMENT
 
 Dependencies must be:
 
@@ -811,8 +769,7 @@ Do not install packages simply because they are popular.
 
 Every major dependency must have a clear purpose.
 
-
-45. ARCHITECTURE DECISION RULES
+ 1. ARCHITECTURE DECISION RULES
 
 Before adding a major technology:
 
@@ -823,8 +780,7 @@ Before adding a major technology:
 5. Evaluate maintenance cost.
 6. Add it only when justified.
 
-
-46. ANTI-PATTERNS
+7. ANTI-PATTERNS
 
 Avoid:
 
@@ -838,8 +794,7 @@ Avoid:
 • Premature microservices
 • Unnecessary dependencies
 
-
-47. ARCHITECTURE EVOLUTION
+ 1. ARCHITECTURE EVOLUTION
 
 MVP:
 
@@ -873,8 +828,7 @@ Phase 4:
 • Cloud workspaces
 • Platform services
 
-
-48. ARCHITECTURE DEFINITION OF DONE
+ 1. ARCHITECTURE DEFINITION OF DONE
 
 Architecture is sufficiently implemented when:
 
@@ -891,8 +845,7 @@ Architecture is sufficiently implemented when:
 ✓ API errors are handled consistently.
 ✓ The system can be extended without major restructuring.
 
-
-49. FINAL ARCHITECTURE PRINCIPLE
+ 1. FINAL ARCHITECTURE PRINCIPLE
 
 DEVOS v1.0.0 must NOT be architected as a collection of unrelated tools.
 
@@ -920,8 +873,7 @@ The BACKEND is the control and security layer.
 
 The DATABASE is the persistence layer.
 
-
-50. FINAL STATEMENT
+ 1. FINAL STATEMENT
 
 DEVOS v1.0.0 architecture must remain:
 
@@ -943,6 +895,5 @@ CREATE
 → BUILD
 → APPROVE
 → CONTINUE
-
 
 END OF 03_ARCHITECTURE.md

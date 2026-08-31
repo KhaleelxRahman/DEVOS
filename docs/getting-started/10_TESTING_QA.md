@@ -5,7 +5,6 @@ Product: DEVOS v1.0.0
 Version: 1.0
 Status: Active Development
 
-
 1. PURPOSE
 
 This document defines the testing and quality assurance strategy for DEVOS v1.0.0.
@@ -18,8 +17,7 @@ The objective is to ensure that every important feature is:
 • Usable
 • Maintainable
 
-
-2. QA PRINCIPLE
+1. QA PRINCIPLE
 
 DO NOT ASSUME IT WORKS.
 
@@ -30,8 +28,7 @@ IMPLEMENTED
 → VERIFIED
 → REGRESSION CHECKED
 
-
-3. TESTING LEVELS
+1. TESTING LEVELS
 
 DEVOS v1.0.0 should use:
 
@@ -44,8 +41,7 @@ DEVOS v1.0.0 should use:
 7. Performance Testing
 8. Manual QA
 
-
-4. UNIT TESTING
+9. UNIT TESTING
 
 Unit tests validate individual functions/services.
 
@@ -59,8 +55,7 @@ Test:
 • Git services
 • AI context filtering
 
-
-5. BACKEND UNIT TESTING
+1. BACKEND UNIT TESTING
 
 Important areas:
 
@@ -72,8 +67,7 @@ Important areas:
 • Secret filtering
 • Terminal command validation
 
-
-6. FRONTEND UNIT TESTING
+1. FRONTEND UNIT TESTING
 
 Test:
 
@@ -84,8 +78,7 @@ Test:
 • Navigation logic
 • Context UI
 
-
-7. API TESTING
+1. API TESTING
 
 Test every critical endpoint.
 
@@ -99,7 +92,6 @@ P0:
 /files
 /ai
 
-
 P1:
 
 /git
@@ -107,8 +99,7 @@ P1:
 /terminal
 /activity
 
-
-8. AUTH TEST CASES
+1. AUTH TEST CASES
 
 Test:
 
@@ -121,8 +112,7 @@ Test:
 ✓ Logout works
 ✓ Protected routes reject unauthenticated users
 
-
-9. AUTHORIZATION TESTS
+1. AUTHORIZATION TESTS
 
 Test:
 
@@ -133,8 +123,7 @@ User A cannot access:
 • User B conversations
 • User B activities
 
-
-10. PROJECT TESTS
+ 1. PROJECT TESTS
 
 Test:
 
@@ -147,8 +136,7 @@ Test:
 ✓ Technology information
 ✓ Persistence after refresh
 
-
-11. FILE TESTS
+ 1. FILE TESTS
 
 Test:
 
@@ -161,8 +149,7 @@ Test:
 ✓ Path traversal protection
 ✓ Sensitive file filtering
 
-
-12. TERMINAL TESTS
+ 1. TERMINAL TESTS
 
 Test:
 
@@ -174,8 +161,7 @@ Test:
 ✓ Process failure
 ✓ Project directory restriction
 
-
-13. GIT TESTS
+ 1. GIT TESTS
 
 Test:
 
@@ -188,8 +174,7 @@ Test:
 ✓ Pull
 ✓ Git failure
 
-
-14. GITHUB TESTS
+ 1. GITHUB TESTS
 
 Test:
 
@@ -201,8 +186,7 @@ Test:
 ✓ Expired credentials
 ✓ Permission failure
 
-
-15. AI TESTS
+ 1. AI TESTS
 
 Test:
 
@@ -215,8 +199,7 @@ Test:
 ✓ Empty response handled
 ✓ Provider failure handled
 
-
-16. CONTEXT ENGINE TESTS
+ 1. CONTEXT ENGINE TESTS
 
 Example:
 
@@ -230,8 +213,7 @@ AI receives relevant authentication files.
 
 It should NOT receive unrelated files unnecessarily.
 
-
-17. CONTEXT ISOLATION TEST
+ 1. CONTEXT ISOLATION TEST
 
 Project A:
 
@@ -243,8 +225,7 @@ Solar Sentinel
 
 AI request for Project A must not receive Project B context.
 
-
-18. SECURITY TESTING
+ 1. SECURITY TESTING
 
 Test:
 
@@ -257,8 +238,7 @@ Test:
 • Secret exposure
 • Rate-limit bypass
 
-
-19. UI TESTING
+ 1. UI TESTING
 
 Verify:
 
@@ -272,8 +252,7 @@ Verify:
 • Terminal
 • Git status
 
-
-20. RESPONSIVE TESTING
+ 1. RESPONSIVE TESTING
 
 Test:
 
@@ -281,8 +260,7 @@ Desktop
 Tablet
 Mobile
 
-
-21. BROWSER TESTING
+ 1. BROWSER TESTING
 
 Priority:
 
@@ -290,8 +268,7 @@ Priority:
 • Firefox
 • Safari where practical
 
-
-22. LOADING STATE TESTS
+ 1. LOADING STATE TESTS
 
 Every major feature should display a meaningful loading state.
 
@@ -303,8 +280,7 @@ Examples:
 
 "Analyzing project..."
 
-
-23. ERROR STATE TESTS
+ 1. ERROR STATE TESTS
 
 Every major API must have an error state.
 
@@ -316,8 +292,7 @@ Actions:
 
 Retry
 
-
-24. EMPTY STATE TESTS
+ 1. EMPTY STATE TESTS
 
 Examples:
 
@@ -325,18 +300,15 @@ No projects:
 
 "Create your first project."
 
-
 No repository:
 
 "Connect GitHub."
-
 
 No Git changes:
 
 "Working tree clean."
 
-
-25. ACCESSIBILITY
+ 1. ACCESSIBILITY
 
 Check:
 
@@ -347,8 +319,7 @@ Check:
 • Screen-reader-friendly structure
 • Form errors
 
-
-26. PERFORMANCE TESTING
+ 1. PERFORMANCE TESTING
 
 Measure:
 
@@ -359,8 +330,7 @@ Measure:
 • API response time
 • AI response latency
 
-
-27. PERFORMANCE TARGETS
+ 1. PERFORMANCE TARGETS
 
 Aim for:
 
@@ -369,8 +339,7 @@ Fast navigation
 Minimal unnecessary network calls
 Efficient file loading
 
-
-28. AI PERFORMANCE
+ 1. AI PERFORMANCE
 
 Measure:
 
@@ -379,8 +348,7 @@ Measure:
 • Model response time
 • Total response time
 
-
-29. TERMINAL PERFORMANCE
+ 1. TERMINAL PERFORMANCE
 
 Check:
 
@@ -389,8 +357,7 @@ Check:
 • Memory usage
 • Timeout behavior
 
-
-30. DATABASE TESTING
+ 1. DATABASE TESTING
 
 Test:
 
@@ -401,15 +368,13 @@ Test:
 • Migrations
 • Index behavior
 
-
-31. MIGRATION TESTING
+ 1. MIGRATION TESTING
 
 Every migration should be tested on a clean database.
 
 Also test upgrading an existing database.
 
-
-32. REGRESSION TESTING
+ 1. REGRESSION TESTING
 
 After fixing a bug:
 
@@ -419,8 +384,7 @@ After fixing a bug:
 4. Run related tests
 5. Run regression suite
 
-
-33. BUILD TEST
+6. BUILD TEST
 
 Frontend:
 
@@ -430,15 +394,13 @@ Backend:
 
 Application must start successfully.
 
-
-34. LINTING
+ 1. LINTING
 
 Run project linting where configured.
 
 No major lint errors should remain before release.
 
-
-35. TYPE CHECKING
+ 1. TYPE CHECKING
 
 If TypeScript is used:
 
@@ -446,8 +408,7 @@ Run type checking.
 
 No critical type errors should remain.
 
-
-36. API CONTRACT TESTING
+ 1. API CONTRACT TESTING
 
 Ensure frontend assumptions match backend responses.
 
@@ -457,8 +418,7 @@ Changes to API response structures must update:
 • Frontend API client
 • Tests
 
-
-37. E2E TEST
+ 1. E2E TEST
 
 Critical workflow:
 
@@ -472,15 +432,13 @@ Register
 → Check Git
 → Commit
 
-
-38. HACKATHON E2E TEST
+ 1. HACKATHON E2E TEST
 
 Run the complete demo exactly as it will be shown to judges.
 
 Do not test only isolated features.
 
-
-39. DEMO FAILURE PREVENTION
+ 1. DEMO FAILURE PREVENTION
 
 Before presentation:
 
@@ -493,15 +451,13 @@ Before presentation:
 ✓ Demo project ready
 ✓ Backup demo path prepared
 
-
-40. TEST DATA
+ 1. TEST DATA
 
 Use separate test data.
 
 Never use production credentials for testing.
 
-
-41. TEST ENVIRONMENT
+ 1. TEST ENVIRONMENT
 
 Recommended:
 
@@ -511,8 +467,7 @@ Production
 
 Keep environments isolated.
 
-
-42. BUG SEVERITY
+ 1. BUG SEVERITY
 
 CRITICAL:
 
@@ -532,8 +487,7 @@ LOW:
 
 Minor UI issue
 
-
-43. BUG REPORT FORMAT
+ 1. BUG REPORT FORMAT
 
 Title:
 
@@ -561,8 +515,7 @@ Severity:
 
 ...
 
-
-44. QA CHECKLIST
+ 1. QA CHECKLIST
 
 Before every major release:
 
@@ -579,8 +532,7 @@ Before every major release:
 ✓ Responsive UI
 ✓ Security
 
-
-45. RELEASE BLOCKERS
+ 1. RELEASE BLOCKERS
 
 Do not release with:
 
@@ -591,8 +543,7 @@ Do not release with:
 • Critical database corruption
 • Broken core workflow
 
-
-46. CI TESTING
+ 1. CI TESTING
 
 Future CI pipeline should run:
 
@@ -602,8 +553,7 @@ Future CI pipeline should run:
 • Type checking
 • Build
 
-
-47. TEST AUTOMATION
+ 1. TEST AUTOMATION
 
 Automate high-value repetitive tests.
 
@@ -616,8 +566,7 @@ AI
 Files
 Terminal
 
-
-48. MANUAL QA
+ 1. MANUAL QA
 
 Manual testing remains necessary for:
 
@@ -627,8 +576,7 @@ Manual testing remains necessary for:
 • Hackathon demo
 • Complex workflows
 
-
-49. MVP DEFINITION OF QUALITY
+ 1. MVP DEFINITION OF QUALITY
 
 DEVOS v1.0.0 MVP should:
 
@@ -639,8 +587,7 @@ DEVOS v1.0.0 MVP should:
 ✓ Maintain project context
 ✓ Avoid fake functionality
 
-
-50. FINAL QA PRINCIPLE
+ 1. FINAL QA PRINCIPLE
 
 A feature is NOT complete when the code is written.
 
@@ -657,6 +604,5 @@ SECURITY
 USER FLOW
 
 all work correctly.
-
 
 END OF 10_TESTING_QA.md
