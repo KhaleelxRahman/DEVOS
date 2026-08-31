@@ -1,0 +1,16 @@
+[project]
+name = "devos-backend"
+version = "1.0.0"
+description = "DEVOS Backend"
+requires-python = ">=3.13"
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E","F","I","UP","B"]
+
+[tool.pytest.ini_options]
+testpaths = ["../04-tests"]
+pythonpath = ["."]
