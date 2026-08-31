@@ -1,25 +1,30 @@
-# DEVOS Deployment Guide
+# DEVOS Production Deployment
 
-Frontend: Vercel
-Backend: Render
-Database: PostgreSQL
+Frontend:
+- Vercel
 
-## Backend
-Start Command:
+Backend:
+- Render
+
+Database:
+- PostgreSQL
+
+## Backend Start Command
+
 uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
-## Frontend
-Build:
+## Frontend Build
+
 npm run build
 
 Output:
 dist
 
-## Environment Variables
+## Required Environment Variables
 
-BACKEND_URL=
+DATABASE_URL=
+SECRET_KEY=
 OPENAI_API_KEY=
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-DATABASE_URL=
-SECRET_KEY=
+BACKEND_URL=
