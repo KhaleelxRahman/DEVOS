@@ -1,3 +1,6 @@
+﻿from typing import cast
+from starlette.types import ExceptionHandler
+from typing import cast
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -50,7 +53,10 @@ app = FastAPI(
 # Rate limiting setup
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(
+    RateLimitExceeded,
+    cast(ExceptionHandler, _rate_limit_exceeded_handler),
+)
 
 # CORS Configuration
 if settings.BACKEND_CORS_ORIGINS:
@@ -63,8 +69,14 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 # Exception Handlers
-app.add_exception_handler(AppException, app_exception_handler)
-app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(
+    AppException,
+    cast(ExceptionHandler, app_exception_handler),
+)
+app.add_exception_handler(
+    RequestValidationError,
+    cast(ExceptionHandler, validation_exception_handler),
+)
 app.add_exception_handler(Exception, generic_exception_handler)
 
 
@@ -88,5 +100,6 @@ async def health_check_v1():
 
 # Mount API v1
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+
 
 
