@@ -19,3 +19,5 @@ coverage/
 htmlcov/
 04-tests/__pycache__/
 *.log
+.vercel
+.env*
