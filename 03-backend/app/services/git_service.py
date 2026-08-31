@@ -228,22 +228,22 @@ class GitService:
     @staticmethod
     def _validate_relative_path(path: str) -> None:
         """Validate a git‑related file path.
-+
-+        The path must be a relative POSIX‑style path without any of the following:
-+        * absolute components (os.path.isabs)
-+        * parent directory traversals ("..")
-+        * null bytes (potential injection vector)
-+        * leading dash (prevents treating the argument as a git option)
-+
-+        Raises:
-+            AppException: with code "GIT_ERROR" and HTTP 400 when invalid.
-+        """
-+        if (
-+            not path
-+            or os.path.isabs(path)
-+            or ".." in path.split("/")
-+            or "\x00" in path
-+            or path.startswith("-")
-+        ):
-+            raise AppException("Invalid file path", code="GIT_ERROR", status_code=400)
+
+        The path must be a relative POSIX‑style path without any of the following:
+        * absolute components (os.path.isabs)
+        * parent directory traversals ("..")
+        * null bytes (potential injection vector)
+        * leading dash (prevents treating the argument as a git option)
+
+        Raises:
+            AppException: with code "GIT_ERROR" and HTTP 400 when invalid.
+        """
+        if (
+            not path
+            or os.path.isabs(path)
+            or ".." in path.split("/")
+            or "\x00" in path
+            or path.startswith("-")
+        ):
+            raise AppException("Invalid file path", code="GIT_ERROR", status_code=400)
 
