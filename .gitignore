@@ -18,3 +18,4 @@ __pycache__/
 coverage/
 htmlcov/
 04-tests/__pycache__/
+*.log

@@ -1,0 +1,6 @@
+{
+  "log_level":"INFO",
+  "log_file":"logs/devos.log",
+  "console":true,
+  "rotation":"10MB"
+}
