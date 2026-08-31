@@ -207,6 +207,11 @@
   gap: var(--space-6);
 }
 .site-footer-brand p { color: var(--color-text-muted); font-size: var(--font-size-sm); }
+/* Links inside footer text sit on --color-surface; the global accent #2563eb
+   is only 3.45:1 there, so use the bright accent (7.02:1, WCAG AA). */
+.site-footer-brand p a { color: var(--color-accent-bright); }
+.site-footer-brand p a:hover,
+.site-footer-brand p a:focus-visible { color: var(--color-text-secondary); }
 .site-footer-col { display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--font-size-sm); }
 .site-footer-col strong { color: var(--color-text-primary); margin-bottom: var(--space-1); }
 .site-footer-col a { color: var(--color-text-secondary); text-decoration: none; }
