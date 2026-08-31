@@ -1,74 +1,9 @@
-# =========================
-# DEVOS v1.0.0 Enterprise .gitignore
-# =========================
-
-# Python
+node_modules/
+02-frontend/node_modules/
 __pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.so
 .pytest_cache/
 .ruff_cache/
-.mypy_cache/
-.coverage
-htmlcov/
-.pytype/
-
-# Virtual Environments
-.venv/
-venv/
-env/
-
-# Environment Files
-.env
-.env.*
-!.env.example
-
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Frontend Build
-dist/
-build/
-.vite/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS Files
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Logs
-logs/
-*.log
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Temporary
-tmp/
-temp/
-
-# Testing
-.playwright/
-coverage/
-
-# GitHub
-.github/*.cache
-
-# Runtime artifacts
-projects_storage/
 .vercel/
-.markdownlintignore
+.dist/
+.coverage
+*.pyc

@@ -1,0 +1,15 @@
+{
+  "files.exclude": {
+    "**/.dist": true,
+    "**/.vercel": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/__pycache__": true,
+    "**/node_modules": true
+  },
+  "explorer.compactFolders": true,
+  "explorer.sortOrder": "type",
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}
