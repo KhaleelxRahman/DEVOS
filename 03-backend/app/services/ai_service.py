@@ -218,7 +218,7 @@ class AIService:
         self,
         prompt: str,
         context: dict[str, Any],
-        history: list[dict[str, str]] = None,
+        history: list[dict[str, str]] | None = None,
     ) -> AIMessageResponse:
         return await self.provider.generate_response(prompt, context, history or [])
 

@@ -1,9 +1,8 @@
-﻿from typing import cast
-from starlette.types import ExceptionHandler
-from typing import cast
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
+from typing import cast
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -25,6 +24,15 @@ from app.core.errors import (
 from app.db.base import Base
 from app.db.session import engine
 from app.schemas.common import ApiResponse, HealthResponse
+
+# Starlette's `add_exception_handler` expects a handler whose second parameter
+# is the base `Exception` type. slowapi's and our custom handlers declare
+# narrower exception types (e.g. `RateLimitExceeded`, `AppException`), which is
+# correct at runtime but rejected by the type checker for contravariance
+# reasons. Casting to the exact handler contract satisfies the type checker
+# without changing runtime behaviour: handlers are still only ever invoked
+# with the exception type they were registered for.
+ExceptionHandlerT = Callable[[Request, Exception], Response | Awaitable[Response]]
 
 # Fail fast at startup when a production deployment is missing the minimum
 # security requirements (strong AUTH_SECRET, allow-listed CORS origins, DB).
@@ -55,7 +63,7 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(
     RateLimitExceeded,
-    cast(ExceptionHandler, _rate_limit_exceeded_handler),
+    cast(ExceptionHandlerT, _rate_limit_exceeded_handler),
 )
 
 # CORS Configuration
@@ -71,11 +79,11 @@ if settings.BACKEND_CORS_ORIGINS:
 # Exception Handlers
 app.add_exception_handler(
     AppException,
-    cast(ExceptionHandler, app_exception_handler),
+    cast(ExceptionHandlerT, app_exception_handler),
 )
 app.add_exception_handler(
     RequestValidationError,
-    cast(ExceptionHandler, validation_exception_handler),
+    cast(ExceptionHandlerT, validation_exception_handler),
 )
 app.add_exception_handler(Exception, generic_exception_handler)
 
@@ -100,6 +108,7 @@ async def health_check_v1():
 
 # Mount API v1
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+
 
 
 
