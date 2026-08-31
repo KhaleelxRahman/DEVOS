@@ -1,23 +1,16 @@
 # DEVOS Production Deployment
 
-Frontend:
-- Vercel
+Frontend: Vercel
+Backend: Render
+Database: PostgreSQL
 
-Backend:
-- Render
-
-Database:
-- PostgreSQL
-
-## Backend Start Command
-
+## Backend Start
 uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 ## Frontend Build
-
 npm run build
 
-Output:
+## Output
 dist
 
 ## Required Environment Variables
