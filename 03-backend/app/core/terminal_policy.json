@@ -1,0 +1,19 @@
+{
+  "allowed_commands": [
+    "pwd",
+    "ls",
+    "cd",
+    "git",
+    "python",
+    "pip",
+    "npm",
+    "pytest",
+    "uvicorn"
+  ],
+  "blocked_commands": [
+    "format",
+    "diskpart",
+    "shutdown",
+    "rd /s /q C:\\"
+  ]
+}
