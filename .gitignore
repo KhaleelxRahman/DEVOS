@@ -31,3 +31,8 @@ playwright-report/
 test-results/
 playwright-report/
 playwright/.cache/
+
+# Generated databases (backend default DB + pytest artifacts)
+*.db
+*.db-journal
+*.sqlite3
