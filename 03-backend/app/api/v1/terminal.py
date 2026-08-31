@@ -50,6 +50,7 @@ async def execute_command(
         activity_type="terminal.executed",
         metadata={"command": data.command, "exit_code": result.exit_code},
     )
+    await db.commit()
     return ApiResponse(
         success=True,
         data=result,

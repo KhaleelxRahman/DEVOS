@@ -32,6 +32,7 @@ async def create_project(
         activity_type="project.created",
         metadata={"name": project.name},
     )
+    await db.commit()
     return ApiResponse(
         success=True,
         data=ProjectResponse.model_validate(project),
@@ -77,6 +78,7 @@ async def update_project(
         activity_type="project.updated",
         metadata={"name": project.name},
     )
+    await db.commit()
     return ApiResponse(
         success=True,
         data=ProjectResponse.model_validate(project),
@@ -95,6 +97,7 @@ async def delete_project(
         activity_type="project.deleted",
         metadata={"project_id": project_id},
     )
+    await db.commit()
     return ApiResponse(
         success=True,
         data={"message": "Project deleted successfully"},

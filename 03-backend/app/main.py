@@ -12,7 +12,7 @@ from slowapi.util import get_remote_address
 import app.models
 from app.api.v1.router import api_v1_router
 from app.core.app_logging import logger
-from app.core.config import settings
+from app.core.config import _validate_production_safety, settings
 from app.core.errors import (
     AppException,
     app_exception_handler,
@@ -22,6 +22,10 @@ from app.core.errors import (
 from app.db.base import Base
 from app.db.session import engine
 from app.schemas.common import ApiResponse, HealthResponse
+
+# Fail fast at startup when a production deployment is missing the minimum
+# security requirements (strong AUTH_SECRET, allow-listed CORS origins, DB).
+_validate_production_safety(settings)
 
 
 @asynccontextmanager
@@ -47,7 +51,6 @@ app = FastAPI(
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
 
 # CORS Configuration
 if settings.BACKEND_CORS_ORIGINS:
@@ -85,4 +88,5 @@ async def health_check_v1():
 
 # Mount API v1
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+
 
