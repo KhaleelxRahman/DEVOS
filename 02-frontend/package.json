@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "auth0-js": "^10.2.1",
+    "axios": "^1.20.0",
     "lucide-react": "^1.38.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
