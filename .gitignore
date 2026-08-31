@@ -17,3 +17,4 @@ __pycache__/
 .lighthouseci/
 coverage/
 htmlcov/
+04-tests/__pycache__/

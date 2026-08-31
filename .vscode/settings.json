@@ -1,15 +1,16 @@
 {
-    "files.insertFinalNewline":  true,
-    "editor.formatOnSave":  true,
-    "explorer.sortOrder":  "type",
-    "files.exclude":  {
-                          "**/.ruff_cache":  true,
-                          "**/node_modules":  true,
-                          "**/.vercel":  true,
-                          "**/.dist":  true,
-                          "**/__pycache__":  true,
-                          "**/.pytest_cache":  true
-                      },
-    "explorer.compactFolders":  true,
-    "files.trimTrailingWhitespace":  true
+  "files.exclude":{
+    "**/node_modules":true,
+    "**/.ruff_cache":true,
+    "**/.pytest_cache":true,
+    "**/__pycache__":true,
+    "**/dist":true
+  },
+  "explorer.compactFolders":true,
+  "editor.formatOnSave":true,
+  "files.trimTrailingWhitespace":true,
+  "files.insertFinalNewline":true,
+  "typescript.tsserver.maxTsServerMemory":1024,
+  "python.analysis.indexing":false,
+  "python.analysis.autoImportCompletions":true
 }
