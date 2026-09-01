@@ -39,8 +39,10 @@ reflects these rules.
   `ProjectService.get_for_user(db, project_id, current_user.id)`, which
   rejects non-owners (403) or hides the project (404) — verified by
   `test_projects.py` and `test_public_and_files.py` cross-user tests.
+
 - Files on disk live under `PROJECTS_STORAGE_PATH/<project_id>/`; all paths
   are validated with `validate_safe_path` before any filesystem operation.
+
 - AI conversations, terminal history, and activity rows are keyed by
   `user_id` and only ever queried for the authenticated user.
 

@@ -770,7 +770,9 @@ Avoid excessive animation.
 Every empty state should explain:
 
 1. What is empty
+
 2. Why it matters
+
 3. What to do next
 
 Example:
@@ -844,8 +846,11 @@ Small screens:
 Prioritize:
 
 1. Code
+
 2. File explorer
+
 3. AI
+
 4. Terminal
 
 Do not allow panels to become unusably small.
@@ -980,9 +985,13 @@ All primary actions use the same primary button system.
 Every screen:
 
 1. Primary purpose
+
 2. Primary action
+
 3. Important information
+
 4. Secondary information
+
 5. Supporting actions
 
 Do not give every element equal visual weight.
@@ -1105,9 +1114,13 @@ Do not require manual page refresh.
 When something fails:
 
 1. Preserve user input where possible.
+
 2. Explain failure.
+
 3. Provide retry.
+
 4. Avoid losing project state.
+
 5. Log diagnostic information appropriately.
 
 6. PERFORMANCE UX
@@ -1194,9 +1207,13 @@ Avoid:
 Mobile priorities:
 
 1. Dashboard
+
 2. Projects
+
 3. AI
+
 4. Activity
+
 5. Project information
 
 Full developer workspace remains desktop-first.
@@ -1206,10 +1223,15 @@ Full developer workspace remains desktop-first.
 Desktop priorities:
 
 1. Workspace
+
 2. Code
+
 3. File explorer
+
 4. AI
+
 5. Terminal
+
 6. Git
 
 7. UI SECURITY

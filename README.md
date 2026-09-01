@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=111827)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](./02-frontend/public/manifest.webmanifest)
 
 **Project links:** [Live Demo](#live-demo) · [Documentation](./01-docs/README.md) · [Deployment Checklist](./01-docs/deployment/DEPLOYMENT_CHECKLIST.md) · [Release Notes](./01-docs/releases/RELEASE_NOTES.md) · [Rollback Plan](./01-docs/deployment/ROLLBACK_PLAN.md)
@@ -60,8 +60,11 @@ FastAPI ── SQLAlchemy async ── SQLite or PostgreSQL
 ```bash
 cd 03-backend
 python -m venv .venv
+
 # Windows: .venv\Scripts\activate
+
 # Linux/macOS: source .venv/bin/activate
+
 pip install -r requirements.txt
 copy .env.example .env  # Windows; use cp on Linux/macOS
 uvicorn app.main:app --reload --port 8000
@@ -110,15 +113,21 @@ remain human-owned configuration steps.
 ## Tech Stack
 
 - **Frontend:** React 18, TypeScript, Vite, React Router, Lucide
+
 - **Backend:** FastAPI, SQLAlchemy async, Pydantic Settings
+
 - **Data:** SQLite locally; PostgreSQL supported for deployment
+
 - **Quality:** Ruff, pytest, TypeScript, Vite build, GitHub Actions
 
 ## Roadmap
 
 - Container or OS-level isolation for terminal workloads
+
 - Production observability and privacy-preserving analytics
+
 - Expanded repository import and collaboration flows
+
 - Formal Lighthouse and multi-browser release gates
 
 ## Documentation
@@ -132,8 +141,43 @@ Read [CONTRIBUTING.md](./.github/CONTRIBUTING.md), open an issue using the provi
 ## Support
 
 - Email: [mdkhaleelurrahman51@gmail.com](mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS%20v1.0.0%20Support)
+
 - Phone: [+91 78428 35936](tel:+917842835936)
 
-## License
+## License & Legal
 
-DEVOS v1.0.0 is released under the [MIT License](./LICENSE).
+DEVOS v1.0.0 is released under the **[Apache License 2.0](./LICENSE)**.
+
+**Copyright © 2026 Md Khaleel Ur Rahman**
+
+- **Source Code:** Licensed under Apache 2.0 (use, modify, distribute freely)
+
+- **Documentation:** Original content protected; see [COPYRIGHT.md](./COPYRIGHT.md)
+
+- **Brand & Assets:** DEVOS name and logos are protected; use only as permitted
+
+- **Third-Party:** See [NOTICE](./NOTICE) for dependencies and their licenses
+
+**Quick Legal Summary:**
+
+- ✅ You can use DEVOS for personal and commercial projects
+
+- ✅ You can modify and distribute the source code
+
+- ✅ You must include the original copyright notice and Apache 2.0 license
+
+- ✅ You must document significant changes
+
+- ❌ You cannot claim DEVOS as your own product
+
+- ❌ You cannot use the DEVOS trademark without permission
+
+For details, see:
+
+- [LICENSE](./LICENSE) — Full Apache 2.0 legal text
+
+- [COPYRIGHT.md](./COPYRIGHT.md) — Ownership, trademark, and usage policy
+
+- [NOTICE](./NOTICE) — Third-party dependency attribution
+
+**This is original work submitted to iQOO Hackathon 2026.**

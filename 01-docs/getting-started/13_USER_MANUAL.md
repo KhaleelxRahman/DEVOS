@@ -17,9 +17,13 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 - Default database: SQLite at `03-backend/devos.db` (no setup needed).
+
 - Tables are created automatically at startup.
+
 - For PostgreSQL: set `DATABASE_URL` and run `alembic upgrade head`.
+
 - API docs: `http://localhost:8000/api/v1/docs` and `/api/v1/redoc`.
+
 - Health: `GET /health` and `GET /api/v1/health`.
 
 ### Frontend
@@ -60,20 +64,29 @@ context (stored per session in `sessionStorage`).
 The Workspace has five panels:
 
 1. **Files** — real project file tree. Sensitive files (`.env`, keys),
+
    `.git`, `node_modules`, and build output are never exposed. Filename
    search hits the backend search index.
+
 2. **Code Viewer** — tabbed file viewer with language detection and an Edit mode
+
    (Edit -> Save persists via the API; closing a tab with unsaved changes asks for
    confirmation).
+
 3. **AI Assistant** — chat persists per project/user. The header shows the
+
    active provider; without an API key it is labelled **Local/Mock**. With a
    file open, `/explain`, `/debug`, `/refactor`, `/test`, `/document`,
    `/security`, and `/optimize` run against the file's content.
+
 4. **Terminal** — executes an allowlisted set of dev commands
+
    (`git, npm, node, python, pip, pytest, cargo, ls, echo, cat, pwd, tree`)
    with no shell, a 30s timeout, and the project workspace as cwd. Blocked
    commands are rejected with a clear error.
+
 5. **Git & Tests** — live branch list, stage/unstage per file, commit,
+
    pull/push, diff, recent commits; plus Testing Center jobs (`pytest`,
    `typecheck`, `build`) with captured logs.
 
@@ -82,6 +95,7 @@ The Workspace has five panels:
 Set one of these in `03-backend/.env`:
 
 - `GEMINI_API_KEY` (with `AI_PROVIDER=gemini`)
+
 - `OPENAI_API_KEY` (with `AI_PROVIDER=openai`)
 
 Without a key, DEVOS v1.0.0 serves **Local/Mock** responses that are clearly marked

@@ -583,10 +583,15 @@ Select relevant information.
 Potential strategy:
 
 1. Current file
+
 2. Related files
+
 3. Imports
+
 4. Project metadata
+
 5. Relevant Git information
+
 6. Recent conversation
 
 7. SECRET PROTECTION
@@ -636,14 +641,23 @@ Register
 Scenario:
 
 1. Create DEVOS v1.0.0 project
+
 2. Open project workspace
+
 3. Inspect project structure
+
 4. Open a source file
+
 5. Ask AI to explain it
+
 6. Run a development command
+
 7. Modify code
+
 8. Check Git status
+
 9. Review diff
+
 10. Commit
 
 11. PHASE 12 DEFINITION OF DONE
@@ -861,10 +875,15 @@ Prefer small, testable increments.
 After every meaningful change:
 
 1. Run tests.
+
 2. Run build.
+
 3. Check console errors.
+
 4. Check API.
+
 5. Check UI.
+
 6. Check existing functionality.
 
 7. BUG FIXING PROCESS
@@ -872,10 +891,15 @@ After every meaningful change:
 When a bug appears:
 
 1. Reproduce
+
 2. Identify root cause
+
 3. Fix root cause
+
 4. Test fix
+
 5. Check regression
+
 6. Document if important
 
 7. NO BLIND REWRITES
@@ -931,15 +955,25 @@ Simplify:
 Recommended demonstration:
 
 1. Login
+
 2. Create/open DEVOS v1.0.0 project
+
 3. Show project-aware workspace
+
 4. Show file tree
+
 5. Open code
+
 6. Ask AI about code
+
 7. Show AI using project context
+
 8. Run terminal command
+
 9. Show Git changes
+
 10. Review workflow
+
 11. Explain context engine
 
 12. DEMO PRINCIPLE
@@ -1050,10 +1084,15 @@ Marketplace
 Every feature must answer:
 
 1. Why does it exist?
+
 2. Which user problem does it solve?
+
 3. Does it reduce context switching?
+
 4. Is it necessary for MVP?
+
 5. Can it be implemented safely?
+
 6. Can it be tested?
 
 7. FEATURE PRIORITY FRAMEWORK

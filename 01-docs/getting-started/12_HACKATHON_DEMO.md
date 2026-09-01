@@ -263,9 +263,13 @@ Judges should remember:
 Show visually:
 
 1. Workspace
+
 2. File explorer
+
 3. AI
+
 4. Terminal
+
 5. Git
 
 6. DO NOT DEMONSTRATE

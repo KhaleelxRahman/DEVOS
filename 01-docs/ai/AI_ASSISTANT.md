@@ -3,10 +3,15 @@
 Features
 
 - Project-aware AI
+
 - Code Explanation
+
 - Commit Message Generator
+
 - Bug Analysis
+
 - File Context
+
 - Conversation History
 
 Environment Variables

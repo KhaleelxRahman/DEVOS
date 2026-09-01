@@ -10,7 +10,9 @@ Git, terminal, testing, AI, activity, workspace, and GitHub integration.
 GitHub OAuth contract:
 
 - `POST /api/v1/github/connect`
+
 - `GET /api/v1/github/callback`
+
 - `GET /api/v1/github/repositories`
 
 See the detailed [API specification](./API_SPECIFICATION.md).

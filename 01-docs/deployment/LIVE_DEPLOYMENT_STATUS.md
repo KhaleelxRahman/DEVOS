@@ -29,8 +29,13 @@ Connect DATABASE_URL from Render PostgreSQL.
 ## Environment Variables
 
 - DATABASE_URL
+
 - SECRET_KEY
+
 - OPENAI_API_KEY
+
 - GITHUB_CLIENT_ID
+
 - GITHUB_CLIENT_SECRET
+
 - BACKEND_URL

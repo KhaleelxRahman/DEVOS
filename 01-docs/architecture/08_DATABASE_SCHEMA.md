@@ -54,10 +54,15 @@ The database must be:
 MVP entities:
 
 1. User
+
 2. Project
+
 3. Conversation
+
 4. ConversationMessage
+
 5. Activity
+
 6. GitHubConnection
 
 Future entities may include:

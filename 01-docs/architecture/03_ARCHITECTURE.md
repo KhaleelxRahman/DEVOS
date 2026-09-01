@@ -479,10 +479,15 @@ AI Request
 Priority order:
 
 1. Current file
+
 2. User-mentioned files
+
 3. Relevant neighboring files
+
 4. Project metadata
+
 5. Relevant Git information
+
 6. Recent relevant activity
 
 Never send the entire repository blindly to the AI.
@@ -774,10 +779,15 @@ Every major dependency must have a clear purpose.
 Before adding a major technology:
 
 1. Identify the problem.
+
 2. Check whether the existing stack can solve it.
+
 3. Evaluate complexity.
+
 4. Evaluate security.
+
 5. Evaluate maintenance cost.
+
 6. Add it only when justified.
 
 7. ANTI-PATTERNS

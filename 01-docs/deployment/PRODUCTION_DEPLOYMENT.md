@@ -5,12 +5,15 @@ Backend: Render
 Database: PostgreSQL
 
 ## Backend Start
+
 uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 ## Frontend Build
+
 npm run build
 
 ## Output
+
 dist
 
 ## Required Environment Variables

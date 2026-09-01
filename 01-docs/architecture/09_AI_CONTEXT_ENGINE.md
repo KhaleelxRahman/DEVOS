@@ -221,9 +221,13 @@ Context should remain within a defined token budget.
 When context is too large:
 
 1. Keep current file
+
 2. Keep directly related files
+
 3. Keep relevant metadata
+
 4. Summarize lower-priority information
+
 5. Remove unrelated files
 
 6. SECRET FILTERING
@@ -407,9 +411,13 @@ For:
 Context priority:
 
 1. Current file
+
 2. Function
+
 3. Imported dependencies
+
 4. Related types
+
 5. Project metadata
 
 6. BUG DEBUGGING
@@ -421,10 +429,15 @@ For:
 Context priority:
 
 1. Error
+
 2. API endpoint
+
 3. Backend service
+
 4. Database model
+
 5. Relevant frontend request
+
 6. Git changes
 
 7. CODE GENERATION

@@ -33,12 +33,19 @@ IMPLEMENTED
 DEVOS v1.0.0 should use:
 
 1. Unit Testing
+
 2. API Testing
+
 3. Integration Testing
+
 4. UI Testing
+
 5. End-to-End Testing
+
 6. Security Testing
+
 7. Performance Testing
+
 8. Manual QA
 
 9. UNIT TESTING
@@ -379,9 +386,13 @@ Also test upgrading an existing database.
 After fixing a bug:
 
 1. Reproduce original bug
+
 2. Apply fix
+
 3. Verify fix
+
 4. Run related tests
+
 5. Run regression suite
 
 6. BUILD TEST
