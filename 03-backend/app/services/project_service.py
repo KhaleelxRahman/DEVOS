@@ -1,5 +1,6 @@
 import os
 import shutil
+import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,6 +40,13 @@ class ProjectService:
 
     @staticmethod
     async def get_by_id(db: AsyncSession, project_id: str) -> Project | None:
+        # Project ids are UUIDs; malformed ids can never match a row, so fail
+        # fast with a clean "not found" instead of relying on DB-specific
+        # behaviour for arbitrary strings.
+        try:
+            uuid.UUID(str(project_id))
+        except (TypeError, ValueError):
+            return None
         stmt = select(Project).where(Project.id == project_id)
         result = await db.execute(stmt)
         return result.scalars().first()
@@ -54,12 +62,18 @@ class ProjectService:
 
     @staticmethod
     async def list_for_user(db: AsyncSession, user_id: str) -> list[Project]:
-        stmt = select(Project).where(Project.user_id == user_id).order_by(Project.created_at.desc())
+        stmt = (
+            select(Project)
+            .where(Project.user_id == user_id)
+            .order_by(Project.created_at.desc())
+        )
         result = await db.execute(stmt)
         return list(result.scalars().all())
 
     @staticmethod
-    async def update(db: AsyncSession, project_id: str, user_id: str, data: ProjectUpdate) -> Project:
+    async def update(
+        db: AsyncSession, project_id: str, user_id: str, data: ProjectUpdate
+    ) -> Project:
         project = await ProjectService.get_for_user(db, project_id, user_id)
 
         if data.name is not None:
@@ -86,4 +100,3 @@ class ProjectService:
         if os.path.isdir(storage_path):
             shutil.rmtree(storage_path)
         return True
-

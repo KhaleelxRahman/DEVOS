@@ -19,6 +19,7 @@ class AppException(Exception):
         self.data = data
         super().__init__(message)
 
+
 class AuthRequiredException(AppException):
     def __init__(self, message: str = "Authentication required"):
         super().__init__(
@@ -26,6 +27,7 @@ class AuthRequiredException(AppException):
             code="AUTH_REQUIRED",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
+
 
 class InvalidCredentialsException(AppException):
     def __init__(self, message: str = "Invalid email or password"):
@@ -35,6 +37,7 @@ class InvalidCredentialsException(AppException):
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
+
 class ProjectNotFoundException(AppException):
     def __init__(self, message: str = "Project not found"):
         super().__init__(
@@ -43,13 +46,17 @@ class ProjectNotFoundException(AppException):
             status_code=status.HTTP_404_NOT_FOUND,
         )
 
+
 class ProjectAccessDeniedException(AppException):
-    def __init__(self, message: str = "You do not have permission to access this project"):
+    def __init__(
+        self, message: str = "You do not have permission to access this project"
+    ):
         super().__init__(
             message=message,
             code="PROJECT_ACCESS_DENIED",
             status_code=status.HTTP_403_FORBIDDEN,
         )
+
 
 class FileNotFoundException(AppException):
     def __init__(self, message: str = "File not found"):
@@ -59,6 +66,7 @@ class FileNotFoundException(AppException):
             status_code=status.HTTP_404_NOT_FOUND,
         )
 
+
 class FileAccessDeniedException(AppException):
     def __init__(self, message: str = "Path outside project boundaries is forbidden"):
         super().__init__(
@@ -67,6 +75,7 @@ class FileAccessDeniedException(AppException):
             status_code=status.HTTP_403_FORBIDDEN,
         )
 
+
 class ValidationException(AppException):
     def __init__(self, message: str = "Validation error"):
         super().__init__(
@@ -74,6 +83,7 @@ class ValidationException(AppException):
             code="VALIDATION_ERROR",
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
+
 
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     return JSONResponse(
@@ -86,6 +96,7 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
             },
         },
     )
+
 
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
@@ -103,6 +114,7 @@ async def validation_exception_handler(
         },
     )
 
+
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -114,4 +126,3 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
             },
         },
     )
-

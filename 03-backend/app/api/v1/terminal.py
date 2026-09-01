@@ -13,6 +13,7 @@ from app.services.terminal_service import TerminalService
 
 router = APIRouter(prefix="/projects/{project_id}/terminal", tags=["terminal"])
 
+
 @router.get("/history", response_model=ApiResponse[dict])
 async def get_history(
     project_id: str,
@@ -34,7 +35,11 @@ async def get_history(
     return ApiResponse(success=True, data={"history": history})
 
 
-@router.post("/execute", response_model=ApiResponse[TerminalResultResponse], dependencies=[Depends(rate_limit(30, 60, "terminal"))])
+@router.post(
+    "/execute",
+    response_model=ApiResponse[TerminalResultResponse],
+    dependencies=[Depends(rate_limit(30, 60, "terminal"))],
+)
 async def execute_command(
     project_id: str,
     data: TerminalExecuteRequest,
@@ -50,8 +55,8 @@ async def execute_command(
         activity_type="terminal.executed",
         metadata={"command": data.command, "exit_code": result.exit_code},
     )
+    await db.commit()
     return ApiResponse(
         success=True,
         data=result,
     )
-

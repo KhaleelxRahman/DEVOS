@@ -1,0 +1,39 @@
+name: Python Tests
+
+on:
+  push:
+    branches:
+      - main
+      - DEVOS-v1.0.0
+  pull_request:
+    branches:
+      - main
+      - DEVOS-v1.0.0
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then
+            pytest
+          else
+            echo "No tests directory found. Skipping."
+          fi

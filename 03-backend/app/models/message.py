@@ -25,7 +25,9 @@ class ConversationMessage(Base):
         nullable=False,
         index=True,
     )
-    role: Mapped[str] = mapped_column(String(50), nullable=False)  # user, assistant, system
+    role: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )  # user, assistant, system
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -37,4 +39,3 @@ class ConversationMessage(Base):
     conversation: Mapped["Conversation"] = relationship(
         "Conversation", back_populates="messages"
     )
-

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProjectProvider } from './context/ProjectContext';
@@ -8,6 +8,7 @@ import { SiteLayout } from './components/site/SiteLayout';
 import { CookieConsentBanner } from './components/site/CookieConsentBanner';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProjectsPage } from './pages/ProjectsPage';
+import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { WorkspacePage } from './pages/WorkspacePage';
 import { SettingsPage } from './pages/SettingsPage';
 
@@ -91,6 +92,7 @@ export const App: React.FC = () => {
                 <Route index element={<Navigate to="/app/dashboard" replace />} />
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="projects" element={<ProjectsPage />} />
+                <Route path="projects/:projectId" element={<ProjectDetailPage />} />
                 <Route path="workspace" element={<WorkspacePage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>

@@ -1,0 +1,6 @@
+node_modules/
+02-frontend/node_modules/
+.dist/
+.vercel/
+.pytest_cache/
+.ruff_cache/

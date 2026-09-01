@@ -18,6 +18,7 @@ from app.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
+
 @router.post("", response_model=ApiResponse[ProjectResponse])
 async def create_project(
     data: ProjectCreate,
@@ -32,10 +33,12 @@ async def create_project(
         activity_type="project.created",
         metadata={"name": project.name},
     )
+    await db.commit()
     return ApiResponse(
         success=True,
         data=ProjectResponse.model_validate(project),
     )
+
 
 @router.get("", response_model=ApiResponse[ProjectListResponse])
 async def list_projects(
@@ -50,6 +53,7 @@ async def list_projects(
         ),
     )
 
+
 @router.get("/{project_id}", response_model=ApiResponse[ProjectResponse])
 async def get_project(
     project_id: str,
@@ -61,6 +65,7 @@ async def get_project(
         success=True,
         data=ProjectResponse.model_validate(project),
     )
+
 
 @router.patch("/{project_id}", response_model=ApiResponse[ProjectResponse])
 async def update_project(
@@ -77,10 +82,12 @@ async def update_project(
         activity_type="project.updated",
         metadata={"name": project.name},
     )
+    await db.commit()
     return ApiResponse(
         success=True,
         data=ProjectResponse.model_validate(project),
     )
+
 
 @router.delete("/{project_id}", response_model=ApiResponse[dict])
 async def delete_project(
@@ -95,15 +102,17 @@ async def delete_project(
         activity_type="project.deleted",
         metadata={"project_id": project_id},
     )
+    await db.commit()
     return ApiResponse(
         success=True,
         data={"message": "Project deleted successfully"},
     )
 
+
 @router.get("/{project_id}/context", response_model=ApiResponse[dict])
 async def get_project_context(
     project_id: str,
-    current_file: str = None,
+    current_file: str | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -114,6 +123,7 @@ async def get_project_context(
         success=True,
         data=context,
     )
+
 
 @router.get("/{project_id}/activity", response_model=ApiResponse[ActivityListResponse])
 async def get_project_activity(
@@ -130,4 +140,3 @@ async def get_project_activity(
             activities=[ActivityResponse.model_validate(a) for a in activities]
         ),
     )
-

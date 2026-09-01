@@ -27,14 +27,27 @@ class ActivityService:
         return activity
 
     @staticmethod
-    async def list_for_user(db: AsyncSession, user_id: str, limit: int = 20) -> list[Activity]:
-        stmt = select(Activity).where(Activity.user_id == user_id).order_by(Activity.created_at.desc()).limit(limit)
+    async def list_for_user(
+        db: AsyncSession, user_id: str, limit: int = 20
+    ) -> list[Activity]:
+        stmt = (
+            select(Activity)
+            .where(Activity.user_id == user_id)
+            .order_by(Activity.created_at.desc())
+            .limit(limit)
+        )
         result = await db.execute(stmt)
         return list(result.scalars().all())
 
     @staticmethod
-    async def list_for_project(db: AsyncSession, project_id: str, limit: int = 20) -> list[Activity]:
-        stmt = select(Activity).where(Activity.project_id == project_id).order_by(Activity.created_at.desc()).limit(limit)
+    async def list_for_project(
+        db: AsyncSession, project_id: str, limit: int = 20
+    ) -> list[Activity]:
+        stmt = (
+            select(Activity)
+            .where(Activity.project_id == project_id)
+            .order_by(Activity.created_at.desc())
+            .limit(limit)
+        )
         result = await db.execute(stmt)
         return list(result.scalars().all())
-

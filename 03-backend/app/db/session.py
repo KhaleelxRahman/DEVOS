@@ -1,31 +1,22 @@
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncIterator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.core.config import settings
+from app.core.config import DATABASE_URL
 
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=False,
-    future=True,
-)
+# Async engine (aiosqlite locally, asyncpg in production). The entire request
+# path — dependencies, services and Alembic — is async-first.
+engine = create_async_engine(DATABASE_URL, future=True)
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
-    autocommit=False,
     autoflush=False,
 )
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
 
+async def get_db() -> AsyncIterator[AsyncSession]:
+    """FastAPI dependency that yields a request-scoped async session."""
+    async with AsyncSessionLocal() as session:
+        yield session

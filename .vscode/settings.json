@@ -1,0 +1,7 @@
+﻿{
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/03-backend"
+  ],
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.indexing": true
+}

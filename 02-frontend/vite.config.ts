@@ -4,6 +4,25 @@ import path from 'node:path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build:{
+    sourcemap:false,
+    cssCodeSplit:true,
+    chunkSizeWarningLimit:600,
+    rollupOptions:{
+      output:{
+        manualChunks(id){
+          if(id.includes("node_modules")){
+            if(id.includes("lucide-react")) return "icons";
+            if(
+              id.includes("react") ||
+              id.includes("react-dom") ||
+              id.includes("react-router-dom")
+            ) return "vendor";
+          }
+        }
+      }
+    }
+  },
   plugins: [react()],
   resolve: {
     alias: {
@@ -34,3 +53,5 @@ export default defineConfig({
     },
   },
 });
+
+

@@ -19,8 +19,9 @@
   /* Text & Content */
   --color-text-primary: #f8fafc;
   --color-text-secondary: #94a3b8;
-  /* #6c7b95 chosen for 4.55:1 contrast ratio with background (WCAG AA compliant) */
-  --color-text-muted: #6c7b95;
+  /* #8494ad gives 5.8:1 on --color-surface (#0f172a) and 6.5:1 on
+     --color-background (#090d16) — WCAG AA compliant (computed, verified) */
+  --color-text-muted: #8494ad;
   --color-text-disabled: #475569;
 
   /* Accent (Primary brand/action) */
@@ -29,6 +30,8 @@
   --color-accent-hover: #1d4ed8;
   --color-accent-subtle: rgba(37, 99, 235, 0.12);
   --color-accent-text: #ffffff;
+  /* Brighter accent for links/text on dark surfaces (7.02:1 on #0f172a) */
+  --color-accent-bright: #60a5fa;
 
   /* Functional Status Colors */
   --color-success: #10b981;

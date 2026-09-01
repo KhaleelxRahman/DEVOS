@@ -4,6 +4,7 @@ This is NOT a general-purpose command executor: only the predefined jobs
 below can be requested, and their arguments cannot be influenced by the
 caller beyond the project scope.
 """
+
 import asyncio
 import shutil
 import time
@@ -107,4 +108,3 @@ class TestingService:
             "stdout": stdout,
             "stderr": stderr,
         }
-

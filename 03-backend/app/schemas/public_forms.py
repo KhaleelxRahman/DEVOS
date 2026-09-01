@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
@@ -42,4 +41,3 @@ class ContactRequest(BaseModel):
 
 class ContactResponse(BaseModel):
     status: str  # "received"
-

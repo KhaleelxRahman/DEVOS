@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ExternalLink, RefreshCw, Star, GitFork } from 'lucide-react';
+import { ExternalLink, RefreshCw, Star, GitFork, Github } from 'lucide-react';
 import { Card, Button, Badge, Spinner, Input } from '../components/common';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,8 @@ export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const [github, setGithub] = useState<{ connected: boolean; username: string | null } | null>(null);
   const [githubError, setGithubError] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [githubNotice, setGithubNotice] = useState('');
   const [apiStatus, setApiStatus] = useState<string | null>(null);
   const [repositories, setRepositories] = useState<GithubRepository[]>([]);
   const [repositoryError, setRepositoryError] = useState('');
@@ -69,6 +71,36 @@ export const SettingsPage: React.FC = () => {
     navigate('/login');
   };
 
+  const handleConnectGitHub = () => {
+    setIsConnecting(true);
+    setGithubError('');
+    setGithubNotice('');
+    githubApi
+      .connect()
+      .then((res) => {
+        const url = res.data?.authorization_url;
+        if (url) {
+          window.location.assign(url);
+        } else {
+          setIsConnecting(false);
+          setGithubNotice(
+            'GitHub OAuth is not configured on the server yet. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET to enable connecting.'
+          );
+        }
+      })
+      .catch((err) => {
+        setIsConnecting(false);
+        const code = (err as { code?: string })?.code;
+        if (code === 'GITHUB_NOT_CONFIGURED' || /not configured/i.test(err?.message || '')) {
+          setGithubNotice(
+            'GitHub OAuth is not configured on the server yet. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET to enable connecting.'
+          );
+        } else {
+          setGithubError(err?.message || 'Unable to start GitHub connection');
+        }
+      });
+  };
+
   return (
     <div style={{ maxWidth: 600 }}>
       <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, marginBottom: 'var(--space-2)' }}>Settings</h1>
@@ -96,6 +128,11 @@ export const SettingsPage: React.FC = () => {
 
       <Card title="GitHub Connection" subtitle="Repository integration status" style={{ marginBottom: 'var(--space-4)' }}>
         {githubError && <p style={{ color: 'var(--color-error)', fontSize: 'var(--font-size-sm)' }}>{githubError}</p>}
+        {githubNotice && (
+          <p role="status" style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-2)' }}>
+            {githubNotice}
+          </p>
+        )}
         {!github && !githubError && <Spinner size={16} />}
         {github && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 'var(--font-size-sm)' }}>
@@ -114,6 +151,17 @@ export const SettingsPage: React.FC = () => {
                 </>
               )}
             </span>
+            {!github.connected && (
+              <Button
+                variant="primary"
+                size="sm"
+                leftIcon={<Github size={14} />}
+                onClick={handleConnectGitHub}
+                disabled={isConnecting}
+              >
+                {isConnecting ? 'Connecting…' : 'Connect GitHub'}
+              </Button>
+            )}
             {github.connected && (
               <Button
                 variant="secondary"

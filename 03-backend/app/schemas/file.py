@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel
 
 
@@ -10,8 +9,10 @@ class FileNodeResponse(BaseModel):
     extension: str | None = None
     children: list["FileNodeResponse"] | None = None
 
+
 class FileTreeResponse(BaseModel):
     files: list[FileNodeResponse]
+
 
 class FileContentResponse(BaseModel):
     name: str
@@ -19,4 +20,3 @@ class FileContentResponse(BaseModel):
     content: str
     language: str | None = None
     size: int
-

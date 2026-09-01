@@ -42,5 +42,6 @@ class Activity(Base):
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="activities")
-    project: Mapped[Optional["Project"]] = relationship("Project", back_populates="activities")
-
+    project: Mapped[Optional["Project"]] = relationship(
+        "Project", back_populates="activities"
+    )

@@ -36,7 +36,10 @@ async def run_job(
         user_id=current_user.id,
         project_id=project_id,
         activity_type="tests.executed",
-        metadata={"job": job_id, "status": result["status"], "duration_ms": result["duration_ms"]},
+        metadata={
+            "job": job_id,
+            "status": result["status"],
+            "duration_ms": result["duration_ms"],
+        },
     )
     return ApiResponse(success=True, data=result)
-

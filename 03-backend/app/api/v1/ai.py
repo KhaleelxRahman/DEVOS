@@ -1,8 +1,13 @@
+"""Project-scoped AI endpoints.
+
+Every route verifies project ownership through ProjectService.get_for_user,
+so a user can never read or reply inside another user's conversation.
+"""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
-from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.ai import (
@@ -23,12 +28,66 @@ from app.services.conversation_service import ConversationService
 from app.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects/{project_id}/ai", tags=["ai"])
-ai_service = AIService.from_settings()
 
 
 @router.get("/provider", response_model=ApiResponse[AIProviderStatusResponse])
-async def provider_status(current_user: User = Depends(get_current_user)):
-    return ApiResponse(success=True, data=AIProviderStatusResponse(**ai_service.status()))
+async def get_provider(
+    project_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await ProjectService.get_for_user(db, project_id, current_user.id)
+    return ApiResponse(
+        success=True,
+        data=AIProviderStatusResponse.model_validate(
+            AIService.from_settings().status()
+        ),
+    )
+
+
+@router.post("/chat", response_model=ApiResponse[AIChatResponse])
+async def chat(
+    project_id: str,
+    payload: AIChatRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await ProjectService.get_for_user(db, project_id, current_user.id)
+
+    if payload.conversation_id:
+        conversation = await ConversationService.get_for_user(
+            db, payload.conversation_id, project_id, current_user.id
+        )
+    else:
+        conversation = await ConversationService.create(db, project_id, current_user.id)
+
+    context = await ContextService.build_project_context(
+        db, project_id, current_user.id, current_file=payload.current_file
+    )
+    history = await ConversationService.list_messages(db, conversation.id)
+    history_payload = [{"role": m.role, "content": m.content} for m in history]
+
+    response = await AIService.from_settings().chat(
+        payload.message, context, history_payload
+    )
+
+    await ConversationService.add_message(db, conversation.id, "user", payload.message)
+    await ConversationService.add_message(
+        db, conversation.id, response.role, response.content
+    )
+    await ActivityService.record(
+        db,
+        user_id=current_user.id,
+        project_id=project_id,
+        activity_type="ai.chat",
+        metadata={"conversation_id": conversation.id},
+    )
+    await db.commit()
+
+    return ApiResponse(
+        success=True,
+        data=AIChatResponse(conversation_id=conversation.id, message=response),
+    )
 
 
 @router.get("/conversations", response_model=ApiResponse[ConversationListResponse])
@@ -38,11 +97,15 @@ async def list_conversations(
     db: AsyncSession = Depends(get_db),
 ):
     await ProjectService.get_for_user(db, project_id, current_user.id)
-    conversations = await ConversationService.list_for_project(db, project_id, current_user.id)
+    conversations = await ConversationService.list_for_project(
+        db, project_id, current_user.id
+    )
     return ApiResponse(
         success=True,
         data=ConversationListResponse(
-            conversations=[ConversationResponse.model_validate(c) for c in conversations]
+            conversations=[
+                ConversationResponse.model_validate(c) for c in conversations
+            ]
         ),
     )
 
@@ -55,99 +118,61 @@ async def create_conversation(
 ):
     await ProjectService.get_for_user(db, project_id, current_user.id)
     conversation = await ConversationService.create(db, project_id, current_user.id)
-    return ApiResponse(success=True, data=ConversationResponse.model_validate(conversation))
+    await db.commit()
+    return ApiResponse(
+        success=True, data=ConversationResponse.model_validate(conversation)
+    )
 
 
-@router.get("/conversations/{conversation_id}/messages", response_model=ApiResponse[MessageListResponse])
-async def list_messages(
+@router.get(
+    "/conversations/{conversation_id}/messages",
+    response_model=ApiResponse[MessageListResponse],
+)
+async def get_messages(
     project_id: str,
     conversation_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     await ProjectService.get_for_user(db, project_id, current_user.id)
-    conversation = await ConversationService.get_for_user(db, conversation_id, project_id, current_user.id)
+    conversation = await ConversationService.get_for_user(
+        db, conversation_id, project_id, current_user.id
+    )
     messages = await ConversationService.list_messages(db, conversation.id)
     return ApiResponse(
         success=True,
         data=MessageListResponse(
             messages=[
-                AIMessageResponse(
-                    role=m.role,
-                    content=m.content,
-                    created_at=m.created_at,
-                    provider=ai_service.provider.name if m.role == "assistant" else "user",
-                )
-                for m in messages
+                AIMessageResponse(role=m.role, content=m.content) for m in messages
             ]
         ),
     )
 
 
-@router.post("/chat", response_model=ApiResponse[AIChatResponse], dependencies=[Depends(rate_limit(20, 60, "ai_chat"))])
-async def chat(
-    project_id: str,
-    data: AIChatRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    await ProjectService.get_for_user(db, project_id, current_user.id)
-
-    if data.conversation_id:
-        conversation = await ConversationService.get_for_user(
-            db, data.conversation_id, project_id, current_user.id
-        )
-    else:
-        title = data.message.strip()[:60] or "New Conversation"
-        conversation = await ConversationService.create(db, project_id, current_user.id, title=title)
-
-    context = await ContextService.build_project_context(
-        db, project_id, current_user.id, current_file=data.current_file
-    )
-
-    history_records = await ConversationService.list_messages(db, conversation.id)
-    history = [{"role": m.role, "content": m.content} for m in history_records[-10:]]
-
-    await ConversationService.add_message(db, conversation.id, "user", data.message)
-    response_message = await ai_service.chat(prompt=data.message, context=context, history=history)
-    await ConversationService.add_message(db, conversation.id, "assistant", response_message.content)
-
-    await ActivityService.record(
-        db,
-        user_id=current_user.id,
-        project_id=project_id,
-        activity_type="ai.requested",
-        metadata={"prompt_preview": data.message[:50], "provider": ai_service.provider.name},
-    )
-
-    return ApiResponse(
-        success=True,
-        data=AIChatResponse(conversation_id=conversation.id, message=response_message),
-    )
-
-
-@router.post("/actions", response_model=ApiResponse[AIMessageResponse], dependencies=[Depends(rate_limit(20, 60, "ai_actions"))])
+@router.post("/actions", response_model=ApiResponse[AIMessageResponse])
 async def run_action(
     project_id: str,
-    data: AIActionRequest,
+    payload: AIActionRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     await ProjectService.get_for_user(db, project_id, current_user.id)
-    context = await ContextService.build_project_context(db, project_id, current_user.id)
-    result = await ai_service.run_action(
-        action=data.action,
-        code=data.code,
-        context=context,
-        file_path=data.file_path,
-        language=data.language,
+    context = await ContextService.build_project_context(
+        db, project_id, current_user.id, current_file=payload.file_path
+    )
+    response = await AIService.from_settings().run_action(
+        payload.action,
+        payload.code,
+        context,
+        file_path=payload.file_path,
+        language=payload.language,
     )
     await ActivityService.record(
         db,
         user_id=current_user.id,
         project_id=project_id,
-        activity_type=f"ai.action.{data.action}",
-        metadata={"file": data.file_path},
+        activity_type="ai.action",
+        metadata={"action": payload.action},
     )
-    return ApiResponse(success=True, data=result)
-
+    await db.commit()
+    return ApiResponse(success=True, data=response)

@@ -50,10 +50,18 @@ class GitHubService:
                 },
             )
         if response.status_code != 200:
-            raise AppException("GitHub OAuth token exchange failed", code="GITHUB_OAUTH_ERROR", status_code=502)
+            raise AppException(
+                "GitHub OAuth token exchange failed",
+                code="GITHUB_OAUTH_ERROR",
+                status_code=502,
+            )
         payload = response.json()
         if not payload.get("access_token"):
-            raise AppException("GitHub OAuth did not return an access token", code="GITHUB_OAUTH_ERROR", status_code=502)
+            raise AppException(
+                "GitHub OAuth did not return an access token",
+                code="GITHUB_OAUTH_ERROR",
+                status_code=502,
+            )
         return payload
 
     @staticmethod
@@ -68,7 +76,11 @@ class GitHubService:
                 },
             )
         if response.status_code != 200:
-            raise AppException("Unable to read GitHub account", code="GITHUB_API_ERROR", status_code=502)
+            raise AppException(
+                "Unable to read GitHub account",
+                code="GITHUB_API_ERROR",
+                status_code=502,
+            )
         return response.json()
 
     @staticmethod
@@ -147,4 +159,3 @@ class GitHubService:
             }
             for repo in resp.json()
         ]
-

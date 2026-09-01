@@ -7,20 +7,24 @@
     "dev": "vite",
     "build": "node scripts/generate-sitemap.mjs && tsc && vite build",
     "lint": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "lucide-react": "^0.359.0",
+    "auth0-js": "^10.2.1",
+    "axios": "^1.20.0",
+    "lucide-react": "^0.542.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.18.2"
+    "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
-    "@types/node": "^20.11.30",
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.22",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
     "@vitejs/plugin-react": "^6.1.0",
-    "typescript": "^5.2.2",
+    "typescript": "^7.0.2",
     "vite": "^8.2.2"
   }
 }

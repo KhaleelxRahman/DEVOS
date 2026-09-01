@@ -30,8 +30,9 @@ class GitHubConnection(Base, TimestampMixin):
     github_username: Mapped[str] = mapped_column(String(100), nullable=False)
     access_token: Mapped[str] = mapped_column(Text, nullable=False)
     refresh_token: Mapped[str | None] = mapped_column(Text, nullable=True)
-    token_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    token_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="github_connection")
-

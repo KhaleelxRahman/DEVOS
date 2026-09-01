@@ -64,9 +64,38 @@ async def test_project_crud_and_ownership(client):
     # Unknown project id
     assert (await client.get("/api/v1/projects/does-not-exist", headers=owner)).status_code == 404
 
+    # A deleted project id stays a clean 404 (stale client caches must fail
+    # gracefully), and malformed ids never 500.
     deleted = await client.delete(f"/api/v1/projects/{project_id}", headers=owner)
     assert deleted.status_code == 200
-    assert (await client.get(f"/api/v1/projects/{project_id}", headers=owner)).status_code == 404
+    gone = await client.get(f"/api/v1/projects/{project_id}", headers=owner)
+    assert gone.status_code == 404
+    assert gone.json()["error"]["code"] == "PROJECT_NOT_FOUND"
+
+
+@pytest.mark.asyncio
+async def test_get_project_handles_stale_and_malformed_ids(client):
+    """BUG-001 regression: stale/unknown project references return a clean 404."""
+    headers = await _register(client)
+    project_id = await _create_project(client, headers)
+
+    # Sanity: an existing project is reachable for its owner.
+    got = await client.get(f"/api/v1/projects/{project_id}", headers=headers)
+    assert got.status_code == 200
+
+    # Malformed (non-UUID) ids must be a deterministic 404, never a 500.
+    for bad_id in ("not-a-uuid", "e0e5b2c8-a13b-4742-af40-1eb7daf19ad6"):
+        res = await client.get(f"/api/v1/projects/{bad_id}", headers=headers)
+        assert res.status_code == 404
+        assert res.json()["error"]["code"] == "PROJECT_NOT_FOUND"
+
+    # A deleted project keeps returning 404 PROJECT_NOT_FOUND.
+    assert (
+        await client.delete(f"/api/v1/projects/{project_id}", headers=headers)
+    ).status_code == 200
+    res = await client.get(f"/api/v1/projects/{project_id}", headers=headers)
+    assert res.status_code == 404
+    assert res.json()["error"]["code"] == "PROJECT_NOT_FOUND"
 
 
 @pytest.mark.asyncio

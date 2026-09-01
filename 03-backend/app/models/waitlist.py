@@ -15,7 +15,9 @@ class WaitlistEntry(Base):
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
     )
-    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    email: Mapped[str] = mapped_column(
+        String(255), nullable=False, unique=True, index=True
+    )
     name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -41,4 +43,3 @@ class ContactMessage(Base):
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
-

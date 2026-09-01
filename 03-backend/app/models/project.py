@@ -30,9 +30,13 @@ class Project(Base, TimestampMixin):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     technologies: Mapped[Any | None] = mapped_column(JSON, nullable=True)
     repository_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    repository_provider: Mapped[str | None] = mapped_column(String(50), default="github", nullable=True)
+    repository_provider: Mapped[str | None] = mapped_column(
+        String(50), default="github", nullable=True
+    )
     repository_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    default_branch: Mapped[str | None] = mapped_column(String(100), default="main", nullable=True)
+    default_branch: Mapped[str | None] = mapped_column(
+        String(100), default="main", nullable=True
+    )
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="projects")
@@ -42,4 +46,3 @@ class Project(Base, TimestampMixin):
     activities: Mapped[list["Activity"]] = relationship(
         "Activity", back_populates="project", cascade="all, delete-orphan"
     )
-

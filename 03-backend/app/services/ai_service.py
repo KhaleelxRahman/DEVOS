@@ -5,6 +5,7 @@ selects a real provider only when its API key is configured; otherwise it
 returns the clearly labelled local mock provider. Mock responses are never
 presented as coming from a real provider.
 """
+
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -25,8 +26,7 @@ class BaseAIProvider(ABC):
         prompt: str,
         context: dict[str, Any],
         history: list[dict[str, str]],
-    ) -> AIMessageResponse:
-        ...
+    ) -> AIMessageResponse: ...
 
 
 def _render_context(context: dict[str, Any]) -> str:
@@ -34,7 +34,9 @@ def _render_context(context: dict[str, Any]) -> str:
     parts: list[str] = []
     project = context.get("project") or {}
     if project:
-        parts.append(f"Project: {project.get('name')} | stack: {', '.join(project.get('technologies') or [])}")
+        parts.append(
+            f"Project: {project.get('name')} | stack: {', '.join(project.get('technologies') or [])}"
+        )
 
     readme = context.get("readme")
     if readme:
@@ -90,7 +92,11 @@ class MockAIProvider(BaseAIProvider):
     ) -> AIMessageResponse:
         project_name = (context.get("project") or {}).get("name", "your project")
         current_file = context.get("current_file")
-        file_note = f" I can see your active file `{current_file.get('path')}`." if current_file else ""
+        file_note = (
+            f" I can see your active file `{current_file.get('path')}`."
+            if current_file
+            else ""
+        )
         content = (
             "**DEVOS v1.0.0 Local/Mock AI** (no AI provider configured — set `AI_PROVIDER` and "
             "`AI_API_KEY` to enable a real model).\n\n"
@@ -114,14 +120,18 @@ class GeminiProvider(BaseAIProvider):
     async def generate_response(self, prompt, context, history) -> AIMessageResponse:
         context_text = _render_context(context)
         contents = [
-            {"role": "user" if m.get("role") == "user" else "model",
-             "parts": [{"text": m.get("content", "")}]}
+            {
+                "role": "user" if m.get("role") == "user" else "model",
+                "parts": [{"text": m.get("content", "")}],
+            }
             for m in history[-10:]
         ]
-        contents.append({
-            "role": "user",
-            "parts": [{"text": f"{context_text}\n\nUser question:\n{prompt}"}],
-        })
+        contents.append(
+            {
+                "role": "user",
+                "parts": [{"text": f"{context_text}\n\nUser question:\n{prompt}"}],
+            }
+        )
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
             f"{self.model}:generateContent?key={self.api_key}"
@@ -136,7 +146,9 @@ class GeminiProvider(BaseAIProvider):
             .get("parts", [{}])[0]
             .get("text", "")
         )
-        return AIMessageResponse(role="assistant", content=text or "(empty response)", provider=self.name)
+        return AIMessageResponse(
+            role="assistant", content=text or "(empty response)", provider=self.name
+        )
 
 
 class OpenAIProvider(BaseAIProvider):
@@ -150,7 +162,10 @@ class OpenAIProvider(BaseAIProvider):
     async def generate_response(self, prompt, context, history) -> AIMessageResponse:
         context_text = _render_context(context)
         messages = [
-            {"role": "system", "content": "You are the DEVOS v1.0.0 coding assistant. Use the project context provided."},
+            {
+                "role": "system",
+                "content": "You are the DEVOS v1.0.0 coding assistant. Use the project context provided.",
+            },
             {"role": "system", "content": context_text},
         ]
         messages.extend(
@@ -168,7 +183,9 @@ class OpenAIProvider(BaseAIProvider):
             resp.raise_for_status()
             data = resp.json()
         text = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-        return AIMessageResponse(role="assistant", content=text or "(empty response)", provider=self.name)
+        return AIMessageResponse(
+            role="assistant", content=text or "(empty response)", provider=self.name
+        )
 
 
 _ACTION_PROMPTS = {
@@ -218,7 +235,7 @@ class AIService:
         self,
         prompt: str,
         context: dict[str, Any],
-        history: list[dict[str, str]] = None,
+        history: list[dict[str, str]] | None = None,
     ) -> AIMessageResponse:
         return await self.provider.generate_response(prompt, context, history or [])
 
@@ -232,9 +249,9 @@ class AIService:
     ) -> AIMessageResponse:
         if action not in _ACTION_PROMPTS:
             from app.core.errors import ValidationException
+
             raise ValidationException(f"Unknown AI action '{action}'")
         header = _ACTION_PROMPTS[action]
         location = f" (from `{file_path}`)" if file_path else ""
         prompt = f"{header}{location}\n\n```{language or ''}\n{code[:12000]}\n```"
         return await self.chat(prompt, context)
-

@@ -9,8 +9,10 @@ class GitStatusResponse(BaseModel):
     deleted: list[str] = []
     untracked: list[str] = []
 
+
 class GitCommitRequest(BaseModel):
     message: str
+
 
 class GitDiffResponse(BaseModel):
     diff: str
@@ -47,4 +49,3 @@ class GitCheckoutRequest(BaseModel):
 class GitOperationResponse(BaseModel):
     success: bool = True
     message: str = ""
-
