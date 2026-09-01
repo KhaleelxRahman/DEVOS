@@ -8,6 +8,7 @@ class AIChatRequest(BaseModel):
     conversation_id: str | None = None
     current_file: str | None = None
 
+
 class AIMessageResponse(BaseModel):
     role: str
     content: str
@@ -16,9 +17,11 @@ class AIMessageResponse(BaseModel):
     # "gemini" or "openai" — the UI must never disguise mock output as real.
     provider: str = "local-mock"
 
+
 class AIChatResponse(BaseModel):
     conversation_id: str
     message: AIMessageResponse
+
 
 class AIProviderStatusResponse(BaseModel):
     provider: str
@@ -26,17 +29,21 @@ class AIProviderStatusResponse(BaseModel):
     is_mock: bool
     configured: bool
 
+
 class AIActionRequest(BaseModel):
     action: str  # explain | debug | refactor | test | document | security | optimize
     code: str
     file_path: str | None = None
     language: str | None = None
 
+
 class ConversationListResponse(BaseModel):
     conversations: list["ConversationResponse"] = []
 
+
 class MessageListResponse(BaseModel):
     messages: list[AIMessageResponse] = []
+
 
 class ConversationResponse(BaseModel):
     id: str
@@ -46,4 +53,3 @@ class ConversationResponse(BaseModel):
     updated_at: datetime | None = None
 
     model_config = {"from_attributes": True}
-

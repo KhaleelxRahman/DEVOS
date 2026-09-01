@@ -1,4 +1,3 @@
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,7 +25,11 @@ class AuthService:
     async def register(db: AsyncSession, data: UserRegister) -> tuple[User, str]:
         existing = await AuthService.get_by_email(db, data.email)
         if existing:
-            raise AppException("An account with this email already exists", code="DUPLICATE_EMAIL", status_code=400)
+            raise AppException(
+                "An account with this email already exists",
+                code="DUPLICATE_EMAIL",
+                status_code=400,
+            )
 
         hashed_pw = get_password_hash(data.password)
         user = User(
@@ -52,4 +55,3 @@ class AuthService:
 
         token = create_access_token(subject=user.id)
         return user, token
-

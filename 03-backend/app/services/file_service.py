@@ -5,16 +5,30 @@ from app.schemas.file import FileContentResponse, FileNodeResponse
 from app.services.project_service import ProjectService
 
 SENSITIVE_PATTERNS = {
-    ".env", ".env.local", ".env.production", ".env.development",
-    "credentials.json", "secrets.json", "id_rsa", "id_ed25519"
+    ".env",
+    ".env.local",
+    ".env.production",
+    ".env.development",
+    "credentials.json",
+    "secrets.json",
+    "id_rsa",
+    "id_ed25519",
 }
 
 SENSITIVE_EXTENSIONS = {".key", ".pem", ".p12", ".pfx"}
 
 # Directories never exposed through the file API or the AI context engine
 EXCLUDED_DIRECTORIES = {
-    "node_modules", "__pycache__", "dist", "build", ".venv", "venv",
-    "target", ".next", ".cache", "coverage",
+    "node_modules",
+    "__pycache__",
+    "dist",
+    "build",
+    ".venv",
+    "venv",
+    "target",
+    ".next",
+    ".cache",
+    "coverage",
 }
 
 EXTENSION_LANGUAGE_MAP = {
@@ -34,6 +48,7 @@ EXTENSION_LANGUAGE_MAP = {
     ".txt": "plaintext",
 }
 
+
 class FileService:
     @staticmethod
     def is_sensitive(name: str) -> bool:
@@ -44,7 +59,9 @@ class FileService:
 
     @staticmethod
     def validate_safe_path(project_id: str, relative_path: str) -> str:
-        project_root = os.path.realpath(ProjectService.get_project_storage_path(project_id))
+        project_root = os.path.realpath(
+            ProjectService.get_project_storage_path(project_id)
+        )
         clean_rel = relative_path.lstrip("/\\")
         target_path = os.path.realpath(os.path.join(project_root, clean_rel))
 
@@ -54,30 +71,36 @@ class FileService:
 
         # Check sensitive file
         if FileService.is_sensitive(os.path.basename(target_path)):
-            raise FileAccessDeniedException("Access to sensitive credentials file is blocked")
+            raise FileAccessDeniedException(
+                "Access to sensitive credentials file is blocked"
+            )
 
         return target_path
 
     @staticmethod
     def get_file_tree(project_id: str) -> list[FileNodeResponse]:
-        project_root = os.path.abspath(ProjectService.get_project_storage_path(project_id))
-        
+        project_root = os.path.abspath(
+            ProjectService.get_project_storage_path(project_id)
+        )
+
         def walk_dir(current_path: str, rel_path: str = "") -> list[FileNodeResponse]:
             nodes: list[FileNodeResponse] = []
             try:
-                entries = sorted(os.scandir(current_path), key=lambda e: (not e.is_dir(), e.name.lower()))
+                entries = sorted(
+                    os.scandir(current_path),
+                    key=lambda e: (not e.is_dir(), e.name.lower()),
+                )
             except Exception:
                 return nodes
 
             for entry in entries:
                 if (
                     entry.is_symlink()
-                    or
-                    entry.name.startswith(".git")
+                    or entry.name.startswith(".git")
                     or entry.name in EXCLUDED_DIRECTORIES
                 ):
                     continue
-                
+
                 # Check sensitive
                 if FileService.is_sensitive(entry.name):
                     continue
@@ -150,36 +173,50 @@ class FileService:
         if not name or name.strip() != name:
             raise FileAccessDeniedException("Invalid name")
         if name in (".", "..") or "/" in name or "\\" in name or "\x00" in name:
-            raise FileAccessDeniedException("Invalid name: path separators are not allowed")
+            raise FileAccessDeniedException(
+                "Invalid name: path separators are not allowed"
+            )
         if name.startswith("."):
             raise FileAccessDeniedException("Hidden files and folders are not allowed")
         if FileService.is_sensitive(name):
-            raise FileAccessDeniedException("This filename is reserved for sensitive credentials and is not allowed")
+            raise FileAccessDeniedException(
+                "This filename is reserved for sensitive credentials and is not allowed"
+            )
         rel = f"{parent_rel.rstrip('/')}/{name}" if parent_rel else name
         return FileService.validate_safe_path(project_id, rel)
 
     @staticmethod
-    def create_file(project_id: str, parent_rel: str, name: str, content: str = "") -> FileContentResponse:
+    def create_file(
+        project_id: str, parent_rel: str, name: str, content: str = ""
+    ) -> FileContentResponse:
         abs_path = FileService._validate_new_name(project_id, parent_rel, name)
         if os.path.exists(abs_path):
-            raise FileAccessDeniedException("A file or folder with this name already exists")
+            raise FileAccessDeniedException(
+                "A file or folder with this name already exists"
+            )
         if len(content.encode("utf-8")) > FileService.MAX_FILE_WRITE_BYTES:
             raise FileAccessDeniedException("File content exceeds the 2MB limit")
         os.makedirs(os.path.dirname(abs_path), exist_ok=True)
         with open(abs_path, "x", encoding="utf-8") as f:
             f.write(content)
-        return FileService.get_file_content(project_id, f"{parent_rel.rstrip('/') + '/' if parent_rel else ''}{name}")
+        return FileService.get_file_content(
+            project_id, f"{parent_rel.rstrip('/') + '/' if parent_rel else ''}{name}"
+        )
 
     @staticmethod
     def create_folder(project_id: str, parent_rel: str, name: str) -> str:
         abs_path = FileService._validate_new_name(project_id, parent_rel, name)
         if os.path.exists(abs_path):
-            raise FileAccessDeniedException("A file or folder with this name already exists")
+            raise FileAccessDeniedException(
+                "A file or folder with this name already exists"
+            )
         os.makedirs(abs_path)
         return f"{parent_rel.rstrip('/') + '/' if parent_rel else ''}{name}"
 
     @staticmethod
-    def save_file(project_id: str, relative_path: str, content: str) -> FileContentResponse:
+    def save_file(
+        project_id: str, relative_path: str, content: str
+    ) -> FileContentResponse:
         abs_path = FileService.validate_safe_path(project_id, relative_path)
         if not os.path.isfile(abs_path):
             raise FileNotFoundException()
@@ -195,22 +232,29 @@ class FileService:
         if not os.path.exists(abs_path):
             raise FileNotFoundException()
         parent_abs = os.path.dirname(abs_path)
-        project_root = os.path.abspath(ProjectService.get_project_storage_path(project_id))
+        project_root = os.path.abspath(
+            ProjectService.get_project_storage_path(project_id)
+        )
         if os.path.abspath(parent_abs) == project_root and os.path.isdir(abs_path):
             raise FileAccessDeniedException("Cannot rename the project root")
         parent_rel = os.path.relpath(parent_abs, project_root).replace("\\", "/")
         parent_rel = "" if parent_rel == "." else parent_rel
         new_abs = FileService._validate_new_name(project_id, parent_rel, new_name)
         if os.path.exists(new_abs):
-            raise FileAccessDeniedException("A file or folder with this name already exists")
+            raise FileAccessDeniedException(
+                "A file or folder with this name already exists"
+            )
         os.rename(abs_path, new_abs)
         return f"{parent_rel + '/' if parent_rel else ''}{new_name}"
 
     @staticmethod
     def delete(project_id: str, relative_path: str) -> None:
         import shutil
+
         abs_path = FileService.validate_safe_path(project_id, relative_path)
-        project_root = os.path.abspath(ProjectService.get_project_storage_path(project_id))
+        project_root = os.path.abspath(
+            ProjectService.get_project_storage_path(project_id)
+        )
         if os.path.abspath(abs_path) == project_root:
             raise FileAccessDeniedException("Cannot delete the project root")
         if not os.path.exists(abs_path):
@@ -221,9 +265,13 @@ class FileService:
             os.remove(abs_path)
 
     @staticmethod
-    def save_upload(project_id: str, parent_rel: str, filename: str, data: bytes) -> str:
+    def save_upload(
+        project_id: str, parent_rel: str, filename: str, data: bytes
+    ) -> str:
         if len(data) > FileService.MAX_UPLOAD_BYTES:
-            raise FileAccessDeniedException(f"File exceeds the {FileService.MAX_UPLOAD_BYTES // (1024*1024)}MB upload limit")
+            raise FileAccessDeniedException(
+                f"File exceeds the {FileService.MAX_UPLOAD_BYTES // (1024*1024)}MB upload limit"
+            )
         safe_name = os.path.basename(filename.replace("\\", "/"))
         _, ext = os.path.splitext(safe_name.lower())
         if ext in FileService.BLOCKED_UPLOAD_EXTENSIONS:
@@ -233,8 +281,9 @@ class FileService:
         if os.path.exists(abs_path):
             # Overwriting via upload is allowed only for identical re-upload UX;
             # rename first if the user needs to keep both copies.
-            raise FileAccessDeniedException("A file or folder with this name already exists")
+            raise FileAccessDeniedException(
+                "A file or folder with this name already exists"
+            )
         with open(abs_path, "xb") as f:
             f.write(data)
         return f"{parent_rel.rstrip('/') + '/' if parent_rel else ''}{safe_name}"
-

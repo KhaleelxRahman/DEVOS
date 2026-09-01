@@ -15,6 +15,6 @@ class ActivityResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class ActivityListResponse(BaseModel):
     activities: list[ActivityResponse]
-

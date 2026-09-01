@@ -21,6 +21,7 @@ from app.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects/{project_id}/git", tags=["git"])
 
+
 @router.get("/status", response_model=ApiResponse[GitStatusResponse])
 async def get_git_status(
     project_id: str,
@@ -34,6 +35,7 @@ async def get_git_status(
         data=status,
     )
 
+
 @router.get("/diff", response_model=ApiResponse[GitDiffResponse])
 async def get_git_diff(
     project_id: str,
@@ -46,6 +48,7 @@ async def get_git_diff(
         success=True,
         data=diff,
     )
+
 
 @router.post("/commit", response_model=ApiResponse[dict])
 async def commit_changes(
@@ -111,7 +114,9 @@ async def unstage_files(
 ):
     await ProjectService.get_for_user(db, project_id, current_user.id)
     await GitService.unstage(project_id, data.files)
-    return ApiResponse(success=True, data=GitOperationResponse(message="Files unstaged"))
+    return ApiResponse(
+        success=True, data=GitOperationResponse(message="Files unstaged")
+    )
 
 
 @router.post("/checkout", response_model=ApiResponse[GitOperationResponse])
@@ -124,10 +129,15 @@ async def checkout_branch(
     await ProjectService.get_for_user(db, project_id, current_user.id)
     await GitService.checkout(project_id, data.branch, create=data.create)
     await ActivityService.record(
-        db, user_id=current_user.id, project_id=project_id,
-        activity_type="git.checkout", metadata={"branch": data.branch, "create": data.create},
+        db,
+        user_id=current_user.id,
+        project_id=project_id,
+        activity_type="git.checkout",
+        metadata={"branch": data.branch, "create": data.create},
     )
-    return ApiResponse(success=True, data=GitOperationResponse(message=f"Checked out {data.branch}"))
+    return ApiResponse(
+        success=True, data=GitOperationResponse(message=f"Checked out {data.branch}")
+    )
 
 
 @router.post("/pull", response_model=ApiResponse[GitOperationResponse])
@@ -139,9 +149,14 @@ async def pull(
     await ProjectService.get_for_user(db, project_id, current_user.id)
     output = await GitService.pull(project_id)
     await ActivityService.record(
-        db, user_id=current_user.id, project_id=project_id, activity_type="git.pull",
+        db,
+        user_id=current_user.id,
+        project_id=project_id,
+        activity_type="git.pull",
     )
-    return ApiResponse(success=True, data=GitOperationResponse(message=output or "Pulled"))
+    return ApiResponse(
+        success=True, data=GitOperationResponse(message=output or "Pulled")
+    )
 
 
 @router.post("/push", response_model=ApiResponse[GitOperationResponse])
@@ -153,7 +168,11 @@ async def push(
     await ProjectService.get_for_user(db, project_id, current_user.id)
     output = await GitService.push(project_id)
     await ActivityService.record(
-        db, user_id=current_user.id, project_id=project_id, activity_type="git.push",
+        db,
+        user_id=current_user.id,
+        project_id=project_id,
+        activity_type="git.push",
     )
-    return ApiResponse(success=True, data=GitOperationResponse(message=output or "Pushed"))
-
+    return ApiResponse(
+        success=True, data=GitOperationResponse(message=output or "Pushed")
+    )

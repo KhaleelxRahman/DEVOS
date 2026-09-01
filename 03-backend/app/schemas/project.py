@@ -10,11 +10,13 @@ class ProjectCreate(BaseModel):
     technologies: list[str] | None = None
     repository_url: str | None = None
 
+
 class ProjectUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255)
     description: str | None = None
     technologies: list[str] | None = None
     repository_url: str | None = None
+
 
 class ProjectResponse(BaseModel):
     id: str
@@ -31,6 +33,6 @@ class ProjectResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class ProjectListResponse(BaseModel):
     projects: list[ProjectResponse]
-

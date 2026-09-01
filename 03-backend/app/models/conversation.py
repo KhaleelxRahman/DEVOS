@@ -32,12 +32,15 @@ class Conversation(Base, TimestampMixin):
         nullable=False,
         index=True,
     )
-    title: Mapped[str] = mapped_column(String(255), default="New Conversation", nullable=False)
+    title: Mapped[str] = mapped_column(
+        String(255), default="New Conversation", nullable=False
+    )
 
     # Relationships
     project: Mapped["Project"] = relationship("Project", back_populates="conversations")
     user: Mapped["User"] = relationship("User", back_populates="conversations")
     messages: Mapped[list["ConversationMessage"]] = relationship(
-        "ConversationMessage", back_populates="conversation", cascade="all, delete-orphan"
+        "ConversationMessage",
+        back_populates="conversation",
+        cascade="all, delete-orphan",
     )
-

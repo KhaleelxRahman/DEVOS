@@ -10,6 +10,7 @@ from app.services.activity_service import ActivityService
 
 router = APIRouter(prefix="/activity", tags=["activity"])
 
+
 @router.get("", response_model=ApiResponse[ActivityListResponse])
 async def list_user_activity(
     limit: int = Query(default=20, ge=1, le=100),
@@ -23,4 +24,3 @@ async def list_user_activity(
             activities=[ActivityResponse.model_validate(a) for a in activities]
         ),
     )
-

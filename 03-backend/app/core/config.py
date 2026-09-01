@@ -9,6 +9,7 @@ Production safety: `_validate_production_safety` raises on import when a
 production deployment is missing the minimum security requirements
 (strong AUTH_SECRET, explicitly allow-listed CORS origins, non-SQLite DB).
 """
+
 import json
 from typing import Any
 

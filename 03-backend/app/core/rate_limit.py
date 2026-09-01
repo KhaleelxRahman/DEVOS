@@ -10,6 +10,7 @@ class RateLimitExceededException(AppException):
     def __init__(self, message: str = "Too many requests. Please try again later."):
         super().__init__(message=message, code="RATE_LIMITED", status_code=429)
 
+
 class InMemoryRateLimiter:
     """Sliding-window, per-IP, per-route-key rate limiter.
 
@@ -33,16 +34,19 @@ class InMemoryRateLimiter:
     def reset(self) -> None:
         self._hits.clear()
 
+
 rate_limiter = InMemoryRateLimiter()
+
 
 def _client_ip(request: Request) -> str:
     # Only trust X-Forwarded-For from explicitly trusted proxies; by default
     # use the direct peer address.
     return request.client.host if request.client else "unknown"
 
+
 def rate_limit(limit: int, window_seconds: int, bucket: str):
     async def dependency(request: Request) -> None:
         key = f"{bucket}:{_client_ip(request)}"
         rate_limiter.check(key, limit, window_seconds)
-    return dependency
 
+    return dependency

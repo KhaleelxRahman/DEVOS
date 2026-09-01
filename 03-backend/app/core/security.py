@@ -3,6 +3,7 @@
 Keys and algorithms are read from application settings so they are identical
 for authentication routes, GitHub OAuth state, and the API dependency layer.
 """
+
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
@@ -46,14 +47,18 @@ def create_access_token(
     payload.update(extra)
     now = datetime.now(timezone.utc)
     payload["iat"] = now
-    payload["exp"] = now + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    payload["exp"] = now + (
+        expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     return jwt.encode(payload, settings.AUTH_SECRET, algorithm=settings.JWT_ALGORITHM)
 
 
 def decode_access_token(token: str) -> str | None:
     """Validate a JWT and return the subject (user id), or None when invalid."""
     try:
-        payload = jwt.decode(token, settings.AUTH_SECRET, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.AUTH_SECRET, algorithms=[settings.JWT_ALGORITHM]
+        )
     except JWTError:
         return None
     sub = payload.get("sub")

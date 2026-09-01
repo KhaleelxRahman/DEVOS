@@ -25,13 +25,19 @@ router = APIRouter(tags=["public"])
     response_model=ApiResponse[WaitlistJoinResponse],
     dependencies=[Depends(rate_limit(5, 60, "waitlist"))],
 )
-async def join_waitlist(payload: WaitlistJoinRequest, db: AsyncSession = Depends(get_db)):
+async def join_waitlist(
+    payload: WaitlistJoinRequest, db: AsyncSession = Depends(get_db)
+):
     email = payload.email.lower()
-    existing = await db.execute(select(WaitlistEntry).where(WaitlistEntry.email == email))
+    existing = await db.execute(
+        select(WaitlistEntry).where(WaitlistEntry.email == email)
+    )
     if existing.scalar_one_or_none() is not None:
         # Idempotent: do not reveal whether an email was previously used
         # beyond what the submitter already knows, and never duplicate rows.
-        return ApiResponse(success=True, data=WaitlistJoinResponse(status="already_registered"))
+        return ApiResponse(
+            success=True, data=WaitlistJoinResponse(status="already_registered")
+        )
     db.add(WaitlistEntry(email=email, name=payload.name))
     await db.commit()
     return ApiResponse(success=True, data=WaitlistJoinResponse(status="joined"))
@@ -56,4 +62,3 @@ async def submit_contact(payload: ContactRequest, db: AsyncSession = Depends(get
     )
     await db.commit()
     return ApiResponse(success=True, data=ContactResponse(status="received"))
-

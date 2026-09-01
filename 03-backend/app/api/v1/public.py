@@ -9,6 +9,7 @@ from app.schemas.public import (
 
 router = APIRouter(tags=["public"])
 
+
 @router.post("/waitlist", response_model=ApiResponse[WaitlistJoinResponse])
 async def join_waitlist(payload: WaitlistJoinRequest):
     return ApiResponse(
@@ -19,6 +20,7 @@ async def join_waitlist(payload: WaitlistJoinRequest):
         ),
     )
 
+
 @router.post("/contact", response_model=ApiResponse[ContactResponse])
 async def submit_contact(payload: ContactRequest):
     return ApiResponse(
@@ -27,4 +29,3 @@ async def submit_contact(payload: ContactRequest):
             message="Your message has been received.",
         ),
     )
-

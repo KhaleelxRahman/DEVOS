@@ -25,4 +25,3 @@ async def get_current_user(
         raise AuthRequiredException("User associated with token no longer exists")
 
     return user
-

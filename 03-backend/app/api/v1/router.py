@@ -25,4 +25,3 @@ api_v1_router.include_router(terminal_router)
 api_v1_router.include_router(activity_router)
 api_v1_router.include_router(testing_router)
 api_v1_router.include_router(public_forms_router)
-
