@@ -30,7 +30,9 @@ async def _setup(client):
         json={"name": "Dev", "email": "dev@example.com", "password": "supersecret1"},
     )
     headers = {"Authorization": f"Bearer {res.json()['data']['token']}"}
-    proj = await client.post("/api/v1/projects", json={"name": "git-demo"}, headers=headers)
+    proj = await client.post(
+        "/api/v1/projects", json={"name": "git-demo"}, headers=headers
+    )
     project_id = proj.json()["data"]["id"]
     root = ProjectService.get_project_storage_path(project_id)
     with open(os.path.join(root, "main.py"), "w") as f:
@@ -48,7 +50,9 @@ async def test_git_status_branches_commit_log(client):
     assert status.status_code == 200, status.text
     assert "main.py" in status.json()["data"]["untracked"]
 
-    commit = await client.post(f"{base}/commit", json={"message": "initial"}, headers=headers)
+    commit = await client.post(
+        f"{base}/commit", json={"message": "initial"}, headers=headers
+    )
     assert commit.status_code == 200, commit.text
 
     status2 = await client.get(f"{base}/status", headers=headers)
@@ -65,22 +69,26 @@ async def test_git_status_branches_commit_log(client):
 
     # Create + checkout a branch, then go back
     checkout = await client.post(
-        f"{base}/checkout", json={"branch": "feature-x", "create": True}, headers=headers
+        f"{base}/checkout",
+        json={"branch": "feature-x", "create": True},
+        headers=headers,
     )
     assert checkout.status_code == 200
-    assert (await client.get(f"{base}/branches", headers=headers)).json()["data"]["current"] == "feature-x"
+    assert (await client.get(f"{base}/branches", headers=headers)).json()["data"][
+        "current"
+    ] == "feature-x"
     assert (
         await client.post(f"{base}/checkout", json={"branch": "main"}, headers=headers)
     ).status_code == 200
 
     # Invalid branch names rejected
-    bad = await client.post(
-        f"{base}/checkout", json={"branch": "-rf"}, headers=headers
-    )
+    bad = await client.post(f"{base}/checkout", json={"branch": "-rf"}, headers=headers)
     assert bad.status_code == 400
 
     # Stage/unstage roundtrip
-    with open(os.path.join(ProjectService.get_project_storage_path(project_id), "new.py"), "w") as f:
+    with open(
+        os.path.join(ProjectService.get_project_storage_path(project_id), "new.py"), "w"
+    ) as f:
         f.write("x = 1\n")
     assert (
         await client.post(f"{base}/stage", json={"files": ["new.py"]}, headers=headers)
@@ -88,10 +96,14 @@ async def test_git_status_branches_commit_log(client):
     staged_status = await client.get(f"{base}/status", headers=headers)
     assert "new.py" in staged_status.json()["data"]["added"]
     assert (
-        await client.post(f"{base}/unstage", json={"files": ["new.py"]}, headers=headers)
+        await client.post(
+            f"{base}/unstage", json={"files": ["new.py"]}, headers=headers
+        )
     ).status_code == 200
 
-    with open(os.path.join(ProjectService.get_project_storage_path(project_id), ".env"), "w") as f:
+    with open(
+        os.path.join(ProjectService.get_project_storage_path(project_id), ".env"), "w"
+    ) as f:
         f.write("SECRET=should-not-be-committed\n")
     blocked_commit = await client.post(
         f"{base}/commit", json={"message": "blocked secret"}, headers=headers
@@ -153,12 +165,18 @@ async def test_ai_conversation_ownership_enforced(client):
 
     other = await client.post(
         "/api/v1/auth/register",
-        json={"name": "Other", "email": "other@example.com", "password": "supersecret1"},
+        json={
+            "name": "Other",
+            "email": "other@example.com",
+            "password": "supersecret1",
+        },
     )
     other_headers = {"Authorization": f"Bearer {other.json()['data']['token']}"}
 
     # Other user cannot access the project at all
-    assert (await client.get(f"{base}/conversations", headers=other_headers)).status_code == 403
+    assert (
+        await client.get(f"{base}/conversations", headers=other_headers)
+    ).status_code == 403
     # And cannot reply into someone else's conversation even if project were shared
     res = await client.post(
         f"{base}/chat",

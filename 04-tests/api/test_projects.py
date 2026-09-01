@@ -55,14 +55,22 @@ async def test_project_crud_and_ownership(client):
     assert updated.json()["data"]["description"] == "updated"
 
     # Other user must not read, update, or delete this project
-    assert (await client.get(f"/api/v1/projects/{project_id}", headers=other)).status_code == 403
     assert (
-        await client.patch(f"/api/v1/projects/{project_id}", json={"name": "hijack"}, headers=other)
+        await client.get(f"/api/v1/projects/{project_id}", headers=other)
     ).status_code == 403
-    assert (await client.delete(f"/api/v1/projects/{project_id}", headers=other)).status_code == 403
+    assert (
+        await client.patch(
+            f"/api/v1/projects/{project_id}", json={"name": "hijack"}, headers=other
+        )
+    ).status_code == 403
+    assert (
+        await client.delete(f"/api/v1/projects/{project_id}", headers=other)
+    ).status_code == 403
 
     # Unknown project id
-    assert (await client.get("/api/v1/projects/does-not-exist", headers=owner)).status_code == 404
+    assert (
+        await client.get("/api/v1/projects/does-not-exist", headers=owner)
+    ).status_code == 404
 
     # A deleted project id stays a clean 404 (stale client caches must fail
     # gracefully), and malformed ids never 500.
@@ -110,4 +118,6 @@ async def test_project_activity_recorded(client):
 
     user_activity = await client.get("/api/v1/activity", headers=headers)
     assert user_activity.status_code == 200
-    assert "project.created" in [a["activity_type"] for a in user_activity.json()["data"]["activities"]]
+    assert "project.created" in [
+        a["activity_type"] for a in user_activity.json()["data"]["activities"]
+    ]

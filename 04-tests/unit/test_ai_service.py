@@ -62,7 +62,15 @@ async def test_run_action_rejects_unknown_action():
 @pytest.mark.asyncio
 async def test_run_action_accepts_known_actions():
     service = AIService()
-    for action in ("explain", "debug", "refactor", "test", "document", "security", "optimize"):
+    for action in (
+        "explain",
+        "debug",
+        "refactor",
+        "test",
+        "document",
+        "security",
+        "optimize",
+    ):
         response = await service.run_action(action, "x = 1", {})
         assert response.role == "assistant"
 

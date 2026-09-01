@@ -28,7 +28,9 @@ async def _setup(client):
         json={"name": "Dev", "email": "dev@example.com", "password": "supersecret1"},
     )
     headers = {"Authorization": f"Bearer {res.json()['data']['token']}"}
-    proj = await client.post("/api/v1/projects", json={"name": "files-demo"}, headers=headers)
+    proj = await client.post(
+        "/api/v1/projects", json={"name": "files-demo"}, headers=headers
+    )
     project_id = proj.json()["data"]["id"]
 
     root = ProjectService.get_project_storage_path(project_id)
@@ -85,7 +87,9 @@ async def test_file_traversal_and_sensitive_blocked(client):
         assert res.status_code in (403, 404), f"{raw} returned {res.status_code}"
 
     assert (
-        await client.get(f"/api/v1/projects/{project_id}/files/src/missing.py", headers=headers)
+        await client.get(
+            f"/api/v1/projects/{project_id}/files/src/missing.py", headers=headers
+        )
     ).status_code == 404
     assert (
         await client.get(f"/api/v1/projects/{project_id}/files", headers={})

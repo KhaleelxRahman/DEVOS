@@ -7,13 +7,18 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 # Ensure an isolated SQLite database is configured BEFORE importing the app.
-_BACKEND_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "03-backend"))
+_BACKEND_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "03-backend")
+)
 if _BACKEND_PATH not in sys.path:
     sys.path.insert(0, _BACKEND_PATH)
 
 _TEST_DB = os.path.join(os.path.dirname(__file__), f"test_auth_{uuid.uuid4().hex}.db")
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TEST_DB}"
-os.environ.setdefault("PROJECTS_STORAGE_PATH", os.path.join(os.path.dirname(__file__), "test_projects_storage"))
+os.environ.setdefault(
+    "PROJECTS_STORAGE_PATH",
+    os.path.join(os.path.dirname(__file__), "test_projects_storage"),
+)
 
 from app.main import app  # noqa: E402
 from app.db.base import Base  # noqa: E402
@@ -31,7 +36,11 @@ async def client():
         await conn.run_sync(Base.metadata.drop_all)
 
 
-REGISTER_PAYLOAD = {"name": "Dev User", "email": "dev@example.com", "password": "supersecret1"}
+REGISTER_PAYLOAD = {
+    "name": "Dev User",
+    "email": "dev@example.com",
+    "password": "supersecret1",
+}
 LOGIN_PAYLOAD = {"email": "dev@example.com", "password": "supersecret1"}
 
 
