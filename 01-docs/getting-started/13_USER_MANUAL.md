@@ -14,7 +14,7 @@ Status: Matches implemented system (post-stabilization)
 cd 03-backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
-```
+```text
 
 - Default database: SQLite at `03-backend/devos.db` (no setup needed).
 
@@ -42,7 +42,7 @@ works locally, on Replit, and behind reverse proxies unchanged.
 
 ```bash
 cd 04-tests && python -m pytest -q
-```
+```text
 
 Covers auth, projects, files, terminal, git, AI, context, testing jobs,
 ownership enforcement, and path-traversal protection.

@@ -1,12 +1,12 @@
 # DEVOS User Personas
 
-**The Real People Who Need DEVOS**
+## The Real People Who Need DEVOS
 
 ---
 
 ## Persona 1: Priya (College Student, Hackathon Participant)
 
-**Demographics:**
+## Demographics
 
 - Age: 20
 
@@ -16,10 +16,11 @@
 
 - Coding Experience: 2 years
 
-**Background:**
+## Background
+
 Priya is a competitive hackathon participant. She's won 3 hackathons in the past year and is always thinking about her next project idea. She codes on her laptop during college, but spends most of her time commuting, in class, and at the library—places where her laptop isn't available.
 
-**Daily Workflow:**
+## Daily Workflow
 
 - Morning lecture (on phone, browsing GitHub issues, thinking about her project)
 
@@ -31,7 +32,7 @@ Priya is a competitive hackathon participant. She's won 3 hackathons in the past
 
 - Late night (laptop again, hacking until 2 AM, losing productivity to tool setup)
 
-**Goals:**
+## Goals
 
 - ✅ Ship ideas faster than competitors (win hackathons)
 
@@ -41,7 +42,7 @@ Priya is a competitive hackathon participant. She's won 3 hackathons in the past
 
 - ✅ Have projects ready to demo in 6-8 hours (hackathon time pressure)
 
-**Current Frustrations:**
+## Current Frustrations
 
 1. **Setup overhead:** Starting a new project takes 20 minutes (create folder, install dependencies, set up GitHub). In a hackathon, that's 20 minutes she doesn't have.
 
@@ -53,7 +54,7 @@ Priya is a competitive hackathon participant. She's won 3 hackathons in the past
 
 5. **No continuity:** She can't seamlessly move from phone to laptop. Switches require re-context.
 
-**Why DEVOS Helps:**
+## Why DEVOS Helps
 
 - **30-second setup:** Creates new project instantly (no install, no setup)
 
@@ -65,17 +66,19 @@ Priya is a competitive hackathon participant. She's won 3 hackathons in the past
 
 - **Hackathon-optimized:** Built for speed (exactly what she needs)
 
-**Success Outcome:**
+## Success Outcome
+
 *Priya uses DEVOS in her next hackathon. She ships a complete project in 6 hours (vs 8 hours with traditional tools). She wins the hackathon. She tells all her friends about DEVOS. Her entire college is now using it.*
 
-**Quote:**
+## Quote
+
 *"I have amazing ideas, but tools slow me down. With DEVOS, I can just... think → build → ship. No friction. This is how I want to code."*
 
 ---
 
 ## Persona 2: Rajesh (Freelancer, Independent Developer)
 
-**Demographics:**
+## Demographics
 
 - Age: 28
 
@@ -85,10 +88,11 @@ Priya is a competitive hackathon participant. She's won 3 hackathons in the past
 
 - Coding Experience: 7 years
 
-**Background:**
+## Background
+
 Rajesh left his job 2 years ago to freelance. He takes on small to medium projects (building MVPs for startups, fixing legacy code, building custom tools). He works from wherever—co-working spaces, cafés, hotels, home. He's always short on time and wants to maximize billable hours.
 
-**Daily Workflow:**
+## Daily Workflow
 
 - Morning: Client meeting (video call, discussing requirements)
 
@@ -102,7 +106,7 @@ Rajesh left his job 2 years ago to freelance. He takes on small to medium projec
 
 - Night: Writing invoices, realizing he only billed 4 hours for an 8-hour workday (4 hours lost to tool overhead)
 
-**Goals:**
+## Goals
 
 - ✅ Maximize billable hours (every minute counts)
 
@@ -114,7 +118,7 @@ Rajesh left his job 2 years ago to freelance. He takes on small to medium projec
 
 - ✅ Avoid vendor lock-in (use open-source tools)
 
-**Current Frustrations:**
+## Current Frustrations
 
 1. **Context switching tax:** He bills for 4 hours, works for 8 hours. The other 4 hours are tool switching and mental overhead. This costs him ~$500/week.
 
@@ -126,7 +130,7 @@ Rajesh left his job 2 years ago to freelance. He takes on small to medium projec
 
 5. **Onboarding new teammates:** When he contracts another dev to help, onboarding takes 4-6 hours (installing tools, understanding setup). DEVOS could reduce this to 1 hour.
 
-**Why DEVOS Helps:**
+## Why DEVOS Helps
 
 - **Recover 2+ hours/day:** No tool switching overhead (add $200-300/week to income)
 
@@ -138,17 +142,19 @@ Rajesh left his job 2 years ago to freelance. He takes on small to medium projec
 
 - **Quick onboarding:** New teammates productive in 1 hour (save 4-6 hours when contracting help)
 
-**Success Outcome:**
+## Success Outcome
+
 *Rajesh uses DEVOS for all his new projects. He recovers 15+ billable hours per week. His income increases by $1,000/month (with same work hours). He recommends DEVOS to other freelancers in his network. Word spreads to 50+ freelancers.*
 
-**Quote:**
+## Quote
+
 *"I'm selling my time. Every context switch is money lost. DEVOS is the first tool that respects my time. I bill for what I code, not for tool overhead."*
 
 ---
 
 ## Persona 3: Akshay (Hackathon Team, Pre-Startup)
 
-**Demographics:**
+## Demographics
 
 - Age: 23-25 (team of 3-4)
 
@@ -158,10 +164,11 @@ Rajesh left his job 2 years ago to freelance. He takes on small to medium projec
 
 - Coding Experience: 3-5 years (mix of junior and mid-level)
 
-**Background:**
+## Background
+
 Akshay leads a small team building an indie project (potential startup). The team has 2-3 developers, 1 designer, and maybe a product person. They're bootstrapped, passionate, and building in nights/weekends while working day jobs. They're moving fast, iterating quickly, and want to be ready to pitch to investors by Q1 2027.
 
-**Daily Workflow:**
+## Daily Workflow
 
 - Morning: Day job (limited coding)
 
@@ -175,7 +182,7 @@ Akshay leads a small team building an indie project (potential startup). The tea
 
 - Result: Team moving slow, not ready to pitch, burnout from tool overhead
 
-**Goals:**
+## Goals
 
 - ✅ Ship MVP in 6 months (tight timeline)
 
@@ -187,7 +194,7 @@ Akshay leads a small team building an indie project (potential startup). The tea
 
 - ✅ On a budget ($0 ideal, <$100/month if necessary)
 
-**Current Frustrations:**
+## Current Frustrations
 
 1. **Coordination overhead:** Without unified workspace, team is always out of sync. Developers implement features that don't align. Rework is 20-30% of effort.
 
@@ -201,7 +208,7 @@ Akshay leads a small team building an indie project (potential startup). The tea
 
 6. **Scalability question:** As team grows, tool overhead gets worse (more people to coordinate = more tool switching).
 
-**Why DEVOS Helps:**
+## Why DEVOS Helps
 
 - **Unified workspace:** All developers see same project structure, active changes, planning board. No out-of-sync.
 
@@ -215,17 +222,19 @@ Akshay leads a small team building an indie project (potential startup). The tea
 
 - **Freemium:** Unlimited projects on free tier (cost is $0)
 
-**Success Outcome:**
+## Success Outcome
+
 *Akshay's team adopts DEVOS. Development speed increases 30-40% (less coordination overhead). Onboarding new teammates becomes instant. Team reaches MVP stage in 5 months (vs 7-8 with traditional tools). Pitches to investors with polished demo. Raises seed round. Entire team continues using DEVOS at startup.*
 
-**Quote:**
+## Quote
+
 *"We're three talented developers, but fragmented tools make us slower than solo devs. DEVOS made us work like one brain. We ship faster, fight less, and actually enjoy building together."*
 
 ---
 
 ## Persona 4: Meera (Engineering Manager, Professional Team)
 
-**Demographics:**
+## Demographics
 
 - Age: 32
 
@@ -235,7 +244,8 @@ Akshay leads a small team building an indie project (potential startup). The tea
 
 - Coding Experience: 10 years (was IC, now manager)
 
-**Background:**
+## Background
+
 Meera manages a distributed team of 15 developers building an internal platform. The team is split across:
 
 - 7 in Bangalore office
@@ -246,7 +256,7 @@ Meera manages a distributed team of 15 developers building an internal platform.
 
 The team is productive but fragmented. Developers work on different tools (some use VS Code, some use JetBrains). Onboarding new developers takes 3-4 days. Code reviews are slow. There's no unified view of who's doing what.
 
-**Daily Workflow:**
+## Daily Workflow
 
 - Morning standup: "What are you working on?" (takes 30 minutes, lots of questions)
 
@@ -258,7 +268,7 @@ The team is productive but fragmented. Developers work on different tools (some 
 
 - Recurring pain: "Wait, didn't we already implement this?" (duplicate work due to coordination issues)
 
-**Goals:**
+## Goals
 
 - ✅ Reduce onboarding time (from 3-4 days to <1 day)
 
@@ -272,7 +282,7 @@ The team is productive but fragmented. Developers work on different tools (some 
 
 - ✅ Standardize developer tooling (no more "I use JetBrains, you use VS Code" friction)
 
-**Current Frustrations:**
+## Current Frustrations
 
 1. **Onboarding time:** 3-4 days per new developer. With 15-person team, this is 50+ hours/year (nearly 2 weeks lost).
 
@@ -286,7 +296,7 @@ The team is productive but fragmented. Developers work on different tools (some 
 
 6. **Attrition risk:** Developers are tired of tool overhead. They see simpler startups and want to join (your tool should enable focus, not add friction).
 
-**Why DEVOS Helps:**
+## Why DEVOS Helps
 
 - **Standardized tooling:** All developers on DEVOS (no version conflicts, no compatibility issues)
 
@@ -302,10 +312,12 @@ The team is productive but fragmented. Developers work on different tools (some 
 
 - **Team happiness:** Developers feel less tool fatigue (better retention)
 
-**Success Outcome:**
+## Success Outcome
+
 *Meera's team adopts DEVOS. Onboarding new devs reduces from 3-4 days to 1-2 hours. Code review turnaround cuts in half (1 day instead of 2-3). Team is more aligned (fewer "didn't know this was being built" surprises). Developers report 2+ hours/day of recovered focus time. Retention improves. Team ships 30-40% faster. Meera gets promoted for driving efficiency.*
 
-**Quote:**
+## Quote
+
 *"My biggest job isn't writing code—it's keeping 15 developers coordinated across 3 cities. DEVOS made coordination nearly invisible. My team feels more unified than when we were all in the same office."*
 
 ---
@@ -336,7 +348,7 @@ The team is productive but fragmented. Developers work on different tools (some 
 
 ### Virality Path
 
-```
+```text
 Priya (Hackathon)
     ↓
 Tells 5 friends
@@ -360,7 +372,7 @@ Exponential growth through network
 
 ### Revenue Implications
 
-```
+```text
 Priya (Free)      → $0, but 5 referrals
 Rajesh (Pro)      → $12/month → $144/year → $1,000+ with referrals
 Akshay (Free)     → $0, but viral at startup level
@@ -429,7 +441,7 @@ Meera (Enterprise) → $500-2000/month × 15 people = $90,000-360,000/year
 
 **Status:** ✅ READY FOR JUDGES
 
-**Why This Matters for Hackathon:**
+## Why This Matters for Hackathon
 
 - Judges want to see real people, not abstract market segments
 

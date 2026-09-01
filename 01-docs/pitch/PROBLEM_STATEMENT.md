@@ -1,6 +1,6 @@
 # DEVOS Problem Statement
 
-**Why DEVOS Exists: The Developer's Productivity Crisis**
+## Why DEVOS Exists: The Developer's Productivity Crisis
 
 ---
 
@@ -14,7 +14,8 @@ Here's what actually happens:
 
 ## The Daily Developer Workflow (Today)
 
-**9:15 AM — Morning Standup**
+## 9:15 AM — Morning Standup
+
 *"I need to build a real-time chat system. Let me plan this out."*
 
 → Opens VS Code
@@ -22,25 +23,29 @@ Here's what actually happens:
 → Sketches architecture in a text editor
 → Realizes he needs to think through database schema
 
-**9:22 AM — AI Assistance**
+## 9:22 AM — AI Assistance
+
 → Switches to ChatGPT tab
 → Describes the project (context: **zero**, ChatGPT knows nothing)
 → ChatGPT gives generic advice (no project context)
 → Developer manually correlates advice with existing project
 
-**9:35 AM — GitHub Planning**
+## 9:35 AM — GitHub Planning
+
 → Opens GitHub
 → Creates a new project board
 → Manually writes out tasks
 → Realizes VS Code and GitHub are out of sync
 
-**9:50 AM — Terminal Work**
+## 9:50 AM — Terminal Work
+
 → Opens terminal window
 → Sets up project structure
 → Creates files, installs dependencies
 → Window: Minimized, lost in taskbar clutter
 
-**10:15 AM — Back to Code**
+## 10:15 AM — Back to Code
+
 → Switches back to VS Code
 → Realizes the project structure doesn't match his GitHub plan
 → Updates GitHub board
@@ -52,7 +57,7 @@ Here's what actually happens:
 
 ## Student Perspective: The Barrier to Entry
 
-**The Problem Specific to Hackathons & Learning:**
+## The Problem Specific to Hackathons & Learning
 
 ### Context Switching Hell
 
@@ -70,9 +75,11 @@ Here's what actually happens:
 
 - Realize you should use a terminal (open new window)
 
-**Time spent setting up: 15-20 minutes**
-**Time spent coding: 5 minutes**
-**Ratio: 4:1 overhead-to-productivity**
+## Time spent setting up: 15-20 minutes
+
+## Time spent coding: 5 minutes
+
+## Ratio: 4:1 overhead-to-productivity
 
 ### The Mobile Productivity Gap
 
@@ -104,7 +111,7 @@ But there's **no unified tool that works across all these contexts**:
 
 ## Professional Developer Perspective: Lost Hours
 
-**Context Switching Costs (Research-Backed Reality):**
+## Context Switching Costs (Research-Backed Reality)
 
 When a developer switches contexts, they need:
 
@@ -114,7 +121,7 @@ When a developer switches contexts, they need:
 
 - 2-3 minutes to re-read recent code
 
-**One context switch = 20-30 minutes of lost productivity**
+## One context switch = 20-30 minutes of lost productivity
 
 A typical day has:
 
@@ -130,13 +137,13 @@ A typical day has:
 
 - Email → Back to coding (context switch)
 
-**6 context switches × 20-30 minutes = 2-3 hours lost per day**
+## 6 context switches × 20-30 minutes = 2-3 hours lost per day
 
-**That's 10-15 hours per week. 500+ hours per year.**
+## That's 10-15 hours per week. 500+ hours per year
 
 For a team of 10 developers: **5,000 lost hours annually.**
 
-**In salary cost: ~$500,000 wasted productivity per team per year.**
+## In salary cost: ~$500,000 wasted productivity per team per year
 
 ---
 
@@ -145,7 +152,8 @@ For a team of 10 developers: **5,000 lost hours annually.**
 ### VS Code
 
 **What it does:** Edit code locally or in cloud (Codespaces)
-**What it doesn't do:**
+
+## What it doesn't do
 
 - Integrated AI with project context
 
@@ -160,7 +168,8 @@ For a team of 10 developers: **5,000 lost hours annually.**
 ### ChatGPT / Claude
 
 **What it does:** Answer questions with AI
-**What it doesn't do:**
+
+## What it doesn't do
 
 - Know about your project structure
 
@@ -175,7 +184,8 @@ For a team of 10 developers: **5,000 lost hours annually.**
 ### Cursor (AI-First IDE)
 
 **What it does:** VS Code + better AI
-**What it doesn't do:**
+
+## What it doesn't do
 
 - Work on phones
 
@@ -190,7 +200,8 @@ For a team of 10 developers: **5,000 lost hours annually.**
 ### GitHub
 
 **What it does:** Repository management + planning
-**What it doesn't do:**
+
+## What it doesn't do
 
 - Edit files (really)
 
@@ -202,7 +213,7 @@ For a team of 10 developers: **5,000 lost hours annually.**
 
 - Work offline
 
-**The Real Issue:** Every tool solves one problem. **None solve the entire workflow.**
+## The Real Issue:**Every tool solves one problem.**None solve the entire workflow
 
 ---
 
@@ -221,9 +232,9 @@ When developers use 7+ tools daily, they pay hidden costs:
 | **Documentation Hunting** | "Where's the API reference?" | 5-10 min |
 | **AI Frustration** | "Why doesn't the AI understand my project?" | 10-15 min |
 
-**Total Daily Tax: 55-85 minutes of wasted time**
+## Total Daily Tax: 55-85 minutes of wasted time
 
-**That's not a feature problem. That's a system design failure.**
+## That's not a feature problem. That's a system design failure
 
 ---
 
@@ -311,23 +322,27 @@ They would recover **1-2 hours per day** of currently lost time.
 
 ## The Emotional Reality
 
-**As a student:**
+## As a student
+
 *"I have a great idea. But by the time I open all my tools, I've lost the creative momentum. I'm exhausted before I start coding."*
 
-**As a professional:**
+## As a professional
+
 *"I code for 6-7 hours. But only 2-3 hours is actual focused work. The rest is tool switching. I'm getting burned out from tool debt, not work debt."*
 
-**As a mobile-first user:**
+## As a mobile-first user
+
 *"I'm productive at my desk, but my phone is useless for development. I hate it. Tools just don't respect my workflow."*
 
-**As a team lead:**
+## As a team lead
+
 *"My team's developer tools cost me 40+ hours per week in lost productivity. That's over $2,000/week for a 10-person team. But there's no alternative."*
 
 ---
 
 ## Why Now? Why DEVOS?
 
-**The convergence is real:**
+## The convergence is real
 
 1. **AI maturity** — Claude, ChatGPT, and Gemini are finally good enough to actually help with code
 
@@ -339,7 +354,7 @@ They would recover **1-2 hours per day** of currently lost time.
 
 5. **Remote work reality** — Developers code from anywhere—tools need to adapt
 
-**The gap between what developers need and what tools provide has never been bigger.**
+## The gap between what developers need and what tools provide has never been bigger
 
 DEVOS exists to close that gap.
 
@@ -347,7 +362,7 @@ DEVOS exists to close that gap.
 
 ## The Opportunity Cost of Inaction
 
-**If we don't solve this:**
+## If we don't solve this
 
 - Developers continue losing 2+ hours daily to fragmented workflows
 
@@ -359,7 +374,7 @@ DEVOS exists to close that gap.
 
 - The first company to solve this wins $10B+ market
 
-**The developer tools market is fragmented because no one has built the unified solution yet.**
+## The developer tools market is fragmented because no one has built the unified solution yet
 
 DEVOS is that solution.
 
@@ -393,7 +408,8 @@ DEVOS is that solution.
 
 **Status:** ✅ READY FOR JUDGES
 
-**Why This Matters for Hackathon:**
+## Why This Matters for Hackathon
+
 Judges hear dozens of "we built a tool" pitches. This statement makes them feel the actual pain before DEVOS reveals the solution. Emotional connection → emotional investment → advancement.
 
 **Next Step:** STEP 3 — Market Gap Analysis

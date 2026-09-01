@@ -1,31 +1,34 @@
 # DEVOS Elevator Pitch
 
-**Developer Operating System: Build. Architect. Deploy. Anywhere.**
+## Developer Operating System: Build. Architect. Deploy. Anywhere
 
 ---
 
 ## One-Line Hook
 
-**"DEVOS is an AI-powered web-based developer workspace that eliminates fragmented tools—unifying project management, file editing, AI assistance, terminal execution, and GitHub integration in one unified environment."**
+## "DEVOS is an AI-powered web-based developer workspace that eliminates fragmented tools—unifying project management, file editing, AI assistance, terminal execution, and GitHub integration in one unified environment."
 
 ---
 
 ## 15-Second Pitch
 
-**The Problem:**
+## The Problem
+
 Developers waste 2+ hours daily switching between VS Code, GitHub, terminal windows, AI chatbots, and documentation. Every context switch breaks focus and kills productivity.
 
-**The Solution:**
+## The Solution
+
 DEVOS brings everything into one unified web-based workspace. Open your project, ask AI questions with your codebase as context, execute terminal commands, stage commits—all without leaving the app.
 
-**The Ask:**
+## The Ask
+
 Judge DEVOS on speed, AI accuracy, and how naturally developers forget they're in a browser.
 
 ---
 
 ## 30-Second Pitch
 
-**Judges, here's the reality:**
+## Judges, here's the reality
 
 Developers and students are drowning in tool fragmentation. A typical workflow requires:
 
@@ -43,7 +46,7 @@ Developers and students are drowning in tool fragmentation. A typical workflow r
 
 Each context switch costs 15-20 minutes of mental rebuild time.
 
-**DEVOS solves this with:**
+## DEVOS solves this with
 
 1. **Unified Workspace** — Project files, AI assistant, terminal, and GitHub all in one interface
 
@@ -55,7 +58,8 @@ Each context switch costs 15-20 minutes of mental rebuild time.
 
 5. **Phone-to-Laptop Continuity** — Start on mobile (view code, ask AI), continue on laptop (full editing)
 
-**Why Now?**
+## Why Now?
+
 iQOO's ecosystem is perfectly aligned for this:
 
 - Fast processors mean snappy web apps
@@ -66,10 +70,12 @@ iQOO's ecosystem is perfectly aligned for this:
 
 - AI literacy is highest among iQOO users
 
-**Why DEVOS Wins:**
+## Why DEVOS Wins
+
 We're not asking "Should developers use our tool?" We're solving "How can developers avoid tool bloat?" The market is ready. The technology exists. The team (one founder, shipping daily) is all in.
 
-**The Opportunity:**
+## The Opportunity
+
 Capture early adopters in hackathons, students, and indie developers before JetBrains, GitHub, or VS Code build this themselves.
 
 ---
@@ -128,16 +134,20 @@ Capture early adopters in hackathons, students, and indie developers before JetB
 
 ### Common Judge Questions & Answers
 
-**Q: Why is this better than GitHub Codespaces?**
+## Q: Why is this better than GitHub Codespaces?
+
 A: Codespaces is VS Code in the cloud. DEVOS is a ground-up redesign for unified workflows. No File Explorer bloat, integrated AI context, built-in terminal output caching, zero setup required.
 
-**Q: Why is this better than Cursor?**
+## Q: Why is this better than Cursor?
+
 A: Cursor is VS Code + better AI. DEVOS is AI + everything else needed to ship. Cursor has 40MB binary, 5-minute setup. DEVOS loads in browser in 2 seconds. And DEVOS works on phone; Cursor doesn't.
 
-**Q: Aren't there 100 "web IDE" startups that failed?**
+## Q: Aren't there 100 "web IDE" startups that failed?
+
 A: Yes—they tried to be 1:1 VS Code clones in the browser. We're not. We're solving workflow unification, not competing on feature parity. Students don't use VS Code because they want all 200 extensions; they use it because they need to. DEVOS makes them need less.
 
-**Q: How do you monetize this?**
+## Q: How do you monetize this?
+
 A:
 
 - Freemium: Unlimited projects for individuals, AI usage limits
@@ -148,7 +158,8 @@ A:
 
 - Ecosystem: AI model partnerships (revenue share with OpenAI, Google, Anthropic)
 
-**Q: What happens if Microsoft or GitHub builds this?**
+## Q: What happens if Microsoft or GitHub builds this?
+
 A: They could. Probability: Medium. Timeline: 2-3 years (they're slower). Our advantage: (1) already built, (2) optimized for web-first (they're desktop-first), (3) AI-first from Day 1 (they're adding AI later). If acquired, huge exit for team.
 
 ---

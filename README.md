@@ -41,7 +41,7 @@ FastAPI ── SQLAlchemy async ── SQLite or PostgreSQL
    ├── allowlisted terminal and Git services
    ├── GitHub OAuth (server-side tokens)
    └── AI provider adapters
-```
+```text
 
 ## Repository Structure
 
@@ -68,7 +68,7 @@ python -m venv .venv
 pip install -r requirements.txt
 copy .env.example .env  # Windows; use cp on Linux/macOS
 uvicorn app.main:app --reload --port 8000
-```
+```text
 
 The backend defaults to a local SQLite database (`./devos.db`) and creates
 tables automatically on startup. No external services are required. To use
@@ -94,7 +94,7 @@ python -m ruff check 03-backend
 python -m pytest -q 04-tests
 cd 02-frontend
 npm run build
-```
+```text
 
 ## Screenshots
 
@@ -148,7 +148,7 @@ Read [CONTRIBUTING.md](./.github/CONTRIBUTING.md), open an issue using the provi
 
 DEVOS v1.0.0 is released under the **[Apache License 2.0](./LICENSE)**.
 
-**Copyright © 2026 Md Khaleel Ur Rahman**
+## Copyright © 2026 Md Khaleel Ur Rahman
 
 - **Source Code:** Licensed under Apache 2.0 (use, modify, distribute freely)
 
@@ -158,7 +158,7 @@ DEVOS v1.0.0 is released under the **[Apache License 2.0](./LICENSE)**.
 
 - **Third-Party:** See [NOTICE](./NOTICE) for dependencies and their licenses
 
-**Quick Legal Summary:**
+## Quick Legal Summary:
 
 - ✅ You can use DEVOS for personal and commercial projects
 
@@ -180,4 +180,4 @@ For details, see:
 
 - [NOTICE](./NOTICE) — Third-party dependency attribution
 
-**This is original work submitted to iQOO Hackathon 2026.**
+## This is original work submitted to iQOO Hackathon 2026.

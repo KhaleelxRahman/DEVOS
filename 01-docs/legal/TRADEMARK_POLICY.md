@@ -1,6 +1,6 @@
 # Trademark Compliance & Usage Policy
 
-**DEVOS v1.0.0 Trademark Guidelines**
+## DEVOS v1.0.0 Trademark Guidelines
 
 ---
 
@@ -88,7 +88,7 @@ These trademark references are **PERMITTED** in technical context:
 
 DEVOS is an open-source developer workspace built with React and FastAPI.
 This guide explains the DEVOS architecture and design decisions.
-```
+```text
 
 ✅ **APPROVED:**
 
@@ -111,7 +111,7 @@ how to build DEVOS-compatible tools.
 This project is a fork of DEVOS with custom modifications.
 Original project: https://github.com/devos-dev/devos
 License: Apache 2.0 (as required)
-```
+```text
 
 ❌ **NOT APPROVED:**
 
@@ -130,7 +130,7 @@ This is our enhanced version of DEVOS with enterprise features.
 "How We Built a Development Environment Like DEVOS"
 "Learning from DEVOS: 5 Architecture Lessons"
 "Comparing DEVOS to Other IDEs"
-```
+```text
 
 ❌ **NOT APPROVED:**
 
@@ -147,7 +147,7 @@ This is our enhanced version of DEVOS with enterprise features.
 
 When presenting DEVOS, must include these attributions:
 
-**Frontend:**
+## Frontend
 
 - React (Meta) — <https://react.dev>
 
@@ -157,7 +157,7 @@ When presenting DEVOS, must include these attributions:
 
 - Lucide (Lucide Contributors) — <https://lucide.dev>
 
-**Backend:**
+## Backend
 
 - FastAPI (Sebastián Ramírez) — <https://fastapi.tiangolo.com>
 
@@ -165,7 +165,7 @@ When presenting DEVOS, must include these attributions:
 
 - Pydantic (Samuel Colvin) — <https://docs.pydantic.dev>
 
-**Deployment:**
+## Deployment
 
 - Docker (Docker, Inc.) — <https://www.docker.com>
 
@@ -190,7 +190,7 @@ When presenting DEVOS, must include these attributions:
 
 ### For Developers Using DEVOS
 
-**DO:**
+## DO
 
 - ✅ Mention DEVOS in your project documentation
 
@@ -202,7 +202,7 @@ When presenting DEVOS, must include these attributions:
 
 - ✅ Use "DEVOS-inspired" or "based on DEVOS concepts"
 
-**DON'T:**
+## DON'T
 
 - ❌ Claim your product IS DEVOS
 
@@ -216,7 +216,7 @@ When presenting DEVOS, must include these attributions:
 
 ### For Companies Building Integrations
 
-**DO:**
+## DO
 
 - ✅ State "integrates with DEVOS"
 
@@ -226,7 +226,7 @@ When presenting DEVOS, must include these attributions:
 
 - ✅ Acknowledge DEVOS as third-party software
 
-**DON'T:**
+## DON'T
 
 - ❌ Say "endorsed by DEVOS"
 
@@ -242,32 +242,32 @@ When presenting DEVOS, must include these attributions:
 
 ### Platform Hashtag Usage
 
-**APPROVED:**
+## APPROVED
 
-```
+```text
 #DEVOS #DeveloperTools #OpenSource #WebIDE
 #Build #Architect #Deploy #AnywhereWithDEVOS
 ```
 
-**NOT APPROVED:**
+## NOT APPROVED
 
-```
+```text
 #TheDEVOS #MyDEVOS #DEVOSOfficial #DEVOSInc
 ```
 
 ### Competitor Comparison
 
-**APPROVED:**
+## APPROVED
 
-```
+```text
 "DEVOS vs VS Code: Which is right for your team?"
 "5 Ways DEVOS Differs from JetBrains IDEs"
 "Alternative to VS Code Desktop: DEVOS"
 ```
 
-**NOT APPROVED:**
+## NOT APPROVED
 
-```
+```text
 "DEVOS: Better Than VS Code"
 "Why Everyone Should Ditch VS Code For DEVOS"
 ```
@@ -286,7 +286,7 @@ When presenting DEVOS, must include these attributions:
 
 ### Escalation Path
 
-**Stage 1: Friendly Notification**
+## Stage 1: Friendly Notification
 
 - Email sent explaining violation
 
@@ -294,7 +294,7 @@ When presenting DEVOS, must include these attributions:
 
 - Offer to provide correct branding guidelines
 
-**Stage 2: Formal Cease & Desist**
+## Stage 2: Formal Cease & Desist
 
 - Official legal letter
 
@@ -302,7 +302,7 @@ When presenting DEVOS, must include these attributions:
 
 - Reference to relevant trademark law
 
-**Stage 3: Legal Action**
+## Stage 3: Legal Action
 
 - DMCA takedown notice to platform
 
@@ -369,22 +369,28 @@ These actions are **NOT** violations and require **NO** action:
 
 ## FAQ
 
-**Q: Can I use "DEVOS" in my project name?**
+## Q: Can I use "DEVOS" in my project name?
+
 A: If it's a fork of DEVOS, yes (with attribution). If it's a new project, choose a different name and reference DEVOS as inspiration.
 
-**Q: Can I sell a DEVOS-based product?**
+## Q: Can I sell a DEVOS-based product?
+
 A: Yes, under Apache 2.0 license. You cannot use "DEVOS" in your product name without permission.
 
-**Q: Can I register a domain with "DEVOS" in it?**
+## Q: Can I register a domain with "DEVOS" in it?
+
 A: Not without permission. Contact the owner first.
 
-**Q: What if I disagree with this policy?**
+## Q: What if I disagree with this policy?
+
 A: Open an issue on GitHub or contact the owner directly to discuss concerns.
 
-**Q: Can I use DEVOS trademark for educational purposes?**
+## Q: Can I use DEVOS trademark for educational purposes?
+
 A: Yes, for teaching and research about DEVOS. Must clearly state educational context.
 
-**Q: Is this trademark policy enforceable?**
+## Q: Is this trademark policy enforceable?
+
 A: Yes. It reflects current trademark law and Apache 2.0 license terms.
 
 ---
@@ -396,4 +402,4 @@ A: Yes. It reflects current trademark law and Apache 2.0 license terms.
 
 ---
 
-**This policy is binding. Violations may result in legal action.**
+## This policy is binding. Violations may result in legal action

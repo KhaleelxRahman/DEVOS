@@ -1,6 +1,6 @@
 # DEVOS User Journey
 
-**From Idea to Shipped: The Story Judges Will Never Forget**
+## From Idea to Shipped: The Story Judges Will Never Forget
 
 ---
 
@@ -8,7 +8,7 @@
 
 ### Setup (30 seconds)
 
-**"Let me show you how DEVOS works."**
+## "Let me show you how DEVOS works."
 
 Developer opens devos.dev in browser.
 
@@ -26,7 +26,7 @@ Developer opens devos.dev in browser.
 
 **Developer:** "I want to build a real-time chat system."
 
-**DEVOS Action:**
+## DEVOS Action
 
 1. Opens project creation form
 
@@ -34,9 +34,9 @@ Developer opens devos.dev in browser.
 
 3. Clicks "Let AI Design This"
 
-**AI Response:**
+## AI Response
 
-```
+```text
 DEVOS AI suggests:
 
 ARCHITECTURE:
@@ -73,7 +73,7 @@ GITHUB ISSUES (auto-created):
 
 ### Stage 2: Project Setup (30 seconds)
 
-**DEVOS Action:**
+## DEVOS Action
 
 1. Creates GitHub repository automatically (with README template, .env.example)
 
@@ -81,7 +81,7 @@ GITHUB ISSUES (auto-created):
 
 3. Shows developer the project workspace
 
-**Developer sees:**
+## Developer sees
 
 - Left sidebar: File explorer (empty, ready to code)
 
@@ -99,7 +99,7 @@ GITHUB ISSUES (auto-created):
 
 **Developer:** "Let me start with the backend."
 
-**DEVOS Action:**
+## DEVOS Action
 
 1. Developer opens terminal in DEVOS
 
@@ -109,9 +109,9 @@ GITHUB ISSUES (auto-created):
 
 4. AI watches code, provides context-aware suggestions
 
-**Developer experience:**
+## Developer experience
 
-```
+```text
 
 1. Types: from fastapi import FastAPI
 
@@ -139,7 +139,7 @@ GITHUB ISSUES (auto-created):
 
 ### Stage 4: Progress Tracking (1 minute)
 
-**Developer notices:**
+## Developer notices
 
 - Right sidebar shows GitHub issues automatically updated
 
@@ -211,7 +211,7 @@ DEVOS shows:
 
 **Developer clicks:** "Deploy"
 
-**Result:**
+## Result
 
 - GitHub Actions runs
 
@@ -249,7 +249,7 @@ Opens DEVOS on phone:
 
 ## The Journey Visualized (Mermaid Diagram)
 
-```
+```text
 Idea
   │
   ├─→ Developer: "Build a chat system"
@@ -321,7 +321,7 @@ Complete
 | **Phone Continuity** | 0 min (seamless) | Not possible | Infinite |
 | **Total** | 24.5 min | 80+ min | **55+ minutes saved** |
 
-**DEVOS ships the same project in 1/3 the time.**
+## DEVOS ships the same project in 1/3 the time
 
 ---
 
@@ -398,7 +398,7 @@ Complete
 
 *"From idea to shipped product: 25 minutes. With traditional tools: 80+ minutes. That's the DEVOS advantage."*
 
-**Total demo length: 5 minutes**
+## Total demo length: 5 minutes
 
 ---
 
@@ -450,7 +450,7 @@ Complete
 
 ### Priya's Journey (Hackathon)
 
-```
+```text
 Idea (30 sec)
   ↓
 Rapid Architecture Design (2 min)
@@ -464,11 +464,11 @@ Demo Ready (5 min)
 Winner! 🏆
 ```
 
-**Total: 19 minutes. Goal: Win hackathon. ✅**
+## Total: 19 minutes. Goal: Win hackathon. ✅
 
 ### Rajesh's Journey (Freelance Project)
 
-```
+```text
 Client Brief (1 min)
   ↓
 Architecture Design (10 min, with AI)
@@ -484,11 +484,11 @@ Invoice Generated (2 min)
 Client Happy 💰
 ```
 
-**Total: 80 minutes (vs 120 minutes with traditional tools). Recovered: 40 billable minutes.**
+## Total: 80 minutes (vs 120 minutes with traditional tools). Recovered: 40 billable minutes
 
 ### Akshay's Team Journey (Startup)
 
-```
+```text
 Team Planning (5 min, in DEVOS)
   ↓
 Distributed Development (3 developers, one workspace)
@@ -500,11 +500,11 @@ Continuous Deployment (GitHub Actions auto)
 Ship MVP Week 1 ✅
 ```
 
-**Total: 1 week. Goal: Ship MVP. ✅ Traditional tools: 2-3 weeks.**
+## Total: 1 week. Goal: Ship MVP. ✅ Traditional tools: 2-3 weeks
 
 ### Meera's Team Journey (Enterprise)
 
-```
+```text
 Onboard New Developer (1 hour, not 3-4 days)
   ↓
 Week 1: Productive (knows codebase, understands architecture)
@@ -516,7 +516,7 @@ Month 1: Senior dev quality (AI context + unified workflow)
 Team Velocity: 30-40% improvement
 ```
 
-**Total: Permanent productivity gain. Cost: $0 (freemium).**
+## Total: Permanent productivity gain. Cost: $0 (freemium)
 
 ---
 
@@ -524,10 +524,12 @@ Team Velocity: 30-40% improvement
 
 ### Why DEVOS Is Perfect for iQOO
 
-**Traditional Perspective:**
+## Traditional Perspective
+
 "Developer tools are desktop-only. Phones can't do real work."
 
-**iQOO Perspective:**
+## iQOO Perspective
+
 "What if phones were designed for developer work from Day 1?"
 
 **DEVOS answers:** "They can be. Here's proof."
@@ -582,7 +584,7 @@ Team Velocity: 30-40% improvement
 
 ## ASCII Diagram: The Complete Journey
 
-```
+```text
                     DEVOS USER JOURNEY
 
      Developer
@@ -634,7 +636,7 @@ Team Velocity: 30-40% improvement
 
 **Status:** ✅ READY FOR JUDGES
 
-**Why This Matters:**
+## Why This Matters
 
 - This journey is what judges will experience
 
@@ -646,4 +648,4 @@ Team Velocity: 30-40% improvement
 
 - It's memorable and inspiring
 
-**Next: Phase 1 Completion Review**
+## Next: Phase 1 Completion Review

@@ -1,14 +1,14 @@
 # Third-Party Asset Audit Report
 
-**DEVOS v1.0.0 — September 1, 2026**
+## DEVOS v1.0.0 — September 1, 2026
 
 ---
 
 ## Audit Summary
 
-**Status:** ✅ **CLEAN - No Violations Found**
+## Status:**✅**CLEAN - No Violations Found
 
-**Scope:**
+## Scope
 
 - Image assets (PNG, JPG, SVG, GIF)
 
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | `devos-banner.svg` | `/01-docs/assets/` | Original work | Proprietary | ✅ Safe |
 
-**Details:**
+## Details
 
 - Custom-designed banner for DEVOS
 
@@ -50,7 +50,7 @@
 | --- | --- | --- | --- | --- |
 | **lucide-react** | Frontend UI icons | ISC | ✅ Safe | Properly licensed, attribution in `package.json` |
 
-**Scanned Files:**
+## Scanned Files
 
 - `02-frontend/src/components/common/Badge.tsx` — icon props only
 
@@ -178,7 +178,7 @@
 
 ### Scanned Locations
 
-**01-docs/ directory:**
+## 01-docs/ directory
 
 - `README.md` — References `devos-banner.svg` (original)
 
@@ -188,7 +188,7 @@
 
 - `qa/QA_REPORT.md` — No external assets
 
-**02-frontend/ directory:**
+## 02-frontend/ directory
 
 - All image/icon imports → `lucide-react` or local
 

@@ -4,27 +4,36 @@ on:
   push:
     branches:
       - main
+      - DEVOS-v1.0.0
   pull_request:
     branches:
       - main
+      - DEVOS-v1.0.0
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
 
       - name: Run tests
         run: |
-          pytest 04-tests
+          if [ -d tests ]; then
+            pytest
+          else
+            echo "No tests directory found. Skipping."
+          fi

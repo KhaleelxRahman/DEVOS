@@ -6,7 +6,7 @@
 
 ## Ownership
 
-**Copyright © 2026 Md Khaleel Ur Rahman**
+## Copyright © 2026 Md Khaleel Ur Rahman
 
 All original works, source code, documentation, designs, and diagrams in this repository are the exclusive intellectual property of Md Khaleel Ur Rahman unless otherwise explicitly stated.
 
@@ -92,7 +92,7 @@ The following may NOT be used without explicit written permission:
 
 **"DEVOS"** and the DEVOS logotype are product names and may be used only to describe the official DEVOS product.
 
-**Permitted Uses:**
+## Permitted Uses
 
 - "Built with DEVOS"
 
@@ -100,7 +100,7 @@ The following may NOT be used without explicit written permission:
 
 - "Inspired by DEVOS architecture"
 
-**Prohibited Uses:**
+## Prohibited Uses
 
 - Implying official endorsement or affiliation
 
@@ -186,7 +186,7 @@ Example header for modified files:
 
 # Licensed under Apache 2.0
 
-```
+```text
 
 ---
 
@@ -226,22 +226,22 @@ This is a serious matter. Please respect intellectual property rights.
 
 ## FAQ
 
-**Q: Can I fork this repository?**
+## Q: Can I fork this repository?
 A: Yes. Forks are permitted under Apache 2.0. You must retain copyright and license notices.
 
-**Q: Can I use DEVOS code in my commercial product?**
+## Q: Can I use DEVOS code in my commercial product?
 A: Yes, under Apache 2.0. You must include license, copyright, and NOTICE file.
 
-**Q: Can I remove copyright notices?**
+## Q: Can I remove copyright notices?
 A: No. Apache 2.0 requires all copyright notices be retained.
 
-**Q: Can I claim DEVOS is my product?**
+## Q: Can I claim DEVOS is my product?
 A: No. You must retain the original copyright and clearly indicate modifications.
 
-**Q: Can I use DEVOS name/logo for my fork?**
+## Q: Can I use DEVOS name/logo for my fork?
 A: No. Use a different name. "DEVOS" is a trademark.
 
-**Q: Is there a CLA (Contributor License Agreement)?**
+## Q: Is there a CLA (Contributor License Agreement)?
 A: Not yet. This will be added if/when the project transitions to a company.
 
 ---
@@ -259,7 +259,7 @@ All development, design, and architecture credited to:
 
 ---
 
-**This document is binding. By using DEVOS, you agree to these terms.**
+## This document is binding. By using DEVOS, you agree to these terms.
 
 **Last Updated:** September 1, 2026
 **Status:** Active and Enforceable

@@ -1,6 +1,6 @@
 # DEVOS Unique Selling Proposition
 
-**One Unforgettable Sentence That Defines DEVOS**
+## One Unforgettable Sentence That Defines DEVOS
 
 ---
 
@@ -86,9 +86,9 @@ For the first time, building a unified, mobile-first, AI-first developer environ
 
 **What it is:** DEVOS starts with architecture, not code.
 
-**Typical workflow:**
+## Typical workflow
 
-```
+```text
 Idea
   ↓
 Describe project to AI
@@ -104,7 +104,7 @@ Start implementing (code is second, not first)
 Deploy
 ```
 
-**Why this matters:**
+## Why this matters
 
 - Bad architecture = rewrite later (lose weeks)
 
@@ -112,7 +112,7 @@ Deploy
 
 - DEVOS makes good architecture the default path
 
-**Competitor comparison:**
+## Competitor comparison
 
 - Cursor: "Here's code. Hope the architecture is right."
 
@@ -128,9 +128,9 @@ Deploy
 
 **What it is:** AI that reads your actual project, not generic advice.
 
-**How it works:**
+## How it works
 
-```
+```text
 Developer: "How should I structure the database?"
 
 DEVOS AI:
@@ -141,7 +141,7 @@ DEVOS AI:
   → Gives project-specific advice (not generic ChatGPT)
 ```
 
-**Why this matters:**
+## Why this matters
 
 - ChatGPT wastes 20% of time on copy-pasting context
 
@@ -149,7 +149,7 @@ DEVOS AI:
 
 - Better advice = faster shipping
 
-**Competitor comparison:**
+## Competitor comparison
 
 - ChatGPT: "Here's generic advice about databases."
 
@@ -163,9 +163,9 @@ DEVOS AI:
 
 **What it is:** Seamlessly work across devices without losing context.
 
-**Example:**
+## Example
 
-```
+```text
 8 AM: On phone (commute)
   - View project structure
   - Ask AI a question (with full project context)
@@ -186,7 +186,7 @@ DEVOS AI:
   - Full development environment
 ```
 
-**Why this matters:**
+## Why this matters
 
 - Developers spend 50% of day away from desk
 
@@ -194,7 +194,7 @@ DEVOS AI:
 
 - DEVOS recovers 1-2 hours of productive time daily
 
-**Competitor comparison:**
+## Competitor comparison
 
 - VS Code: Not on phone (desktop only)
 
@@ -242,10 +242,11 @@ DEVOS AI:
 
 - **Timeline if they do:** Never (market segmentation)
 
-**The Real Insight:**
+## The Real Insight
+
 Every competitor is optimizing their existing product category. No one is redesigning from first principles. DEVOS did that from Day 1.
 
-**First-mover advantage: 2-3 years before competition.**
+## First-mover advantage: 2-3 years before competition
 
 ---
 
@@ -253,28 +254,32 @@ Every competitor is optimizing their existing product category. No one is redesi
 
 ### For Students
 
-**USP in 15 seconds:**
+## USP in 15 seconds
+
 *"Ship hackathon projects in half the time. All your tools in one app. Start in 30 seconds, not 30 minutes."*
 
 **Key benefit:** Speed to first demo
 
 ### For Freelancers
 
-**USP in 15 seconds:**
+## USP in 15 seconds
+
 *"Recover 2+ billable hours daily. No more tool switching. Get paid for your code, not for managing tools."*
 
 **Key benefit:** Billable productivity
 
 ### For Startups
 
-**USP in 15 seconds:**
+## USP in 15 seconds
+
 *"Move faster as a team. One unified workspace. Onboard developers in hours, not days. Ship MVPs in half the time."*
 
 **Key benefit:** Team velocity
 
 ### For Enterprise Teams
 
-**USP in 15 seconds:**
+## USP in 15 seconds
+
 *"Standardize tooling. Reduce onboarding from days to hours. Recover 2+ hours per developer daily in lost productivity. That's $500K+ in recovered efficiency per 10-person team annually."*
 
 **Key benefit:** Operational efficiency
@@ -285,7 +290,7 @@ Every competitor is optimizing their existing product category. No one is redesi
 
 ### "DEVOS doesn't generate code first—it designs the architecture first. That's how the best engineers actually think."
 
-**Why this sticks:**
+## Why this sticks
 
 - ✅ Specific (not "better developer experience")
 
@@ -299,7 +304,7 @@ Every competitor is optimizing their existing product category. No one is redesi
 
 - ✅ Repeatable (judges will repeat this to colleagues)
 
-**Why competitors can't copy it:**
+## Why competitors can't copy it
 
 - VS Code is a text editor (can't be design-first)
 
@@ -315,25 +320,25 @@ Every competitor is optimizing their existing product category. No one is redesi
 
 ### Level 1: Headline (10 words max)
 
-**"Design-first development. Then code. Then ship."**
+## "Design-first development. Then code. Then ship."
 
 ### Level 2: Subheading (30 words)
 
-**"DEVOS brings unified workflows to developers. Design your architecture first. AI understands your project. Code and deploy without friction."**
+## "DEVOS brings unified workflows to developers. Design your architecture first. AI understands your project. Code and deploy without friction."
 
 ### Level 3: Elevator (45 seconds)
 
-**[See ELEVATOR_PITCH.md]**
+## [See ELEVATOR_PITCH.md]
 
 ### Level 4: Deep Dive (5 minutes)
 
-**[See PROBLEM_STATEMENT.md + MARKET_GAP.md]**
+## [See PROBLEM_STATEMENT.md + MARKET_GAP.md]
 
 ---
 
 ## Competitive Positioning Matrix
 
-```
+```text
                     ┌─────────── AI Capability ────────────────┐
                     │                                           │
          High  ┌─────────────────────────────────────────────────┐
@@ -379,7 +384,7 @@ Every competitor is optimizing their existing product category. No one is redesi
 
 ### What We Promise
 
-**"Code faster. Think clearer. Ship sooner."**
+## "Code faster. Think clearer. Ship sooner."
 
 ### How We Deliver
 
@@ -425,7 +430,7 @@ Developers feel less tool fatigue and more creative freedom. They ship better co
 
 **Status:** ✅ READY FOR JUDGES
 
-**Why This Matters for Hackathon:**
+## Why This Matters for Hackathon
 
 - Judges remember one thing about each pitch
 

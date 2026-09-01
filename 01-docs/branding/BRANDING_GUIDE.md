@@ -1,6 +1,6 @@
 # DEVOS Branding Guide
 
-**Official Branding Guidelines for DEVOS v1.0.0**
+## Official Branding Guidelines for DEVOS v1.0.0
 
 ---
 
@@ -12,11 +12,11 @@
 
 ### Full Form
 
-**Developer Operating System**
+## Developer Operating System
 
 ### Tagline
 
-**"Build. Architect. Deploy. Anywhere."**
+## "Build. Architect. Deploy. Anywhere."
 
 ### Mission
 
@@ -34,7 +34,7 @@ Become the preferred development environment for teams and individual developers
 
 **Current Status:** Logo design to be added to `/01-docs/assets/`
 
-**Logo Guidelines (When Designed):**
+## Logo Guidelines (When Designed)
 
 - Should feature "DEVOS" wordmark clearly
 
@@ -48,7 +48,7 @@ Become the preferred development environment for teams and individual developers
 
 - Must maintain 3:1 minimum clear space around all edges
 
-**Logo Files to Include:**
+## Logo Files to Include
 
 - `devos-logo.svg` — Full color version
 
@@ -101,15 +101,15 @@ Become the preferred development environment for teams and individual developers
 
 ### Gradients
 
-**Primary Gradient (Left to Right):**
+## Primary Gradient (Left to Right)
 
-```
+```text
 #0061E0 → #003A99
-```
+```text
 
-**Accent Gradient (Top to Bottom):**
+## Accent Gradient (Top to Bottom):
 
-```
+```text
 #0061E0 → #10B981
 ```
 
@@ -272,18 +272,18 @@ Become the preferred development environment for teams and individual developers
 
 ```markdown
 [![DEVOS](https://img.shields.io/badge/DEVOS-v1.0.0-blue.svg)](https://github.com/devos-dev/devos)
-```
+```text
 
 ### GitHub Profile
 
-**Repository Description:**
+## Repository Description:
 
-```
+```text
 Build. Architect. Deploy. Anywhere.
 AI-powered Developer Operating System with Git, Terminal, and Workspace
-```
+```text
 
-**Topics/Tags:**
+## Topics/Tags:
 
 - `devos`
 
@@ -301,11 +301,13 @@ AI-powered Developer Operating System with Git, Terminal, and Workspace
 
 - `typescript`
 
-**URL (if custom domain):**
+## URL (if custom domain):
 
 ```
+
 devos.dev (to be determined — currently owner-managed)
-```
+
+```text
 
 ---
 
