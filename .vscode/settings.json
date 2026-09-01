@@ -1,16 +1,7 @@
-{
-  "files.exclude":{
-    "**/node_modules":true,
-    "**/.ruff_cache":true,
-    "**/.pytest_cache":true,
-    "**/__pycache__":true,
-    "**/dist":true
-  },
-  "explorer.compactFolders":true,
-  "editor.formatOnSave":true,
-  "files.trimTrailingWhitespace":true,
-  "files.insertFinalNewline":true,
-  "typescript.tsserver.maxTsServerMemory":1024,
-  "python.analysis.indexing":false,
-  "python.analysis.autoImportCompletions":true
+﻿{
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/03-backend"
+  ],
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.indexing": true
 }
