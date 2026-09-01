@@ -95,7 +95,7 @@ rich==15.0.0
 rsa==4.9.1
 ruff==0.16.4
 scikit-learn==1.9.0
-scipy==1.18.0
+scipy==1.17.1
 seaborn==0.13.2
 six==1.17.0
 slowapi==0.1.10
