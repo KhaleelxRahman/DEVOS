@@ -1,0 +1,6 @@
+{
+  "name": "DEVOS",
+  "description": "Project-aware AI developer workspace with files, terminal, Git, testing, and AI assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
