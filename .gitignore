@@ -36,3 +36,4 @@ playwright/.cache/
 *.db
 *.db-journal
 *.sqlite3
+DEVOS/
