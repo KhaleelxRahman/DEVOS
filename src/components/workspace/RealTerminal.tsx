@@ -79,7 +79,7 @@ export const RealTerminal: React.FC<RealTerminalProps> = ({ projectId }) => {
 
     // Welcome banner
     term.writeln('\x1b[1;34m╔═════════════════════════════════════════════════════════════════╗\x1b[0m');
-    term.writeln('\x1b[1;34m║\x1b[0m  \x1b[1;32mDEVOS v1.0.0 Real Terminal Sandbox\x1b[0m \x1b[1;33m(iQOO Hackathon Edition)\x1b[0m   \x1b[1;34m║\x1b[0m');
+    term.writeln('\x1b[1;34m║\x1b[0m  \x1b[1;32mDEVOS v1.0.0 Real Terminal Sandbox\x1b[0m \x1b[1;33m\x1b[0m   \x1b[1;34m║\x1b[0m');
     term.writeln('\x1b[1;34m║\x1b[0m  Type commands like \x1b[36mnpm test\x1b[0m, \x1b[36mgit status\x1b[0m, \x1b[36mnode -v\x1b[0m, \x1b[36mls\x1b[0m, \x1b[36mcat\x1b[0m.     \x1b[1;34m║\x1b[0m');
     term.writeln('\x1b[1;34m╚═════════════════════════════════════════════════════════════════╝\x1b[0m');
     term.write('\r\n\x1b[1;32mdevos@workspace\x1b[0m:\x1b[1;34m~/' + projectId.slice(0, 8) + '\x1b[0m$ ');

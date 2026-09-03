@@ -173,10 +173,21 @@ export const activityApi = {
 };
 
 export const githubApi = {
-  connect: () => apiClient.post<{ authorization_url: string }>('/github/connect'),
-  getConnection: () => apiClient.get<{ connected: boolean; username: string | null }>('/github/connection'),
+  connect: () => apiClient.post<{ authorization_url: string; account?: any }>('/github/connect'),
+  getConnection: () => apiClient.get<{ connected: boolean; username: string | null; name?: string; email?: string; avatar_url?: string; organizations?: string[] }>('/github/connection'),
+  setToken: (token: string, username?: string) => apiClient.post<{ connected: boolean; account: any; message: string }>('/github/token', { token, username }),
   disconnect: () => apiClient.delete('/github/connection'),
   getRepos: () => apiClient.get<{ connected: boolean; repositories: GithubRepository[] }>('/github/repositories'),
+  createRepo: (payload: { name: string; description?: string; is_private?: boolean; auto_init_readme?: boolean; gitignore_template?: string; license_template?: string }) =>
+    apiClient.post<{ repository: GithubRepository; message: string }>('/github/repositories/create', payload),
+  getIssues: () => apiClient.get<{ issues: any[]; total_count: number; open_count: number; closed_count: number }>('/github/issues'),
+  createIssue: (payload: { title: string; body?: string; labels?: string[]; assignees?: string[] }) =>
+    apiClient.post<{ issue: any; message: string }>('/github/issues', payload),
+  closeIssue: (id: number) => apiClient.post<{ issue: any; message: string }>(`/github/issues/${id}/close`),
+  generateReadme: (projectId: string, custom_title?: string) =>
+    apiClient.post<{ content: string; file_path: string; message: string }>('/github/readme/generate', { projectId, custom_title }),
+  runGitOp: (projectId: string, operation: 'status' | 'add' | 'commit' | 'push' | 'pull' | 'fetch' | 'checkout', message?: string) =>
+    apiClient.post<{ operation: string; branch: string; log: string; status: any }>('/github/git/op', { projectId, operation, message }),
 };
 
 export const testingApi = {
@@ -376,7 +387,7 @@ export const appApi = {
     apiClient.post<{
       pitch_deck: Array<{ slide: number; title: string; content: string; key_metric: string }>;
       demo_script: Array<{ step: number; time: string; action: string; talking_point: string; wow_factor: string }>;
-      judge_summary: {
+      presentation_summary: {
         innovation_score: string;
         technical_depth: string;
         market_viability: string;

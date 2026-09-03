@@ -1,14 +1,14 @@
-DEVOS v1.0.0 — HACKATHON DEMO & SUBMISSION PLAN
+DEVOS v1.0.0 — PRODUCTION DEMO & SUBMISSION PLAN
 
-Document: 12_HACKATHON_DEMO.md
+Document: 12_PRODUCTION_DEMO.md
 Product: DEVOS v1.0.0
 Version: 1.0
-Status: Hackathon Ready
+Status: Product Ready
 
 
 1. PURPOSE
 
-This document defines the hackathon demonstration strategy for DEVOS v1.0.0.
+This document defines the product demonstration strategy for DEVOS v1.0.0.
 
 The objective is not to demonstrate every feature.
 
@@ -17,7 +17,7 @@ The objective is to prove the core product idea:
 A project-aware AI developer workspace can reduce context switching and help developers move from idea to working code faster.
 
 
-2. CORE HACKATHON MESSAGE
+2. CORE PRODUCTION MESSAGE
 
 DEVOS v1.0.0 is not just another AI chatbot.
 
@@ -89,7 +89,7 @@ into one workspace.
 
 6. DEMO PROJECT
 
-Prepare one stable project before the hackathon.
+Prepare one stable project before the product.
 
 The project should contain:
 
@@ -276,9 +276,9 @@ Git context
 AI response
 
 
-13. JUDGE TAKEAWAY
+13. PRESENTATION TAKEAWAY
 
-Judges should remember:
+Presentations should remember:
 
 "DEVOS v1.0.0 understands the project, not just the prompt."
 
@@ -552,7 +552,7 @@ Enterprise developer ecosystem
 "DEVOS v1.0.0 turns the project itself into the AI's context."
 
 
-32. JUDGE QUESTIONS
+32. PRESENTATION QUESTIONS
 
 Be prepared to answer:
 
@@ -609,7 +609,7 @@ DEVOS v1.0.0 can build context from the active project, relevant files, Git stat
 "The architecture separates frontend, backend services, AI provider, context engine and integrations, allowing advanced capabilities to be added without rebuilding the entire system."
 
 
-39. HACKATHON CHECKLIST
+39. PRODUCTION CHECKLIST
 
 Before leaving for venue:
 
@@ -698,7 +698,7 @@ Do not spend most of the video talking.
 Show the product working.
 
 
-46. HACKATHON BUILD PRIORITY
+46. PRODUCTION BUILD PRIORITY
 
 P0:
 
@@ -769,7 +769,7 @@ Not:
 A collection of random developer tools.
 
 
-51. FINAL HACKATHON PRINCIPLE
+51. FINAL PRODUCTION PRINCIPLE
 
 SHOW THE PROBLEM.
 
@@ -782,4 +782,4 @@ SHOW THE DIFFERENTIATION.
 SHOW THE FUTURE.
 
 
-END OF 12_HACKATHON_DEMO.md
+END OF 12_PRODUCTION_DEMO.md

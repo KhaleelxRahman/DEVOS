@@ -539,7 +539,7 @@ Immediately verify:
 ✓ Health
 
 
-47. HACKATHON DEPLOYMENT
+47. PRODUCTION DEPLOYMENT
 
 Before venue/demo:
 
@@ -551,7 +551,7 @@ Before venue/demo:
 • Prepare local fallback
 
 
-48. HACKATHON FALLBACK
+48. PRODUCTION FALLBACK
 
 If internet or deployment fails:
 

@@ -317,12 +317,12 @@ export const MonacoEditorPro: React.FC<MonacoEditorProProps> = ({
         }}
       >
         <div style={{ display: 'flex', gap: 2, overflowX: 'auto', flex: 1 }} role="tablist">
-          {tabs.map((tab) => {
+          {tabs.map((tab, index) => {
             const isCurrent = tab.path === activePath;
             const filename = tab.path.split('/').pop() || tab.path;
             return (
               <div
-                key={tab.path}
+                key={`${tab.path}-${index}`}
                 role="tab"
                 aria-selected={isCurrent}
                 onClick={() => onActivate(tab.path)}
@@ -549,9 +549,9 @@ export const MonacoEditorPro: React.FC<MonacoEditorProProps> = ({
 
           <div style={{ maxHeight: 240, overflowY: 'auto', padding: '4px' }}>
             {filteredQuickOpenFiles.length > 0 ? (
-              filteredQuickOpenFiles.map((path) => (
+              filteredQuickOpenFiles.map((path, idx) => (
                 <div
-                  key={path}
+                  key={`${path}-${idx}`}
                   onClick={() => {
                     onActivate(path);
                     setIsQuickOpenVisible(false);

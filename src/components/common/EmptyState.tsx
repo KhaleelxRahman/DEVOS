@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from './Button';
 
 export interface EmptyStateProps {
@@ -18,6 +18,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   actionLabel,
   onAction,
 }) => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <div
       style={{
@@ -25,25 +28,47 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '32px 16px',
+        padding: '48px 24px',
         textAlign: 'center',
-        gap: 10,
+        gap: 16,
         color: 'var(--color-text-muted)',
+        background: 'var(--color-surface)',
+        borderRadius: 'var(--radius-xl)',
+        border: '1px dashed var(--color-border)',
+        opacity: mounted ? 1 : 0,
+        transform: mounted ? 'translateY(0)' : 'translateY(10px)',
+        transition: 'opacity 0.4s ease, transform 0.4s ease',
       }}
     >
-      {icon && <div style={{ marginBottom: 4 }}>{icon}</div>}
-      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+      {icon && (
+        <div style={{ 
+          width: 64, 
+          height: 64, 
+          borderRadius: '50%', 
+          background: 'rgba(59, 130, 246, 0.05)', 
+          border: '1px solid rgba(59, 130, 246, 0.1)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          color: '#3b82f6',
+          marginBottom: 8,
+          boxShadow: '0 8px 32px rgba(59, 130, 246, 0.1)',
+        }}>
+          {icon}
+        </div>
+      )}
+      <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
         {title}
       </div>
       {description && (
-        <p style={{ margin: 0, fontSize: '12px', maxWidth: 400, lineHeight: 1.5 }}>
+        <p style={{ margin: 0, fontSize: '14px', maxWidth: 360, lineHeight: 1.6 }}>
           {description}
         </p>
       )}
       {action ? (
-        <div style={{ marginTop: 8 }}>{action}</div>
+        <div style={{ marginTop: 12 }}>{action}</div>
       ) : actionLabel && onAction ? (
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 12 }}>
           <Button variant="primary" size="sm" onClick={onAction}>
             {actionLabel}
           </Button>

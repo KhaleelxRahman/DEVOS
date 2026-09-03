@@ -21,7 +21,7 @@ const SLIDES = [
   {
     id: 'vision',
     title: 'DEVOS: Next-Gen AI Developer Operating System',
-    subtitle: 'Built for iQOO Hackathon by Quantum Coders',
+    subtitle: 'Built by DEVOS',
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ background: 'var(--color-surface-elevated)', padding: '16px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
@@ -88,18 +88,18 @@ const SLIDES = [
     ),
   },
   {
-    id: 'iqoo',
-    title: 'iQOO Phone Optimization & Touch Experience',
+    id: 'mobile',
+    title: 'Mobile Optimization & Touch Experience',
     subtitle: 'Mobile-first developer workspace for smartphones & tablets',
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <div style={{ background: 'var(--color-surface-elevated)', padding: '16px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#f59e0b', marginBottom: 8 }}>
             <Smartphone size={20} />
-            <h4 style={{ margin: 0, fontSize: '14px' }}>Optimized for High-Refresh-Rate iQOO Displays</h4>
+            <h4 style={{ margin: 0, fontSize: '14px' }}>Optimized for High-Refresh-Rate Displays</h4>
           </div>
           <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-            DEVOS features adaptive split layouts that transform from dual-pane desktop into touch-friendly collapsible tab bars on iQOO phones. Includes floating quick AI triggers, virtual terminal keyboards, and smooth 120Hz gestures.
+            DEVOS features adaptive split layouts that transform from dual-pane desktop into touch-friendly collapsible tab bars on mobile phones. Includes floating quick AI triggers, virtual terminal keyboards, and smooth 120Hz gestures.
           </p>
         </div>
 
@@ -121,16 +121,16 @@ const SLIDES = [
     ),
   },
   {
-    id: 'judges',
-    title: 'Hackathon Evaluation & Judge Scorecard',
-    subtitle: 'Quantum Coders • DEVOS v1.0.0 Product Delivery',
+    id: 'presentation',
+    title: 'Presentation Scorecard',
+    subtitle: 'DEVOS v1.0.0 Product Delivery',
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {[
           { criterion: 'Innovation & AI Depth (25%)', detail: 'End-to-end integration of Gemini 3.7 Flash across 14 synchronized developer workflows.' },
           { criterion: 'Technical Architecture & Code Quality (25%)', detail: 'Zero compiler errors, pure TypeScript, Monaco Editor, and real xterm terminal runner.' },
-          { criterion: 'UI/UX & Mobile Polish (25%)', detail: 'Inter typography, 8pt spacing grid, responsive dark mode, and iQOO mobile ergonomics.' },
-          { criterion: 'Startup Viability & Real-World Utility (25%)', detail: 'Complete SaaS MVP ready for developer teams, students, and hackathon competitors.' },
+          { criterion: 'UI/UX & Mobile Polish (25%)', detail: 'Inter typography, 8pt spacing grid, responsive dark mode, and mobile ergonomics.' },
+          { criterion: 'Startup Viability & Real-World Utility (25%)', detail: 'Complete SaaS MVP ready for developer teams, students, and competitors.' },
         ].map((item, idx) => (
           <div
             key={idx}
@@ -219,7 +219,7 @@ export const OfficeKitModal: React.FC<OfficeKitModalProps> = ({ isOpen, onClose 
             </div>
             <div>
               <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                DEVOS Office Kit &mdash; Hackathon Presentation Mode
+                DEVOS Office Kit &mdash; Presentation Mode
               </div>
               <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
                 Slide {currentSlideIndex + 1} of {SLIDES.length}

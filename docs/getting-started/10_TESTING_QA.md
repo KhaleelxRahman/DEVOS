@@ -473,9 +473,9 @@ Register
 → Commit
 
 
-38. HACKATHON E2E TEST
+38. PRODUCTION E2E TEST
 
-Run the complete demo exactly as it will be shown to judges.
+Run the complete demo exactly as it will be shown to stakeholders.
 
 Do not test only isolated features.
 
@@ -624,7 +624,7 @@ Manual testing remains necessary for:
 • UX
 • Visual quality
 • Responsive behavior
-• Hackathon demo
+• Product demo
 • Complex workflows
 
 

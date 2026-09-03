@@ -878,9 +878,9 @@ Before deployment:
 ✓ Rate limits configured
 
 
-73. HACKATHON SECURITY PRIORITY
+73. PRODUCTION SECURITY PRIORITY
 
-For the hackathon MVP, prioritize:
+For the product MVP, prioritize:
 
 1. Authentication
 2. Project ownership
@@ -893,7 +893,7 @@ For the hackathon MVP, prioritize:
 
 74. SECURITY VS SPEED
 
-Hackathon development should NOT remove essential security.
+Product development should NOT remove essential security.
 
 It is acceptable to simplify advanced features.
 

@@ -4,8 +4,8 @@
 
 [![DEVOS v1.0.0 banner](./docs/assets/devos-banner.svg)](./docs/README.md)
 
-[![CI](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/ci.yml/badge.svg)](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/ci.yml)
-[![Security](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/security.yml/badge.svg)](https://github.com/KhaleelxRahman/DEVOS/actions/workflows/security.yml)
+[![CI](https://github.com/devos/DEVOS/actions/workflows/ci.yml/badge.svg)](https://github.com/devos/DEVOS/actions/workflows/ci.yml)
+[![Security](https://github.com/devos/DEVOS/actions/workflows/security.yml/badge.svg)](https://github.com/devos/DEVOS/actions/workflows/security.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=111827)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -133,9 +133,15 @@ Read [CONTRIBUTING.md](./.github/CONTRIBUTING.md), open an issue using the provi
 
 ## Support
 
-- Email: [mdkhaleelurrahman51@gmail.com](mailto:mdkhaleelurrahman51@gmail.com?subject=DEVOS v1.0.0%20Support)
+- Email: [hello@gmail.com](mailto:hello@gmail.com?subject=DEVOS v1.0.0%20Support)
 - Phone: [+91 78428 35936](tel:+917842835936)
 
 ## License
 
 DEVOS v1.0.0 is released under the [MIT License](./LICENSE).
+
+## Phase 8 & 9 Status
+- GitHub OAuth: Completed
+- Native GitHub Workspace: Completed
+- Premium UX/UI Public Launch: Completed
+

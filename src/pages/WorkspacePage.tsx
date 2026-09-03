@@ -13,10 +13,11 @@ import {
   History,
   Users,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useProject } from '../hooks/useProject';
 import { EmptyState, Button, Badge } from '../components/common';
 import { filesApi, projectsApi } from '../api';
+import { AutonomousAICommandCenter } from '../components/command-center/AutonomousAICommandCenter';
 import { ProfessionalFileExplorer } from '../components/workspace/ProfessionalFileExplorer';
 import { MonacoEditorPro } from '../components/workspace/MonacoEditorPro';
 import { RealTerminal } from '../components/workspace/RealTerminal';
@@ -26,14 +27,14 @@ import { GitHubProPanel } from '../components/workspace/GitHubProPanel';
 import { DeployCenterPanel } from '../components/workspace/DeployCenterPanel';
 import { TestingPanel } from '../components/workspace/TestingPanel';
 import { OfficeKitModal } from '../components/presentation/OfficeKitModal';
-import { IQOOFloatingAI } from '../components/mobile/IQOOFloatingAI';
+import { MobileFloatingAI } from '../components/mobile/MobileFloatingAI';
 import { FileVersionModal } from '../components/workspace/FileVersionModal';
 import { TeamCollaborationModal } from '../components/collaboration/TeamCollaborationModal';
 import { useToast } from '../components/common/Toast';
 import { useSeo } from '../hooks/useSeo';
 import { OpenTab } from '../components/workspace/CodeViewer';
 
-type RightTabType = 'ai' | 'debug' | 'git' | 'deploy' | 'test';
+type RightTabType = 'agent' | 'ai' | 'debug' | 'git' | 'deploy' | 'test';
 type LayoutMode = 'default' | 'editor-focus' | 'terminal-focus';
 
 export const WorkspacePage: React.FC = () => {
@@ -41,14 +42,27 @@ export const WorkspacePage: React.FC = () => {
 
   const { activeProject, setActiveProject } = useProject();
   const navigate = useNavigate();
+  const location = useLocation();
   const [tabs, setTabs] = useState<OpenTab[]>([]);
   const [activePath, setActivePath] = useState<string | null>(null);
-  const [rightTab, setRightTab] = useState<RightTabType>('ai');
+  const [rightTab, setRightTab] = useState<RightTabType>('agent');
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('default');
   const [isOfficeKitOpen, setIsOfficeKitOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (location.pathname === '/app/github') {
+      setRightTab('git');
+      setLayoutMode('default');
+    } else if (location.pathname === '/app/chat') {
+      setRightTab('ai');
+      setLayoutMode('default');
+    } else if (location.pathname === '/app/terminal') {
+      setLayoutMode('terminal-focus');
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (activeProject) return;
@@ -156,59 +170,38 @@ export const WorkspacePage: React.FC = () => {
   const panelStyle: React.CSSProperties = { overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 'var(--space-2)' }}>
+    <div className="flex flex-col h-full gap-2 text-slate-100 font-sans">
       {/* Workspace Header & Action Controls */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '6px 12px',
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-lg)',
-          flexWrap: 'wrap',
-          gap: 8,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 6,
-              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-            }}
-          >
-            <FolderGit2 size={15} />
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-900/60 border border-white/10 rounded-2xl backdrop-blur-xl flex-wrap gap-2 shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black shadow-md shadow-blue-500/30 shrink-0">
+            <FolderGit2 className="w-4 h-4" />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <h1 style={{ fontSize: 'var(--font-size-sm)', fontWeight: 700, margin: 0, color: 'var(--color-text-primary)' }}>
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm font-bold text-white tracking-tight">
                 {activeProject.name}
               </h1>
-              <Badge variant="accent" icon={<GitBranch size={10} />}>
-                {activeProject.default_branch || 'main'}
-              </Badge>
+              <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[10px] font-semibold rounded-full flex items-center gap-1">
+                <GitBranch className="w-3 h-3" />
+                <span>{activeProject.default_branch || 'main'}</span>
+              </span>
             </div>
           </div>
         </div>
 
         {/* Action Controls: Presentation Mode, Version History, Team Access, Layout Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div className="flex items-center gap-2">
           {activePath && (
             <Button
               variant="secondary"
               size="sm"
               onClick={() => setIsHistoryOpen(true)}
-              leftIcon={<History size={13} />}
+              className="h-8 px-3 rounded-xl bg-slate-800 text-xs text-slate-200 border-white/10"
               title="View file revisions & restore earlier snapshots"
             >
-              Version History
+              <History className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
+              <span>Version History</span>
             </Button>
           )}
 
@@ -216,75 +209,51 @@ export const WorkspacePage: React.FC = () => {
             variant="secondary"
             size="sm"
             onClick={() => setIsCollabOpen(true)}
-            leftIcon={<Users size={13} />}
+            className="h-8 px-3 rounded-xl bg-slate-800 text-xs text-slate-200 border-white/10"
             title="Team members, presence & code discussions"
           >
-            Team ({activeProject.members?.length || 1})
+            <Users className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
+            <span>Team ({activeProject.members?.length || 1})</span>
           </Button>
 
           <Button
             variant="secondary"
             size="sm"
             onClick={() => setIsOfficeKitOpen(true)}
-            leftIcon={<Presentation size={13} />}
-            style={{
-              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(109, 40, 217, 0.15) 100%)',
-              borderColor: '#8b5cf6',
-              color: '#c4b5fd',
-            }}
+            className="h-8 px-3 rounded-xl bg-purple-500/15 border-purple-500/30 text-purple-300 text-xs font-semibold hover:bg-purple-500/25"
           >
-            Presentation / Judge Mode
+            <Presentation className="w-3.5 h-3.5 mr-1.5" />
+            <span>Presentation Mode</span>
           </Button>
 
           {/* Layout switcher */}
-          <div style={{ display: 'flex', background: 'var(--color-surface-elevated)', borderRadius: 6, padding: 2, border: '1px solid var(--color-border)' }}>
+          <div className="flex bg-slate-950 p-1 rounded-xl border border-white/10">
             <button
               onClick={() => setLayoutMode('default')}
               title="Default Split View"
-              style={{
-                background: layoutMode === 'default' ? 'var(--color-accent)' : 'transparent',
-                border: 'none',
-                borderRadius: 4,
-                color: layoutMode === 'default' ? '#fff' : 'var(--color-text-muted)',
-                padding: '4px 8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-              }}
+              className={`p-1.5 rounded-lg text-xs transition-colors ${
+                layoutMode === 'default' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
             >
-              <LayoutGrid size={13} />
+              <LayoutGrid className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setLayoutMode('editor-focus')}
               title="Editor Focus View"
-              style={{
-                background: layoutMode === 'editor-focus' ? 'var(--color-accent)' : 'transparent',
-                border: 'none',
-                borderRadius: 4,
-                color: layoutMode === 'editor-focus' ? '#fff' : 'var(--color-text-muted)',
-                padding: '4px 8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-              }}
+              className={`p-1.5 rounded-lg text-xs transition-colors ${
+                layoutMode === 'editor-focus' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
             >
-              <FileCode2 size={13} />
+              <FileCode2 className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setLayoutMode('terminal-focus')}
               title="Terminal Focus View"
-              style={{
-                background: layoutMode === 'terminal-focus' ? 'var(--color-accent)' : 'transparent',
-                border: 'none',
-                borderRadius: 4,
-                color: layoutMode === 'terminal-focus' ? '#fff' : 'var(--color-text-muted)',
-                padding: '4px 8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-              }}
+              className={`p-1.5 rounded-lg text-xs transition-colors ${
+                layoutMode === 'terminal-focus' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
             >
-              <TermIcon size={13} />
+              <TermIcon className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -392,7 +361,8 @@ export const WorkspacePage: React.FC = () => {
               }}
             >
               {[
-                { key: 'ai', label: 'AI Assistant', icon: <Sparkles size={12} color="var(--color-accent)" /> },
+                { key: 'agent', label: 'AI Command Center', icon: <Sparkles size={12} color="#60a5fa" /> },
+                { key: 'ai', label: 'AI Chat', icon: <Sparkles size={12} color="var(--color-accent)" /> },
                 { key: 'debug', label: 'Debug', icon: <Bug size={12} color="#ef4444" /> },
                 { key: 'git', label: 'Git Pro', icon: <GitBranch size={12} color="#f59e0b" /> },
                 { key: 'deploy', label: 'Deploy', icon: <Rocket size={12} color="#10b981" /> },
@@ -427,6 +397,14 @@ export const WorkspacePage: React.FC = () => {
 
             {/* Active Tab Panel Content */}
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              {rightTab === 'agent' && (
+                <AutonomousAICommandCenter
+                  projectId={activeProject.id}
+                  projectName={activeProject.name}
+                  onOpenFile={openFile}
+                  onApplyCodeToEditor={handleApplyAICode}
+                />
+              )}
               {rightTab === 'ai' && (
                 <EnterpriseAIPanel
                   projectId={activeProject.id}
@@ -459,7 +437,7 @@ export const WorkspacePage: React.FC = () => {
         )}
       </div>
 
-      {/* Presentation Mode / Judge Evaluation Modal */}
+      {/* Presentation Mode / Presentation Modal */}
       <OfficeKitModal
         isOpen={isOfficeKitOpen}
         onClose={() => setIsOfficeKitOpen(false)}
@@ -487,8 +465,8 @@ export const WorkspacePage: React.FC = () => {
         onClose={() => setIsCollabOpen(false)}
       />
 
-      {/* Floating AI Assistant for iQOO Mobile screens */}
-      <IQOOFloatingAI
+      {/* Floating AI Assistant for Mobile screens */}
+      <MobileFloatingAI
         projectId={activeProject.id}
         activeFilePath={activePath}
         onApplyCode={handleApplyAICode}

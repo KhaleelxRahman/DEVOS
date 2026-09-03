@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { ToastProvider } from './components/common/Toast';
+import { ToastProvider, ErrorBoundary } from './components/common';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProjectProvider } from './hooks/useProject';
+
+import { LandingPage } from './pages/public/LandingPage';
+import { LoginPage } from './pages/public/LoginPage';
+import { SignupPage } from './pages/public/SignupPage';
+import { AboutPage } from './pages/public/AboutPage';
+import { FAQPage } from './pages/public/FAQPage';
+import { ContactPage } from './pages/public/ContactPage';
+import { DocsPage } from './pages/public/DocsPage';
+import { PublicLayout } from './components/public/PublicLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { WorkspacePage } from './pages/WorkspacePage';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { PublicRoute } from './components/auth/PublicRoute';
 import { AuthModal } from './components/auth/AuthModal';
 import { OnboardingModal } from './components/onboarding/OnboardingModal';
 import { UserProfileModal } from './components/auth/UserProfileModal';
@@ -12,6 +23,9 @@ import { Button } from './components/common/Button';
 import {
   Sparkles,
   Code2,
+  FolderGit2,
+  Bot,
+  Terminal,
   LogOut,
   HelpCircle,
   Settings,
@@ -31,8 +45,12 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const navItems = [
-    { label: 'Factory & Dashboard', path: '/app/dashboard', icon: <Sparkles size={16} /> },
-    { label: 'Workspace IDE', path: '/app/workspace', icon: <Code2 size={16} /> },
+    { label: 'Dashboard', path: '/app/dashboard', icon: <Sparkles size={15} /> },
+    { label: 'Workspace IDE', path: '/app/workspace', icon: <Code2 size={15} /> },
+    { label: 'GitHub Brain', path: '/app/github', icon: <FolderGit2 size={15} /> },
+    { label: 'AI Chat', path: '/app/chat', icon: <Bot size={15} /> },
+    { label: 'Terminal', path: '/app/terminal', icon: <Terminal size={15} /> },
+    { label: 'Settings', path: '/app/settings', icon: <Settings size={15} /> },
   ];
 
   return (
@@ -51,13 +69,16 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 20px',
-          height: '48px',
-          background: 'var(--color-surface)',
-          borderBottom: '1px solid var(--color-border)',
+          padding: '0 24px',
+          height: '56px',
+          background: 'rgba(15, 23, 42, 0.60)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           position: 'sticky',
           top: 0,
           zIndex: 100,
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
@@ -340,24 +361,49 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
+
 export const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <ProjectProvider>
-            <AppLayout>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ToastProvider>
+          <AuthProvider>
+            <ProjectProvider>
               <Routes>
-                <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
-                <Route path="/app/dashboard" element={<DashboardPage />} />
-                <Route path="/app/workspace" element={<WorkspacePage />} />
-                <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+                {/* Public Pages */}
+                <Route path="/" element={<PublicLayout><LandingPage /></PublicLayout>} />
+                <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+                <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+                <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
+                <Route path="/faq" element={<PublicLayout><FAQPage /></PublicLayout>} />
+                <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
+                <Route path="/docs" element={<PublicLayout><DocsPage /></PublicLayout>} />
+
+                {/* SaaS Protected App Pages */}
+                <Route path="/app/*" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Routes>
+                        <Route path="dashboard" element={<DashboardPage />} />
+                        <Route path="workspace" element={<WorkspacePage />} />
+                        <Route path="github" element={<WorkspacePage />} />
+                        <Route path="chat" element={<WorkspacePage />} />
+                        <Route path="terminal" element={<WorkspacePage />} />
+                        <Route path="profile" element={<DashboardPage />} />
+                        <Route path="settings" element={<DashboardPage />} />
+                        <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+                      </Routes>
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-            </AppLayout>
-          </ProjectProvider>
-        </AuthProvider>
-      </ToastProvider>
-    </BrowserRouter>
+            </ProjectProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 

@@ -11,3 +11,6 @@ export type { ModalProps } from './Modal';
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
 export { ToastProvider, useToast } from './Toast';
+export { Skeleton } from './Skeleton';
+export { ErrorBoundary } from './ErrorBoundary';
+

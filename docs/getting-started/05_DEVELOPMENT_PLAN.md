@@ -985,7 +985,7 @@ Simplify:
 • Advanced Git
 
 
-59. HACKATHON DEMO PATH
+59. PRODUCTION DEMO PATH
 
 Recommended demonstration:
 
@@ -1008,7 +1008,7 @@ Do not demonstrate every feature.
 
 Demonstrate the strongest workflow.
 
-The judges should understand:
+The stakeholders should understand:
 
 "DEVOS v1.0.0 knows the project, not just the question."
 

@@ -4,13 +4,13 @@ import { aiApi } from '../../api';
 import { Spinner, Button } from '../common';
 import { useToast } from '../common/Toast';
 
-interface IQOOFloatingAIProps {
+interface MobileFloatingAIProps {
   projectId: string;
   activeFilePath: string | null;
   onApplyCode?: (code: string) => void;
 }
 
-export const IQOOFloatingAI: React.FC<IQOOFloatingAIProps> = ({ projectId, activeFilePath, onApplyCode }) => {
+export const MobileFloatingAI: React.FC<MobileFloatingAIProps> = ({ projectId, activeFilePath, onApplyCode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +27,7 @@ export const IQOOFloatingAI: React.FC<IQOOFloatingAIProps> = ({ projectId, activ
 
     try {
       const res = await aiApi.chat(projectId, {
-        prompt: `[iQOO Mobile Trigger] ${text}`,
+        prompt: `[Mobile Trigger] ${text}`,
         file_path: activeFilePath || undefined,
       });
 
@@ -54,7 +54,7 @@ export const IQOOFloatingAI: React.FC<IQOOFloatingAIProps> = ({ projectId, activ
       {/* Floating Trigger Button (visible on mobile / small viewport) */}
       <button
         onClick={() => setIsOpen(true)}
-        aria-label="Open iQOO AI Floating Assistant"
+        aria-label="Open AI Floating Assistant"
         style={{
           position: 'fixed',
           bottom: '20px',
@@ -127,7 +127,7 @@ export const IQOOFloatingAI: React.FC<IQOOFloatingAIProps> = ({ projectId, activ
                 </div>
                 <div>
                   <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                    iQOO Quick AI Copilot
+                    Quick AI Copilot
                   </h4>
                   <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
                     Gemini 3.7 &bull; Touch &amp; Voice Optimized
@@ -200,7 +200,7 @@ export const IQOOFloatingAI: React.FC<IQOOFloatingAIProps> = ({ projectId, activ
                 type="text"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Ask Gemini anything on iQOO mobile…"
+                placeholder="Ask Gemini anything on mobile…"
                 style={{
                   flex: 1,
                   background: 'var(--color-background)',

@@ -1,12 +1,13 @@
+import { GitHubConnectButton } from "./GitHubConnectButton";
 import React, { useState } from 'react';
 import { Modal } from '../common/Modal';
 import { Button } from '../common/Button';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../common/Toast';
 import {
-  User as UserIcon,
+  
   HardDrive,
-  Github,
+  
   LogOut,
   Save,
 } from 'lucide-react';
@@ -161,87 +162,18 @@ export const UserProfileModal: React.FC = () => {
         {/* Edit Details Form */}
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: 'var(--font-size-xs)',
-                fontWeight: 600,
-                color: 'var(--color-text-secondary)',
-                marginBottom: 4,
-              }}
-            >
-              Display Name
+            
+          {/* GitHub Connection */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+              GitHub Integration
             </label>
-            <div style={{ position: 'relative' }}>
-              <UserIcon
-                size={16}
-                style={{
-                  position: 'absolute',
-                  left: 12,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--color-text-muted)',
-                }}
-              />
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                style={{
-                  width: '100%',
-                  padding: '8px 12px 8px 36px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--color-border)',
-                  background: 'var(--color-bg)',
-                  color: 'var(--color-text-primary)',
-                  fontSize: 'var(--font-size-sm)',
-                  boxSizing: 'border-box',
-                }}
-              />
+            <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
+              Connect your GitHub account to enable native Git workflows and repository access.
             </div>
+            <GitHubConnectButton />
           </div>
 
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: 'var(--font-size-xs)',
-                fontWeight: 600,
-                color: 'var(--color-text-secondary)',
-                marginBottom: 4,
-              }}
-            >
-              GitHub Username
-            </label>
-            <div style={{ position: 'relative' }}>
-              <Github
-                size={16}
-                style={{
-                  position: 'absolute',
-                  left: 12,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--color-text-muted)',
-                }}
-              />
-              <input
-                type="text"
-                placeholder="e.g. octocat"
-                value={githubUsername}
-                onChange={(e) => setGithubUsername(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px 8px 36px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--color-border)',
-                  background: 'var(--color-bg)',
-                  color: 'var(--color-text-primary)',
-                  fontSize: 'var(--font-size-sm)',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>

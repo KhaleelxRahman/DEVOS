@@ -7,45 +7,48 @@ import {
   Users,
   Activity as ActivityIcon,
   Plus,
+  ArrowRight,
+  ShieldCheck,
+  Code2,
+  Terminal,
+  Clock,
+  Zap,
 } from 'lucide-react';
 import { Card, Button, Badge } from '../components/common';
 import { useProject } from '../hooks/useProject';
 import { useAuth } from '../context/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { activityApi, projectsApi } from '../api';
 import { Activity } from '../types/activity';
 import { useSeo } from '../hooks/useSeo';
 import { AICommandCenter } from '../components/command-center/AICommandCenter';
 import { TeamCollaborationModal } from '../components/collaboration/TeamCollaborationModal';
+import { motion } from 'framer-motion';
 
 export const DashboardPage: React.FC = () => {
   useSeo({ title: 'Dashboard — DEVOS Developer Operating System', noindex: true });
 
-  const { activeProject, setActiveProject } = useProject();
-  const { user } = useAuth();
-  const [projects, setProjects] = useState<any[]>([]);
+  const { activeProject, setActiveProject, projects } = useProject();
+  const { user, openProfileModal } = useAuth();
+  const location = useLocation();
   const [activity, setActivity] = useState<Activity[]>([]);
+  const safeProjects = Array.isArray(projects) ? projects : [];
+  const safeActivity = Array.isArray(activity) ? activity : [];
   const [showCollabModal, setShowCollabModal] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.pathname === '/app/profile' || location.pathname === '/app/settings') {
+      openProfileModal();
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     activityApi
       .list()
       .then((res) => setActivity(res.data?.activities || []))
       .catch(() => setActivity([]));
-
-    projectsApi
-      .list()
-      .then((res) => {
-        if (res.success && res.data?.projects) {
-          setProjects(res.data.projects);
-          if (!activeProject && res.data.projects.length > 0) {
-            setActiveProject(res.data.projects[0]);
-          }
-        }
-      })
-      .catch(() => {});
-  }, [activeProject, setActiveProject]);
+  }, []);
 
   const handleOpenProject = (proj: any) => {
     setActiveProject(proj);
@@ -54,205 +57,168 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+    <div className="space-y-6 max-w-7xl mx-auto w-full text-slate-100 font-sans">
+      
       {/* Top Banner: AI Build Command Center */}
       <AICommandCenter onScaffoldComplete={() => navigate('/app/workspace')} />
 
       {/* User Session / Workspace Identity Banner */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)',
-          border: '1px solid var(--color-border-strong)',
-          borderRadius: 'var(--radius-xl)',
-          padding: 'var(--space-6)',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 'var(--space-6)',
-          alignItems: 'center',
-        }}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-slate-900/60 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative overflow-hidden"
       >
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
         {/* Profile Info */}
-        <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center' }}>
-          <div
-            style={{
-              width: 72,
-              height: 72,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              fontSize: '24px',
-              fontWeight: 800,
-              boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-              flexShrink: 0,
-            }}
-          >
+        <div className="md:col-span-8 flex items-center gap-5">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white text-xl font-extrabold shadow-lg shadow-blue-500/30 border border-white/20 shrink-0">
             {user?.name ? user.name.slice(0, 2).toUpperCase() : 'KR'}
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <h2 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 800, margin: 0, color: 'var(--color-text-primary)' }}>
-                {user ? user.name : 'Md Khaleel Ur Rahman'}
+            <div className="flex items-center gap-3 flex-wrap">
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                {user ? user.name : 'Guest Developer'}
               </h2>
               {user && (
-                <Badge variant="accent" size="sm">
+                <span className="px-2.5 py-0.5 bg-blue-500/15 border border-blue-500/30 text-blue-400 text-xs font-semibold rounded-full uppercase tracking-wider">
                   {user.role || 'OWNER'}
-                </Badge>
+                </span>
               )}
             </div>
-            <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-accent)', margin: '4px 0 8px 0', fontWeight: 600 }}>
-              {user ? (user.github_username ? `@${user.github_username} • Cloud Developer` : 'Cloud Developer Workspace') : 'Founder • AI & Full Stack Developer'}
+            <p className="text-sm text-blue-400 font-medium mt-1">
+              {user ? (user.github_username ? `@${user.github_username} • Cloud Environment` : 'DEVOS Cloud Workspace') : 'Cloud Developer Workspace'}
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-              <Users size={13} color="var(--color-text-secondary)" />
-              <span>Team <strong>Quantum Coders</strong>: Uzair Ali, Syed Mustafa Hussain Hashmi</span>
+            <div className="flex items-center gap-2 text-xs text-slate-400 mt-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>JWT Encrypted Session • Enterprise Cloud Container Active</span>
             </div>
           </div>
         </div>
 
         {/* Live Metric Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-3)' }}>
-          <div style={{ background: 'var(--color-surface)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', textAlign: 'center' }}>
-            <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-accent)' }}>
-              {projects.length}
+        <div className="md:col-span-4 grid grid-cols-3 gap-3">
+          <div className="bg-slate-950/80 p-3 rounded-2xl border border-white/10 text-center">
+            <div className="text-lg font-extrabold text-blue-400">
+              {safeProjects.length}
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>Active Projects</div>
+            <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Projects</div>
           </div>
-          <div style={{ background: 'var(--color-surface)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', textAlign: 'center' }}>
-            <div style={{ fontSize: '20px', fontWeight: 800, color: '#10b981' }}>0.18s</div>
-            <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>Build Latency</div>
+          <div className="bg-slate-950/80 p-3 rounded-2xl border border-white/10 text-center">
+            <div className="text-lg font-extrabold text-emerald-400">0.18s</div>
+            <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Build</div>
           </div>
-          <div style={{ background: 'var(--color-surface)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', textAlign: 'center' }}>
-            <div style={{ fontSize: '20px', fontWeight: 800, color: '#f59e0b' }}>Gemini 3.7</div>
-            <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>Pro Engine</div>
+          <div className="bg-slate-950/80 p-3 rounded-2xl border border-white/10 text-center">
+            <div className="text-lg font-extrabold text-purple-400">Gemini</div>
+            <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">AI Engine</div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Recent Projects Section */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
           <div>
-            <h3 style={{ fontSize: 'var(--font-size-md)', fontWeight: 700, margin: 0, color: 'var(--color-text-primary)' }}>
+            <h3 className="text-lg font-bold text-white tracking-tight">
               Recent Projects &amp; Workspaces
             </h3>
-            <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', margin: '2px 0 0 0' }}>
+            <p className="text-xs text-slate-400">
               Jump straight into your isolated repositories and cloud workspaces
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="flex items-center gap-2">
             {activeProject && (
               <Button
                 variant="secondary"
                 size="sm"
+                className="h-9 px-3 rounded-xl bg-slate-800 text-xs text-slate-200"
                 onClick={() => setShowCollabModal(true)}
-                leftIcon={<Users size={14} />}
               >
-                Team Access
+                <Users className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
+                <span>Team Access</span>
               </Button>
             )}
-            <Link to="/app/workspace">
-              <Button variant="ghost" size="sm">Open Workspace</Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 px-3 rounded-xl text-xs text-slate-300 hover:text-white"
+              onClick={() => navigate('/app/workspace')}
+            >
+              Open Workspace IDE
+            </Button>
           </div>
         </div>
 
-        {projects.length === 0 ? (
-          <div
-            style={{
-              padding: '36px 24px',
-              textAlign: 'center',
-              background: 'var(--color-surface)',
-              borderRadius: 'var(--radius-lg)',
-              border: '1px dashed var(--color-border)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 12,
-            }}
-          >
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                background: 'rgba(59, 130, 246, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--color-accent)',
-              }}
-            >
-              <FolderGit2 size={24} />
+        {safeProjects.length === 0 ? (
+          <div className="p-8 text-center bg-slate-900/40 border border-dashed border-white/10 rounded-2xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <FolderGit2 className="w-6 h-6" />
             </div>
             <div>
-              <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                Your Workspace is Fresh &amp; Ready
-              </h4>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)', margin: 0, maxWidth: '440px' }}>
-                No projects created yet for your account. Use the AI Command Center above to scaffold a full application or start with a clean slate.
+              <h4 className="text-sm font-bold text-white">Your Workspace is Ready</h4>
+              <p className="text-xs text-slate-400 max-w-md mt-1">
+                No projects created yet for your account. Use the AI Command Center above to scaffold a full application or launch a clean slate.
               </p>
             </div>
             <Button
               variant="primary"
               size="sm"
               onClick={() => navigate('/app/workspace')}
-              leftIcon={<Plus size={14} />}
+              className="mt-2 h-9 px-4 rounded-xl bg-blue-600 text-xs font-semibold"
             >
-              Launch Blank Project
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
+              <span>Launch Blank Project</span>
             </Button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-4)' }}>
-            {projects.slice(0, 3).map((proj) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {safeProjects.slice(0, 3).map((proj) => {
               const isCurrent = activeProject?.id === proj.id;
               return (
                 <div
                   key={proj.id}
                   onClick={() => handleOpenProject(proj)}
-                  style={{
-                    background: 'var(--color-surface)',
-                    border: isCurrent ? '1px solid var(--color-accent)' : '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: 'var(--space-4)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    gap: 12,
-                    boxShadow: isCurrent ? '0 0 0 1px var(--color-accent)' : 'none',
-                    transition: 'border-color 150ms ease',
-                  }}
+                  className={`bg-slate-900/60 border ${
+                    isCurrent ? 'border-blue-500/60 ring-1 ring-blue-500/30' : 'border-white/10 hover:border-white/20'
+                  } rounded-2xl p-5 cursor-pointer flex flex-col justify-between gap-4 transition-all hover:-translate-y-0.5 shadow-lg backdrop-blur-xl`}
                 >
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <FolderGit2 size={16} color="var(--color-accent)" />
-                        <h4 style={{ margin: 0, fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        <FolderGit2 className="w-4 h-4 text-blue-400 shrink-0" />
+                        <h4 className="font-bold text-sm text-white truncate max-w-[180px]">
                           {proj.name}
                         </h4>
                       </div>
-                      <Badge variant={isCurrent ? 'accent' : 'default'}>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                        isCurrent ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-slate-800 text-slate-400'
+                      }`}>
                         {isCurrent ? 'Active' : 'Ready'}
-                      </Badge>
+                      </span>
                     </div>
-                    <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
                       {proj.description || 'Modern full-stack application workspace.'}
                     </p>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '1px solid var(--color-border)' }}>
-                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                      {proj.technologies?.slice(0, 2).map((t: string) => (
-                        <span key={t} style={{ fontSize: '10px', background: 'var(--color-surface-elevated)', padding: '2px 6px', borderRadius: 4, color: 'var(--color-text-muted)' }}>
+                  <div className="flex justify-between items-center pt-3 border-t border-white/5">
+                    <div className="flex gap-1.5 flex-wrap">
+                      {(Array.isArray(proj.technologies) ? proj.technologies : []).slice(0, 2).map((t: string) => (
+                        <span key={t} className="text-[10px] bg-slate-950 px-2 py-0.5 rounded-md text-slate-400 font-mono">
                           {t}
                         </span>
                       ))}
                     </div>
-                    <Button variant="secondary" size="sm" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleOpenProject(proj); }}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="h-7 px-2.5 text-xs rounded-lg bg-blue-600/20 text-blue-300 hover:bg-blue-600/30"
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        handleOpenProject(proj);
+                      }}
+                    >
                       Open
                     </Button>
                   </div>
@@ -264,85 +230,107 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Quick Action Workspace Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-4)' }}>
-        <Card
-          title="Active Workspace"
-          subtitle={activeProject ? activeProject.name : 'No project selected'}
-          action={<Badge variant={activeProject ? 'success' : 'default'}>{activeProject ? 'Synchronized' : 'Idle'}</Badge>}
-        >
-          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5 backdrop-blur-xl space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Active Workspace</span>
+            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-semibold rounded-full border border-emerald-500/20">
+              {activeProject ? 'Synchronized' : 'Idle'}
+            </span>
+          </div>
+          <h4 className="text-sm font-bold text-white">
+            {activeProject ? activeProject.name : 'No project selected'}
+          </h4>
+          <p className="text-xs text-slate-400 leading-relaxed">
             {activeProject?.description || 'Instant Monaco Editor, real sandboxed xterm shell, and auto-deploy pipeline.'}
           </p>
-          <Link to="/app/workspace">
-            <Button variant="primary" size="sm" leftIcon={<FolderGit2 size={14} />}>
-              Launch Pro Workspace
-            </Button>
-          </Link>
-        </Card>
+          <Button
+            variant="primary"
+            size="sm"
+            className="w-full h-9 rounded-xl bg-blue-600 text-xs font-semibold"
+            onClick={() => navigate('/app/workspace')}
+          >
+            <Code2 className="w-3.5 h-3.5 mr-1.5" />
+            <span>Launch Pro Workspace</span>
+          </Button>
+        </div>
 
-        <Card
-          title="AI Diagnostics & Fix"
-          subtitle="Gemini 3.7 Root-Cause Analysis"
-          action={<Badge variant="accent"><Sparkles size={12} /> Active</Badge>}
-        >
-          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
+        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5 backdrop-blur-xl space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">AI Diagnostics</span>
+            <span className="px-2 py-0.5 bg-purple-500/10 text-purple-400 text-[10px] font-semibold rounded-full border border-purple-500/20">
+              Active
+            </span>
+          </div>
+          <h4 className="text-sm font-bold text-white">Gemini Root-Cause Analysis</h4>
+          <p className="text-xs text-slate-400 leading-relaxed">
             Automated stack trace debugging, compiler fix patches, and zero-downtime hot reloading.
           </p>
-          <Link to="/app/workspace">
-            <Button variant="secondary" size="sm" leftIcon={<Bot size={14} />}>
-              Open Debug Center
-            </Button>
-          </Link>
-        </Card>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full h-9 rounded-xl bg-slate-800 text-xs font-semibold text-slate-200"
+            onClick={() => navigate('/app/workspace')}
+          >
+            <Bot className="w-3.5 h-3.5 mr-1.5 text-purple-400" />
+            <span>Open Debug Center</span>
+          </Button>
+        </div>
 
-        <Card
-          title="Cloud Deployments"
-          subtitle="Vercel • Netlify • Cloud Run"
-          action={<Badge variant="default"><Rocket size={12} /> Edge CDN</Badge>}
-        >
-          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
+        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5 backdrop-blur-xl space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Cloud Deployments</span>
+            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-semibold rounded-full border border-amber-500/20">
+              Edge CDN
+            </span>
+          </div>
+          <h4 className="text-sm font-bold text-white">Vercel • Netlify • Cloud Run</h4>
+          <p className="text-xs text-slate-400 leading-relaxed">
             Push code to Git branches and trigger automatic edge container deployments with live previews.
           </p>
-          <Link to="/app/workspace">
-            <Button variant="secondary" size="sm" leftIcon={<Rocket size={14} />}>
-              Deploy Center
-            </Button>
-          </Link>
-        </Card>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full h-9 rounded-xl bg-slate-800 text-xs font-semibold text-slate-200"
+            onClick={() => navigate('/app/workspace')}
+          >
+            <Rocket className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
+            <span>Deploy Center</span>
+          </Button>
+        </div>
       </div>
 
       {/* Tracked Activity Logs */}
-      <Card title="Tracked Developer Activity" subtitle="Real-time audit log of commits, builds, and AI generations">
-        {activity.length === 0 ? (
-          <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)', margin: 0 }}>
-            No activity yet. Use the AI Command Center above to scaffold your next application!
+      <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-6 backdrop-blur-xl space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-sm font-bold text-white">Tracked Developer Activity</h4>
+            <p className="text-xs text-slate-400">Real-time audit log of commits, builds, and AI generations</p>
+          </div>
+          <Zap className="w-4 h-4 text-blue-400" />
+        </div>
+
+        {safeActivity.length === 0 ? (
+          <p className="text-xs text-slate-500">
+            No activity logged yet. Use the AI Command Center above to scaffold your next application!
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {activity.slice(0, 6).map((a) => (
+          <div className="space-y-2">
+            {safeActivity.slice(0, 5).map((a) => (
               <div
                 key={a.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  fontSize: 'var(--font-size-xs)',
-                  padding: '8px 12px',
-                  background: 'var(--color-surface)',
-                  borderRadius: 6,
-                  border: '1px solid var(--color-border)',
-                }}
+                className="flex items-center justify-between text-xs p-3 bg-slate-950/80 border border-white/5 rounded-xl text-slate-300"
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <ActivityIcon size={14} color="var(--color-accent)" />
-                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>{a.activity_type}</span>
+                <div className="flex items-center gap-2.5">
+                  <ActivityIcon className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="font-semibold text-white">{a.activity_type}</span>
                 </div>
-                <span style={{ color: 'var(--color-text-muted)' }}>{new Date(a.created_at).toLocaleString()}</span>
+                <span className="text-slate-500 font-mono text-[11px]">{new Date(a.created_at).toLocaleString()}</span>
               </div>
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Team Collaboration Modal */}
       <TeamCollaborationModal

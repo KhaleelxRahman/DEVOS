@@ -20,12 +20,15 @@ export const Card: React.FC<CardProps> = ({
     <div
       {...props}
       style={{
-        background: elevated ? 'var(--color-surface-elevated)' : 'var(--color-surface)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--space-4)',
+        background: elevated ? 'rgba(17, 24, 39, 0.72)' : 'rgba(15, 23, 42, 0.55)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '24px',
+        padding: '24px',
         display: 'flex',
         flexDirection: 'column',
+        boxShadow: '0 20px 60px rgba(37, 99, 235, 0.12)',
         ...style,
       }}
     >

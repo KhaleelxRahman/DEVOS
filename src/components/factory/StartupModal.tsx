@@ -20,7 +20,7 @@ interface StartupModalProps {
   startupData: {
     pitch_deck?: Array<{ slide: number; title: string; content: string; key_metric: string }>;
     demo_script?: Array<{ step: number; time: string; action: string; talking_point: string; wow_factor: string }>;
-    judge_summary?: {
+    presentation_summary?: {
       innovation_score: string;
       technical_depth: string;
       market_viability: string;
@@ -37,7 +37,7 @@ export const StartupModal: React.FC<StartupModalProps> = ({
   appName,
   startupData,
 }) => {
-  const [activeTab, setActiveTab] = useState<'pitch' | 'demo' | 'judge' | 'memo'>('pitch');
+  const [activeTab, setActiveTab] = useState<'pitch' | 'demo' | 'presentation' | 'memo'>('pitch');
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
@@ -110,8 +110,8 @@ export const StartupModal: React.FC<StartupModalProps> = ({
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Startup Mode &amp; Judge Hub</h3>
-                <Badge variant="accent">iQOO Hackathon Edition</Badge>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Startup Presentation Hub</h3>
+                <Badge variant="accent">Production Edition</Badge>
               </div>
               <p style={{ margin: 0, fontSize: '11px', color: '#94a3b8' }}>
                 Assets generated for <strong>{appName}</strong>
@@ -146,8 +146,8 @@ export const StartupModal: React.FC<StartupModalProps> = ({
         >
           {[
             { id: 'pitch', label: 'Pitch Deck (5 Slides)', icon: <Presentation size={14} /> },
-            { id: 'demo', label: 'Judge Demo Script', icon: <Play size={14} /> },
-            { id: 'judge', label: 'iQOO Scoring Scorecard', icon: <Award size={14} /> },
+            { id: 'demo', label: 'Live Demo Script', icon: <Play size={14} /> },
+            { id: 'presentation', label: 'Evaluation Scorecard', icon: <Award size={14} /> },
             { id: 'memo', label: 'Investor Memo & Specs', icon: <TrendingUp size={14} /> },
           ].map((tab) => (
             <button
@@ -269,8 +269,8 @@ export const StartupModal: React.FC<StartupModalProps> = ({
             </div>
           )}
 
-          {/* Judge Scorecard Tab */}
-          {activeTab === 'judge' && startupData.judge_summary && (
+          {/* Presentation Scorecard Tab */}
+          {activeTab === 'presentation' && startupData.presentation_summary && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div
                 style={{
@@ -284,9 +284,9 @@ export const StartupModal: React.FC<StartupModalProps> = ({
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 700 }}>iQOO HACKATHON ESTIMATED SCORE</div>
+                  <div style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 700 }}>ESTIMATED SCORE</div>
                   <div style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', marginTop: 2 }}>
-                    {startupData.judge_summary.innovation_score}
+                    {startupData.presentation_summary.innovation_score}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -299,21 +299,21 @@ export const StartupModal: React.FC<StartupModalProps> = ({
                 <div style={{ background: '#1e293b', padding: '14px', borderRadius: 10, border: '1px solid #334155' }}>
                   <div style={{ fontSize: '11px', color: '#38bdf8', fontWeight: 700, marginBottom: 4 }}>TECHNICAL DEPTH</div>
                   <p style={{ margin: 0, fontSize: '12px', color: '#cbd5e1', lineHeight: 1.5 }}>
-                    {startupData.judge_summary.technical_depth}
+                    {startupData.presentation_summary.technical_depth}
                   </p>
                 </div>
                 <div style={{ background: '#1e293b', padding: '14px', borderRadius: 10, border: '1px solid #334155' }}>
                   <div style={{ fontSize: '11px', color: '#38bdf8', fontWeight: 700, marginBottom: 4 }}>MARKET VIABILITY</div>
                   <p style={{ margin: 0, fontSize: '12px', color: '#cbd5e1', lineHeight: 1.5 }}>
-                    {startupData.judge_summary.market_viability}
+                    {startupData.presentation_summary.market_viability}
                   </p>
                 </div>
               </div>
 
               <div style={{ background: '#1e293b', padding: '14px', borderRadius: 10, border: '1px solid #334155' }}>
-                <div style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 700, marginBottom: 8 }}>KEY JUDGE HIGHLIGHTS</div>
+                <div style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 700, marginBottom: 8 }}>KEY HIGHLIGHTS</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {startupData.judge_summary.key_highlights.map((h, i) => (
+                  {startupData.presentation_summary.key_highlights.map((h, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '12px', color: '#cbd5e1' }}>
                       <ShieldCheck size={14} color="#10b981" />
                       <span>{h}</span>
@@ -362,7 +362,7 @@ export const StartupModal: React.FC<StartupModalProps> = ({
           }}
         >
           <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-            Ready for presentation to iQOO hackathon evaluators &amp; investors
+            Ready for presentation to evaluators &amp; investors
           </span>
           <Button variant="primary" size="sm" onClick={onClose}>
             Done

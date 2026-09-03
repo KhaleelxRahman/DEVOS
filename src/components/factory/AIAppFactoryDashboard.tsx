@@ -442,7 +442,7 @@ export const AIAppFactoryDashboard: React.FC<AIAppFactoryDashboardProps> = ({ on
               onClick={handleOpenStartupMode}
               leftIcon={<Award size={14} color="#f59e0b" />}
             >
-              Startup &amp; Judge Mode
+              Startup Presentation Hub
             </Button>
           </div>
         </div>
@@ -951,7 +951,7 @@ export const AIAppFactoryDashboard: React.FC<AIAppFactoryDashboardProps> = ({ on
         )}
       </div>
 
-      {/* Startup & Judge Mode Modal */}
+      {/* Startup Presentation Hub Modal */}
       <StartupModal
         isOpen={showStartupModal}
         onClose={() => setShowStartupModal(false)}

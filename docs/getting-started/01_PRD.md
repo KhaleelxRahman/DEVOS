@@ -196,7 +196,7 @@ AI/ML Developers
 
 Developers working with Python, machine learning, AI models, datasets, and APIs.
 
-Hackathon Participants
+Product Participants
 
 Developers who need to move rapidly from idea to working prototype.
 
@@ -1030,13 +1030,13 @@ Not: "Replace everything." Instead: "Connect what developers already use, unders
 
 \--------------------
 
-31\. Hackathon Product Strategy
+31\. Product Product Strategy
 
-DEVOS v1.0.0 may be demonstrated in hackathons as an AI-powered developer workspace.
+DEVOS v1.0.0 may be demonstrated in products as an AI-powered developer workspace.
 
-The hackathon implementation should preserve the core DEVOS v1.0.0 product principles while adapting the implementation to the official event requirements.
+The product implementation should preserve the core DEVOS v1.0.0 product principles while adapting the implementation to the official event requirements.
 
-Hackathon-specific requirements, judging criteria, submission requirements, and event constraints should be maintained separately from this core PRD.
+Product-specific requirements, judging criteria, submission requirements, and event constraints should be maintained separately from this core PRD.
 
 \--------------------
 

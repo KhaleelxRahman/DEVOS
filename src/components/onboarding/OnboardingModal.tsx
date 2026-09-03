@@ -1,3 +1,4 @@
+import { GitHubConnectButton } from "../auth/GitHubConnectButton";
 import React, { useState } from 'react';
 import { Modal } from '../common/Modal';
 import { Button } from '../common/Button';
@@ -7,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '../common/Toast';
 import {
   Sparkles,
-  Github,
+  
   CheckCircle2,
   Code2,
   Layers,
@@ -35,8 +36,8 @@ export const OnboardingModal: React.FC = () => {
 
   const [step, setStep] = useState<number>(1);
   const [selectedInterests, setSelectedInterests] = useState<string[]>(['fullstack', 'ai_systems']);
-  const [githubUsername, setGithubUsername] = useState<string>('');
-  const [githubConnected, setGithubConnected] = useState<boolean>(false);
+  
+  
   const [isFinishing, setIsFinishing] = useState<boolean>(false);
 
   if (!showOnboarding) return null;
@@ -47,21 +48,13 @@ export const OnboardingModal: React.FC = () => {
     );
   };
 
-  const handleConnectGithub = () => {
-    if (!githubUsername.trim()) {
-      toast('Please enter your GitHub handle', 'warning');
-      return;
-    }
-    setGithubConnected(true);
-    toast(`Connected GitHub account @${githubUsername.trim()}`, 'success');
-  };
 
   const handleFinish = async (targetAction: 'dashboard' | 'factory' | 'workspace' = 'dashboard') => {
     setIsFinishing(true);
     try {
       await completeOnboarding(
         selectedInterests,
-        githubConnected ? githubUsername.trim() : undefined
+        undefined
       );
       await refreshProjects();
       toast('Welcome to DEVOS! Your private workspace is ready.', 'success');
@@ -268,6 +261,7 @@ export const OnboardingModal: React.FC = () => {
           </div>
         )}
 
+
         {/* Step 3: Connect GitHub */}
         {step === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', padding: '10px 0' }}>
@@ -279,79 +273,9 @@ export const OnboardingModal: React.FC = () => {
                 Sync private repositories, create automated pull requests, and trigger CI/CD pipelines.
               </p>
             </div>
-
-            <div
-              style={{
-                background: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 14,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: '50%',
-                    background: '#24292e',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#ffffff',
-                  }}
-                >
-                  <Github size={24} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                    GitHub Account Integration
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                    {githubConnected ? `Connected as @${githubUsername}` : 'Isolated OAuth token storage'}
-                  </div>
-                </div>
-              </div>
-
-              {!githubConnected ? (
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <input
-                    type="text"
-                    placeholder="Enter your GitHub username"
-                    value={githubUsername}
-                    onChange={(e) => setGithubUsername(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: '8px 12px',
-                      borderRadius: 'var(--radius-md)',
-                      border: '1px solid var(--color-border)',
-                      background: 'var(--color-bg)',
-                      color: 'var(--color-text-primary)',
-                      fontSize: 'var(--font-size-sm)',
-                    }}
-                  />
-                  <Button variant="primary" size="sm" onClick={handleConnectGithub} leftIcon={<Github size={14} />}>
-                    Connect
-                  </Button>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    color: '#10b981',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                  }}
-                >
-                  <CheckCircle2 size={16} />
-                  <span>GitHub account connected successfully!</span>
-                </div>
-              )}
+            
+            <div style={{ padding: '16px', background: 'var(--color-surface-elevated)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
+              <GitHubConnectButton fullWidth />
             </div>
           </div>
         )}
