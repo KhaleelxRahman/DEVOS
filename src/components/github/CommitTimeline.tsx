@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   GitCommit,
-  GitBranch,
   Copy,
   ExternalLink,
   Check,
@@ -35,8 +34,8 @@ export const CommitTimeline: React.FC<CommitTimelineProps> = ({ projectId }) => 
     setIsLoading(true);
     try {
       const res = await gitApi.getLog(projectId);
-      if (res.success && res.data?.logs) {
-        setCommits(res.data.logs);
+      if (res.success && res.data?.commits) {
+        setCommits(res.data.commits);
       }
     } catch {
       // Fallback

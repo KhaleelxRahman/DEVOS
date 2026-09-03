@@ -57,7 +57,7 @@ export const IssuesCenter: React.FC<IssuesCenterProps> = () => {
         title: newTitle.trim(),
         body: newBody.trim(),
       });
-      if (res.success) {
+      if (res.success && res.data) {
         toast(`Filed issue #${res.data.issue.number}`, 'success');
         setNewTitle('');
         setNewBody('');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal, RefreshCw, CheckCircle2, AlertTriangle, ShieldCheck, Play, Zap } from 'lucide-react';
+import { RefreshCw, Play } from 'lucide-react';
 import { healthApi, terminalApi } from '../../api';
 import { useToast } from '../common/Toast';
 
@@ -54,11 +54,13 @@ export const TerminalIntelligencePanel: React.FC<TerminalIntelligencePanelProps>
     try {
       const res = await terminalApi.execute(projectId, { command: cmd });
       if (res.data) {
-        if (res.data.stdout) {
-          setTermOutput((prev) => [...prev, ...res.data.stdout.split('\n')]);
+        const stdout = res.data.stdout;
+        const stderr = res.data.stderr;
+        if (stdout) {
+          setTermOutput((prev) => [...prev, ...stdout.split('\n')]);
         }
-        if (res.data.stderr) {
-          setTermOutput((prev) => [...prev, ...res.data.stderr.split('\n')]);
+        if (stderr) {
+          setTermOutput((prev) => [...prev, ...stderr.split('\n')]);
         }
         if (res.data.exit_code === 0) {
           toast(`Command '${cmd}' succeeded`, 'success');

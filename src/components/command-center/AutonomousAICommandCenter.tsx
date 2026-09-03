@@ -104,14 +104,15 @@ export const AutonomousAICommandCenter: React.FC<AutonomousAICommandCenterProps>
 
       const genRes = await appApi.generate({ prompt, project_id: projectId });
       if (genRes.data?.files) {
-        const newChanges: FileChange[] = genRes.data.files.map((f: any) => ({
+        const files = genRes.data.files;
+        const newChanges: FileChange[] = files.map((f: any) => ({
           path: f.path || f.name,
           type: 'created',
           linesAdded: f.content ? f.content.split('\n').length : 50,
           timestamp: 'Just now',
         }));
         setFileChanges((prev) => [...newChanges, ...prev]);
-        setLogs((prev) => [...prev, `✓ Generated ${genRes.data.files.length} project files automatically.`]);
+        setLogs((prev) => [...prev, `✓ Generated ${files.length} project files automatically.`]);
       }
 
       // Step 4: Running Build

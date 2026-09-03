@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  GitPullRequest,
   GitCommit,
   UploadCloud,
   DownloadCloud,
@@ -28,9 +27,10 @@ export const GitOperationsPanel: React.FC<GitOperationsPanelProps> = ({ projectI
     try {
       const res = await githubApi.runGitOp(projectId, operation, commitMessage || undefined);
       if (res.success && res.data) {
+        const data = res.data;
         const timestamp = new Date().toLocaleTimeString();
         setLogs((prev) => [
-          `[${timestamp}] $ git ${operation}${operation === 'commit' && commitMessage ? ` -m "${commitMessage}"` : ''}\n${res.data.log}`,
+          `[${timestamp}] $ git ${operation}${operation === 'commit' && commitMessage ? ` -m "${commitMessage}"` : ''}\n${data.log}`,
           ...prev,
         ]);
         toast(`Git operation '${operation}' executed!`, 'success');
