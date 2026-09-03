@@ -2,27 +2,25 @@ import React, { useEffect, useState } from 'react';
 import {
   Bot,
   FolderGit2,
-  Sparkles,
   Rocket,
   Users,
   Activity as ActivityIcon,
   Plus,
-  ArrowRight,
   ShieldCheck,
   Code2,
-  Terminal,
-  Clock,
   Zap,
 } from 'lucide-react';
-import { Card, Button, Badge } from '../components/common';
+import { Button } from '../components/common';
 import { useProject } from '../hooks/useProject';
 import { useAuth } from '../context/AuthContext';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { activityApi, projectsApi } from '../api';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { activityApi } from '../api';
 import { Activity } from '../types/activity';
 import { useSeo } from '../hooks/useSeo';
 import { AICommandCenter } from '../components/command-center/AICommandCenter';
 import { TeamCollaborationModal } from '../components/collaboration/TeamCollaborationModal';
+import { ProjectSummary } from '../components/dashboard/ProjectSummary';
+import { QuickActions } from '../components/dashboard/QuickActions';
 import { motion } from 'framer-motion';
 
 export const DashboardPage: React.FC = () => {
@@ -115,6 +113,12 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Live Repository Statistics & Telemetry Summary */}
+      <ProjectSummary project={activeProject} />
+
+      {/* Quick Developer Actions Shortcuts */}
+      <QuickActions />
 
       {/* Recent Projects Section */}
       <div className="space-y-4">

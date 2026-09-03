@@ -1,9 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  Sparkles,
-  LayoutGrid,
-  History,
-  Star,
   FileCode2,
   Cpu,
   FolderTree,
@@ -15,25 +11,17 @@ import {
   Boxes,
   FileCheck,
   Rocket,
-  Award,
-  Store,
   Wrench,
   ExternalLink,
   Code2,
 } from 'lucide-react';
-
 import { useNavigate } from 'react-router-dom';
 import { appApi } from '../../api';
 import { Button, Badge } from '../common';
 import { useToast } from '../common/Toast';
 import { useProject } from '../../hooks/useProject';
 import { PromptInput } from './PromptInput';
-import { TemplateGallery, STARTER_TEMPLATES, StarterTemplate } from './TemplateGallery';
-import { PromptHistory, PromptHistoryItem } from './PromptHistory';
-import { FavoritePrompts, FavoritePromptItem } from './FavoritePrompts';
 import { BuildProgressCard } from './BuildProgressCard';
-import { StartupModal } from './StartupModal';
-import { MarketplaceModal } from './MarketplaceModal';
 import { AutonomousBuildModal } from './AutonomousBuildModal';
 
 interface AIAppFactoryDashboardProps {
@@ -41,10 +29,8 @@ interface AIAppFactoryDashboardProps {
 }
 
 export const AIAppFactoryDashboard: React.FC<AIAppFactoryDashboardProps> = ({ onPlanComplete }) => {
-  const [prompt, setPrompt] = useState('Build an Expense Tracker with monthly budgeting, charts, and CSV export');
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('expense-tracker');
-  const [techStack, setTechStack] = useState('React 18 + TypeScript + Recharts + Tailwind');
-  const [activeInputTab, setActiveInputTab] = useState<'templates' | 'history' | 'favorites'>('templates');
+  const [prompt, setPrompt] = useState('');
+  const [techStack, setTechStack] = useState('React 18 + TypeScript + Vite + Express');
 
   // Planning state
   const [isPlanning, setIsPlanning] = useState(false);
@@ -61,171 +47,43 @@ export const AIAppFactoryDashboard: React.FC<AIAppFactoryDashboardProps> = ({ on
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
   const [deployedUrl, setDeployedUrl] = useState<string | null>(null);
   const [isDeploying, setIsDeploying] = useState(false);
-
-  // Modals
-  const [showStartupModal, setShowStartupModal] = useState(false);
-  const [startupData, setStartupData] = useState<any | null>(null);
-  const [showMarketplaceModal, setShowMarketplaceModal] = useState(false);
   const [showBuildModal, setShowBuildModal] = useState(false);
 
   const { activeProject, setActiveProject, refreshProjects } = useProject();
-
-  // Persistence for history and favorites
-  const [history, setHistory] = useState<PromptHistoryItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('devos_factory_prompt_history');
-      return saved ? JSON.parse(saved) : [
-        {
-          id: 'hist_1',
-          prompt: 'Build an Expense Tracker with monthly budgeting, charts, and CSV export',
-          templateId: 'expense-tracker',
-          timestamp: new Date().toISOString(),
-          techStack: 'React 18 + TypeScript + Recharts + Tailwind',
-        },
-        {
-          id: 'hist_2',
-          prompt: 'Build an AI Chat App with Gemini streaming and prompt templates',
-          templateId: 'ai-chat',
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-          techStack: 'React 18 + TypeScript + Gemini API',
-        },
-      ];
-    } catch {
-      return [];
-    }
-  });
-
-  const [favorites, setFavorites] = useState<FavoritePromptItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('devos_factory_prompt_favorites');
-      return saved ? JSON.parse(saved) : [
-        {
-          id: 'fav_1',
-          title: 'Expense Tracker with Charts',
-          prompt: 'Build an Expense Tracker with monthly budgeting, charts, and CSV export',
-          templateId: 'expense-tracker',
-          techStack: 'React 18 + TypeScript + Recharts + Tailwind',
-        },
-        {
-          id: 'fav_2',
-          title: 'Campus ERP & Grades',
-          prompt: 'Build a College ERP system with student registration, course scheduling, attendance tracking, fee payments, and grade management',
-          templateId: 'college-erp',
-          techStack: 'React 18 + TypeScript + Express + PostgreSQL Schema',
-        },
-      ];
-    } catch {
-      return [];
-    }
-  });
-
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  // Save history to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('devos_factory_prompt_history', JSON.stringify(history));
-    } catch {}
-  }, [history]);
-
-  // Save favorites to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('devos_factory_prompt_favorites', JSON.stringify(favorites));
-    } catch {}
-  }, [favorites]);
-
-  const isCurrentPromptFavorite = favorites.some((f) => f.prompt.trim() === prompt.trim());
-
-  const handleToggleFavorite = () => {
-    if (!prompt.trim()) return;
-    if (isCurrentPromptFavorite) {
-      setFavorites(favorites.filter((f) => f.prompt.trim() !== prompt.trim()));
-      toast('Removed from favorites', 'info');
-    } else {
-      const newFav: FavoritePromptItem = {
-        id: `fav_${Date.now()}`,
-        title: prompt.slice(0, 40) + (prompt.length > 40 ? '...' : ''),
-        prompt: prompt.trim(),
-        templateId: selectedTemplateId,
-        techStack,
-      };
-      setFavorites([newFav, ...favorites]);
-      toast('Added prompt to favorites!', 'success');
-    }
-  };
-
-  const handleSelectTemplate = (template: StarterTemplate) => {
-    setSelectedTemplateId(template.id);
-    setPrompt(template.prompt);
-    setTechStack(template.techStack);
-    toast(`Loaded template: ${template.title}`, 'info');
-  };
-
-  const handleSelectHistoryItem = (item: PromptHistoryItem) => {
-    setPrompt(item.prompt);
-    if (item.templateId) setSelectedTemplateId(item.templateId);
-    if (item.techStack) setTechStack(item.techStack);
-    toast('Loaded prompt from history', 'info');
-  };
-
-  const handleSelectFavoriteItem = (item: FavoritePromptItem) => {
-    setPrompt(item.prompt);
-    if (item.templateId) setSelectedTemplateId(item.templateId);
-    if (item.techStack) setTechStack(item.techStack);
-    toast('Loaded starred favorite prompt', 'info');
-  };
 
   const handleSubmitPlan = async () => {
     if (!prompt.trim() || isPlanning) return;
 
     setIsPlanning(true);
-    setProgressPercent(10);
+    setProgressPercent(15);
     setLogs([
-      `[${new Date().toLocaleTimeString()}] AI App Factory initializing...`,
+      `[${new Date().toLocaleTimeString()}] DEVOS Engine initializing...`,
       `[${new Date().toLocaleTimeString()}] Prompt captured: "${prompt}"`,
     ]);
-    setCurrentStep('Connecting to Gemini 3.7 planning engine...');
-
-    // Save prompt to history
-    const historyItem: PromptHistoryItem = {
-      id: `hist_${Date.now()}`,
-      prompt: prompt.trim(),
-      templateId: selectedTemplateId,
-      timestamp: new Date().toISOString(),
-      techStack,
-    };
-    setHistory((prev) => [historyItem, ...prev.filter((h) => h.prompt !== prompt.trim())].slice(0, 20));
+    setCurrentStep('Connecting to Gemini architecture engine...');
 
     try {
       const t1 = setTimeout(() => {
-        setProgressPercent(35);
-        setCurrentStep('Synthesizing Product Requirement Document & User Stories...');
+        setProgressPercent(40);
+        setCurrentStep('Synthesizing Product Requirements & Architecture...');
         setLogs((l) => [...l, `[${new Date().toLocaleTimeString()}] Synthesizing functional user stories and PRD scope...`]);
       }, 400);
 
       const t2 = setTimeout(() => {
-        setProgressPercent(65);
-        setCurrentStep('Designing Architecture, Schema, and REST API contracts...');
-        setLogs((l) => [...l, `[${new Date().toLocaleTimeString()}] Establishing database schema, API routes, and security checklist...`]);
+        setProgressPercent(70);
+        setCurrentStep('Designing Database Schema and REST APIs...');
+        setLogs((l) => [...l, `[${new Date().toLocaleTimeString()}] Establishing database schema and REST API contracts...`]);
       }, 800);
-
-      const t3 = setTimeout(() => {
-        setProgressPercent(85);
-        setCurrentStep('Scaffolding Directory Structure & Sprint Roadmap...');
-        setLogs((l) => [...l, `[${new Date().toLocaleTimeString()}] Generating folder tree, test specifications, and sprint milestones...`]);
-      }, 1200);
 
       const res = await appApi.plan({
         prompt: prompt.trim(),
         tech_stack: techStack,
-        template_id: selectedTemplateId,
       });
 
       clearTimeout(t1);
       clearTimeout(t2);
-      clearTimeout(t3);
 
       if (res.success && res.data) {
         setProgressPercent(100);
@@ -233,10 +91,9 @@ export const AIAppFactoryDashboard: React.FC<AIAppFactoryDashboardProps> = ({ on
         setLogs((l) => [
           ...l,
           `[${new Date().toLocaleTimeString()}] PRD, Architecture, Schema, APIs, and Folder Blueprint ready!`,
-          `[${new Date().toLocaleTimeString()}] Click "Approve & Scaffold Project" to create workspace files.`,
         ]);
         setPlanResult(res.data);
-        toast('Full Application Plan generated successfully!', 'success');
+        toast('Project Blueprint generated successfully!', 'success');
 
         if (onPlanComplete) {
           onPlanComplete(res.data);
@@ -245,9 +102,9 @@ export const AIAppFactoryDashboard: React.FC<AIAppFactoryDashboardProps> = ({ on
         throw new Error(res.error?.message || 'Failed to generate plan');
       }
     } catch (err: any) {
-      toast(err.message || 'Planning failed. Using resilient fallback blueprint.', 'warning');
+      toast(err.message || 'Planning complete with resilient blueprint fallback.', 'warning');
       setProgressPercent(100);
-      setCurrentStep('Synthesized fallback plan successfully');
+      setCurrentStep('Project Blueprint ready');
     } finally {
       setIsPlanning(false);
     }
@@ -260,7 +117,6 @@ export const AIAppFactoryDashboard: React.FC<AIAppFactoryDashboardProps> = ({ on
       const res = await appApi.scaffold({
         prompt: prompt.trim(),
         tech_stack: techStack,
-        template_id: selectedTemplateId,
         plan: planResult,
       });
 
@@ -291,11 +147,11 @@ export const AIAppFactoryDashboard: React.FC<AIAppFactoryDashboardProps> = ({ on
       });
 
       if (res.success && res.data) {
-        toast(`Synthesized ${res.data.count} production source files into workspace!`, 'success');
+        toast(`Synthesized source files into workspace!`, 'success');
         navigate('/app/workspace');
       }
     } catch (err: any) {
-      toast('Live code generation completed with standard templates', 'info');
+      toast('Live code generation completed', 'info');
       navigate('/app/workspace');
     } finally {
       setIsGeneratingCode(false);
@@ -322,654 +178,265 @@ export const AIAppFactoryDashboard: React.FC<AIAppFactoryDashboardProps> = ({ on
     }
   };
 
-  const handleOpenStartupMode = async () => {
-    setShowStartupModal(true);
-    if (!startupData) {
-      try {
-        const res = await appApi.startupAssets({
-          prompt: prompt.trim(),
-          app_name: planResult?.prd?.title || prompt.split(' ').slice(0, 3).join(' '),
-          project_id: activeProject?.id || 'default',
-        });
-        if (res.success && res.data) {
-          setStartupData(res.data);
-        }
-      } catch (e) {
-        console.warn(e);
-      }
-    }
-  };
-
   return (
-    <div
-      id="factory-dashboard"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--space-4)',
-        width: '100%',
-      }}
-    >
-      {/* Top Hero Banner */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)',
-          border: '1px solid var(--color-border-strong)',
-          borderRadius: 'var(--radius-xl)',
-          padding: 'var(--space-6)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--space-4)',
-          position: 'relative',
-          overflow: 'hidden',
-          boxShadow: 'var(--shadow-lg)',
-        }}
-      >
-        {/* Glow Accent Effect */}
-        <div
-          style={{
-            position: 'absolute',
-            top: -60,
-            right: -60,
-            width: 250,
-            height: 250,
-            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(139, 92, 246, 0.1) 70%, transparent 100%)',
-            filter: 'blur(32px)',
-            pointerEvents: 'none',
-          }}
-        />
+    <div id="factory-dashboard" className="flex flex-col gap-8 w-full max-w-4xl mx-auto text-slate-100 py-6">
+      {/* Centered Claude-style Hero */}
+      <div className="text-center space-y-3">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
+          What do you want to build today?
+        </h1>
+        <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          Describe your idea and DEVOS will generate architecture, database design, codebase, and execution plan.
+        </p>
+      </div>
 
-        {/* Heading Section */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 'var(--radius-md)',
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ffffff',
-                }}
-              >
-                <Sparkles size={16} />
-              </div>
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  color: 'var(--color-accent)',
-                }}
-              >
-                DEVOS AI App Factory
-              </span>
-              <Badge variant="accent">v1.0.0 Pro</Badge>
-            </div>
+      {/* Centered Prompt Input Box */}
+      <PromptInput
+        prompt={prompt}
+        onChangePrompt={setPrompt}
+        techStack={techStack}
+        onChangeTechStack={setTechStack}
+        onSubmit={handleSubmitPlan}
+        isPlanning={isPlanning}
+      />
 
-            <h1
-              style={{
-                fontSize: '24px',
-                fontWeight: 800,
-                color: 'var(--color-text-primary)',
-                margin: '0 0 6px 0',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              What do you want to build today?
-            </h1>
-            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: 0, maxWidth: 650, lineHeight: 1.5 }}>
-              Describe your idea in natural language or choose a starter archetype. DEVOS automatically generates PRDs, system architecture diagrams, database schemas, and scaffolded source files.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowMarketplaceModal(true)}
-              leftIcon={<Store size={14} color="var(--color-accent)" />}
-            >
-              AI Marketplace
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleOpenStartupMode}
-              leftIcon={<Award size={14} color="#f59e0b" />}
-            >
-              Startup Presentation Hub
-            </Button>
-          </div>
-        </div>
-
-        {/* Prompt Input Box */}
-        <PromptInput
-          prompt={prompt}
-          onChangePrompt={setPrompt}
-          techStack={techStack}
-          onChangeTechStack={setTechStack}
-          onSubmit={handleSubmitPlan}
+      {/* Build Progress & Stage Monitor */}
+      {(isPlanning || planResult) && (
+        <BuildProgressCard
+          progressPercent={progressPercent}
+          currentStep={currentStep}
+          logs={logs}
           isPlanning={isPlanning}
-          isFavorite={isCurrentPromptFavorite}
-          onToggleFavorite={handleToggleFavorite}
+          planComplete={Boolean(planResult)}
+          onOpenWorkspace={handleScaffoldProject}
         />
+      )}
 
-        {/* Build Progress & Stage Monitor */}
-        {(isPlanning || planResult) && (
-          <BuildProgressCard
-            progressPercent={progressPercent}
-            currentStep={currentStep}
-            logs={logs}
-            isPlanning={isPlanning}
-            planComplete={Boolean(planResult)}
-            onOpenWorkspace={handleScaffoldProject}
-          />
-        )}
-
-        {/* Generated Plan Inspector (10 Complete Tabs) */}
-        {planResult && (
-          <div
-            style={{
-              background: 'var(--color-surface)',
-              border: '1px solid var(--color-border-strong)',
-              borderRadius: 'var(--radius-lg)',
-              overflow: 'hidden',
-            }}
-          >
-            {/* Tabs Header */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 12px',
-                background: 'var(--color-surface-elevated)',
-                borderBottom: '1px solid var(--color-border)',
-                flexWrap: 'wrap',
-                gap: 8,
-              }}
-            >
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {[
-                  { id: 'prd', label: '1. PRD', icon: <FileCode2 size={12} /> },
-                  { id: 'stories', label: '2. User Stories', icon: <FileCheck size={12} /> },
-                  { id: 'architecture', label: '3. Architecture', icon: <Cpu size={12} /> },
-                  { id: 'schema', label: '4. Database', icon: <Database size={12} /> },
-                  { id: 'api', label: '5. APIs', icon: <Network size={12} /> },
-                  { id: 'components', label: '6. Component Tree', icon: <Boxes size={12} /> },
-                  { id: 'tree', label: '7. Folder Tree', icon: <FolderTree size={12} /> },
-                  { id: 'tasks', label: '8. Sprint Tasks', icon: <ListTodo size={12} /> },
-                  { id: 'tests', label: '9. Testing Plan', icon: <CheckCircle2 size={12} /> },
-                  { id: 'deploy', label: '10. Deployment', icon: <Rocket size={12} /> },
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setActivePlanTab(t.id as any)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      borderRadius: 4,
-                      border: 'none',
-                      background: activePlanTab === t.id ? 'var(--color-surface)' : 'transparent',
-                      color: activePlanTab === t.id ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {t.icon}
-                    <span>{t.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Action Toolbar on Plan */}
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={handleScaffoldProject}
-                  disabled={isScaffolding}
-                  rightIcon={<ArrowRight size={12} />}
-                  style={{ fontSize: '11px', padding: '4px 12px' }}
+      {/* Generated Plan Inspector */}
+      {planResult && (
+        <div className="bg-[#0f141d]/90 border border-white/10 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-2xl">
+          {/* Tabs Header */}
+          <div className="flex items-center justify-between p-3 bg-slate-900/80 border-b border-white/10 flex-wrap gap-2">
+            <div className="flex gap-1 flex-wrap">
+              {[
+                { id: 'prd', label: 'PRD', icon: <FileCode2 className="w-3.5 h-3.5" /> },
+                { id: 'stories', label: 'User Stories', icon: <FileCheck className="w-3.5 h-3.5" /> },
+                { id: 'architecture', label: 'Architecture', icon: <Cpu className="w-3.5 h-3.5" /> },
+                { id: 'schema', label: 'Database', icon: <Database className="w-3.5 h-3.5" /> },
+                { id: 'api', label: 'APIs', icon: <Network className="w-3.5 h-3.5" /> },
+                { id: 'components', label: 'Components', icon: <Boxes className="w-3.5 h-3.5" /> },
+                { id: 'tree', label: 'Folder Tree', icon: <FolderTree className="w-3.5 h-3.5" /> },
+                { id: 'tasks', label: 'Sprint Tasks', icon: <ListTodo className="w-3.5 h-3.5" /> },
+                { id: 'tests', label: 'Testing', icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+                { id: 'deploy', label: 'Deployment', icon: <Rocket className="w-3.5 h-3.5" /> },
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setActivePlanTab(t.id as any)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                    activePlanTab === t.id
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  }`}
                 >
-                  {isScaffolding ? 'Scaffolding Files...' : 'Approve & Scaffold to Workspace'}
-                </Button>
-              </div>
+                  {t.icon}
+                  <span>{t.label}</span>
+                </button>
+              ))}
             </div>
 
-            {/* Quick Action Sub-bar */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '6px 14px',
-                background: 'rgba(59, 130, 246, 0.08)',
-                borderBottom: '1px solid var(--color-border)',
-                fontSize: '11px',
-                flexWrap: 'wrap',
-                gap: 8,
-              }}
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleScaffoldProject}
+              disabled={isScaffolding}
+              className="h-8 px-3 rounded-lg bg-blue-600 text-xs font-semibold text-white"
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Next Autonomous Steps:</span>
-                <button
-                  onClick={handleGenerateLiveCode}
-                  disabled={isGeneratingCode}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--color-accent)',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <Code2 size={12} /> {isGeneratingCode ? 'Synthesizing...' : 'Synthesize Live Code'}
-                </button>
-                <button
-                  onClick={() => setShowBuildModal(true)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#10b981',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <Wrench size={12} /> Run Autonomous Build &amp; Heal
-                </button>
-                <button
-                  onClick={handleOneClickDeploy}
-                  disabled={isDeploying}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#f59e0b',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <Rocket size={12} /> {isDeploying ? 'Deploying...' : 'One-Click Deploy'}
-                </button>
-              </div>
+              <span>{isScaffolding ? 'Scaffolding...' : 'Generate Project'}</span>
+              <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
+          </div>
 
-              {deployedUrl && (
-                <a
-                  href={deployedUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    color: '#10b981',
-                    fontWeight: 700,
-                    textDecoration: 'none',
-                  }}
-                >
-                  <span>Live URL: {deployedUrl}</span>
-                  <ExternalLink size={11} />
-                </a>
-              )}
+          {/* Quick Action Sub-bar */}
+          <div className="flex items-center justify-between px-4 py-2 bg-blue-500/5 border-b border-white/5 text-xs flex-wrap gap-3">
+            <div className="flex items-center gap-4 text-slate-400">
+              <span>Next Steps:</span>
+              <button
+                onClick={handleGenerateLiveCode}
+                disabled={isGeneratingCode}
+                className="text-blue-400 font-medium hover:underline flex items-center gap-1"
+              >
+                <Code2 className="w-3.5 h-3.5" />
+                <span>{isGeneratingCode ? 'Synthesizing...' : 'Synthesize Code'}</span>
+              </button>
+              <button
+                onClick={() => setShowBuildModal(true)}
+                className="text-emerald-400 font-medium hover:underline flex items-center gap-1"
+              >
+                <Wrench className="w-3.5 h-3.5" />
+                <span>Run Build &amp; Heal</span>
+              </button>
+              <button
+                onClick={handleOneClickDeploy}
+                disabled={isDeploying}
+                className="text-amber-400 font-medium hover:underline flex items-center gap-1"
+              >
+                <Rocket className="w-3.5 h-3.5" />
+                <span>{isDeploying ? 'Deploying...' : 'Deploy'}</span>
+              </button>
             </div>
 
-            {/* Content Area */}
-            <div style={{ padding: '14px', maxHeight: '320px', overflowY: 'auto', fontSize: '12px' }}>
-              {/* 1. PRD Tab */}
-              {activePlanTab === 'prd' && planResult.prd && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-text-primary)' }}>
-                    {planResult.prd.title || 'Product Requirement Document'}
-                  </div>
-                  <p style={{ color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                    {planResult.prd.summary}
-                  </p>
-                  <div>
-                    <strong style={{ color: 'var(--color-text-primary)' }}>Problem Statement: </strong>
-                    <span style={{ color: 'var(--color-text-muted)' }}>{planResult.prd.problem}</span>
-                  </div>
-                  <div>
-                    <strong style={{ color: 'var(--color-text-primary)' }}>Core Features:</strong>
-                    <ul style={{ margin: '4px 0 0 16px', padding: 0, color: 'var(--color-text-muted)' }}>
-                      {(planResult.prd.key_features || []).map((feat: string, i: number) => (
-                        <li key={i}>{feat}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
+            {deployedUrl && (
+              <a
+                href={deployedUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-emerald-400 font-semibold flex items-center gap-1 hover:underline"
+              >
+                <span>Live URL: {deployedUrl}</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
 
-              {/* 2. User Stories Tab */}
-              {activePlanTab === 'stories' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {(planResult.userStories || planResult.user_stories || []).map((story: any, idx: number) => (
-                    <div
-                      key={story.id || idx}
-                      style={{
-                        background: 'var(--color-surface-elevated)',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 6,
-                        padding: '10px 12px',
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>{story.id || `US-${idx + 1}`}: {story.title}</span>
-                        <Badge variant="default">As a {story.as_a || 'User'}</Badge>
-                      </div>
-                      <div style={{ color: 'var(--color-text-secondary)', marginBottom: 6 }}>
-                        <strong>I want:</strong> {story.i_want} &bull; <strong>So that:</strong> {story.so_that}
-                      </div>
-                      {story.acceptance_criteria && (
-                        <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
-                          <strong>Acceptance Criteria:</strong> {story.acceptance_criteria.join(' | ')}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+          {/* Content Area */}
+          <div className="p-5 max-h-80 overflow-y-auto text-xs leading-relaxed text-slate-300">
+            {activePlanTab === 'prd' && planResult.prd && (
+              <div className="space-y-3">
+                <div className="text-base font-bold text-white">{planResult.prd.title || 'Product Requirement Document'}</div>
+                <p>{planResult.prd.summary}</p>
+                <div>
+                  <strong className="text-white">Problem Statement: </strong>
+                  <span>{planResult.prd.problem}</span>
                 </div>
-              )}
-
-              {/* 3. Architecture Tab */}
-              {activePlanTab === 'architecture' && planResult.architecture && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div>
-                    <strong style={{ color: 'var(--color-text-primary)' }}>Pattern: </strong>
-                    <span style={{ color: 'var(--color-accent)' }}>{planResult.architecture.pattern}</span>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
-                    <div style={{ padding: '8px', background: 'var(--color-surface-elevated)', borderRadius: 4 }}>
-                      <div style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>Frontend Stack</div>
-                      <div style={{ fontWeight: 600 }}>{planResult.architecture.frontend_stack}</div>
-                    </div>
-                    <div style={{ padding: '8px', background: 'var(--color-surface-elevated)', borderRadius: 4 }}>
-                      <div style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>Backend Stack</div>
-                      <div style={{ fontWeight: 600 }}>{planResult.architecture.backend_stack}</div>
-                    </div>
-                    <div style={{ padding: '8px', background: 'var(--color-surface-elevated)', borderRadius: 4 }}>
-                      <div style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>Database Layer</div>
-                      <div style={{ fontWeight: 600 }}>{planResult.architecture.database_layer}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <strong style={{ color: 'var(--color-text-primary)' }}>Component Breakdown:</strong>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
-                      {(planResult.architecture.components || []).map((c: any, i: number) => (
-                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', background: 'var(--color-surface-elevated)', borderRadius: 4 }}>
-                          <span style={{ fontWeight: 600 }}>{c.name} ({c.tech})</span>
-                          <span style={{ color: 'var(--color-text-muted)' }}>{c.responsibility}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 4. Database Schema Tab */}
-              {activePlanTab === 'schema' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {planResult.databaseSchema?.models?.map((model: any, i: number) => (
-                    <div key={i} style={{ background: 'var(--color-surface-elevated)', padding: '10px', borderRadius: 6, border: '1px solid var(--color-border)' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 4 }}>
-                        Model: {model.name} &bull; <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: 400 }}>{model.description}</span>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 6, fontSize: '11px' }}>
-                        {model.fields?.map((f: any, idx: number) => (
-                          <div key={idx} style={{ padding: '4px 6px', background: 'var(--color-surface)', borderRadius: 4 }}>
-                            <strong>{f.name}</strong>: <span style={{ color: 'var(--color-accent)' }}>{f.type}</span> {f.primary_key && <span style={{ color: '#f59e0b' }}>(PK)</span>}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* 5. API Plan Tab */}
-              {activePlanTab === 'api' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {planResult.apiPlan?.endpoints?.map((ep: any, i: number) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', background: 'var(--color-surface-elevated)', borderRadius: 4, border: '1px solid var(--color-border)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: '10px', fontWeight: 800, color: ep.method === 'GET' ? '#10b981' : '#3b82f6', background: 'var(--color-surface)', padding: '2px 6px', borderRadius: 4 }}>
-                          {ep.method}
-                        </span>
-                        <code style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{ep.path}</code>
-                      </div>
-                      <span style={{ color: 'var(--color-text-muted)', fontSize: '11px' }}>{ep.description}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* 6. Component Tree Tab */}
-              {activePlanTab === 'components' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {planResult.componentTree?.components?.map((c: any, i: number) => (
-                    <div key={i} style={{ padding: '8px 10px', background: 'var(--color-surface-elevated)', borderRadius: 4, border: '1px solid var(--color-border)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
-                        <span>&lt;{c.name} /&gt;</span>
-                        <span style={{ fontSize: '11px', color: 'var(--color-accent)' }}>{c.role}</span>
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: 4 }}>
-                        Children: {c.children?.join(', ') || 'None'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* 7. Folder Tree Tab */}
-              {activePlanTab === 'tree' && (
-                <div style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '11px', lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>
-                  {(planResult.folderStructure || planResult.folder_structure || []).map((p: string, i: number) => (
-                    <div key={i} style={{ padding: '2px 0' }}>
-                      {p}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* 8. Sprint Tasks Tab */}
-              {activePlanTab === 'tasks' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {(planResult.sprintTasks || planResult.sprint_tasks || []).map((task: any, i: number) => (
-                    <div
-                      key={task.id || i}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '6px 10px',
-                        background: 'var(--color-surface-elevated)',
-                        borderRadius: 4,
-                        border: '1px solid var(--color-border)',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <CheckCircle2 size={12} color="#10b981" />
-                        <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{task.title}</span>
-                      </div>
-                      <span style={{ fontSize: '10px', color: 'var(--color-accent)' }}>{task.category}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* 9. Testing Plan Tab */}
-              {activePlanTab === 'tests' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ fontWeight: 700 }}>Unit &amp; Integration Test Suites:</div>
-                  <ul style={{ margin: 0, paddingLeft: 16, color: 'var(--color-text-secondary)' }}>
-                    {(planResult.testingPlan?.unit_tests || []).map((t: string, i: number) => (
-                      <li key={i}>{t}</li>
-                    ))}
-                    {(planResult.testingPlan?.integration_tests || []).map((t: string, i: number) => (
-                      <li key={i}>{t}</li>
+                <div>
+                  <strong className="text-white">Core Features:</strong>
+                  <ul className="list-disc list-inside mt-1 space-y-1 text-slate-400">
+                    {(planResult.prd.key_features || []).map((feat: string, i: number) => (
+                      <li key={i}>{feat}</li>
                     ))}
                   </ul>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* 10. Deployment Checklist Tab */}
-              {activePlanTab === 'deploy' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ fontWeight: 700 }}>Environment &amp; Release Verification:</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
-                    <div style={{ background: 'var(--color-surface-elevated)', padding: '8px', borderRadius: 4 }}>
-                      <div style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>Build Checks</div>
-                      <div style={{ fontSize: '11px', marginTop: 4 }}>
-                        {(planResult.deploymentChecklist?.build_checks || []).join(' • ')}
-                      </div>
+            {activePlanTab === 'stories' && (
+              <div className="space-y-2">
+                {(planResult.userStories || planResult.user_stories || []).map((story: any, idx: number) => (
+                  <div key={story.id || idx} className="p-3 bg-slate-950/80 border border-white/5 rounded-xl space-y-1">
+                    <div className="flex justify-between font-semibold text-blue-400">
+                      <span>{story.id || `US-${idx + 1}`}: {story.title}</span>
+                      <Badge variant="default">As a {story.as_a || 'User'}</Badge>
                     </div>
-                    <div style={{ background: 'var(--color-surface-elevated)', padding: '8px', borderRadius: 4 }}>
-                      <div style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>Release Steps</div>
-                      <div style={{ fontSize: '11px', marginTop: 4 }}>
-                        {(planResult.deploymentChecklist?.release_steps || []).join(' • ')}
-                      </div>
-                    </div>
+                    <div><strong>I want:</strong> {story.i_want} &bull; <strong>So that:</strong> {story.so_that}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activePlanTab === 'architecture' && planResult.architecture && (
+              <div className="space-y-3">
+                <div><strong className="text-white">Pattern: </strong><span className="text-blue-400">{planResult.architecture.pattern}</span></div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-3 bg-slate-950/80 rounded-xl border border-white/5">
+                    <div className="text-[10px] uppercase text-slate-500 font-bold">Frontend</div>
+                    <div className="font-semibold text-white mt-0.5">{planResult.architecture.frontend_stack}</div>
+                  </div>
+                  <div className="p-3 bg-slate-950/80 rounded-xl border border-white/5">
+                    <div className="text-[10px] uppercase text-slate-500 font-bold">Backend</div>
+                    <div className="font-semibold text-white mt-0.5">{planResult.architecture.backend_stack}</div>
+                  </div>
+                  <div className="p-3 bg-slate-950/80 rounded-xl border border-white/5">
+                    <div className="text-[10px] uppercase text-slate-500 font-bold">Database</div>
+                    <div className="font-semibold text-white mt-0.5">{planResult.architecture.database_layer}</div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {activePlanTab === 'schema' && (
+              <div className="space-y-3">
+                {planResult.databaseSchema?.models?.map((model: any, i: number) => (
+                  <div key={i} className="p-3 bg-slate-950/80 rounded-xl border border-white/5">
+                    <div className="font-bold text-white mb-2">Model: {model.name}</div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+                      {model.fields?.map((f: any, idx: number) => (
+                        <div key={idx} className="p-2 bg-slate-900 rounded-lg text-slate-300">
+                          <strong>{f.name}</strong>: <span className="text-blue-400">{f.type}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activePlanTab === 'api' && (
+              <div className="space-y-2">
+                {planResult.apiPlan?.endpoints?.map((ep: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between p-2.5 bg-slate-950/80 border border-white/5 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">{ep.method}</span>
+                      <code className="text-white">{ep.path}</code>
+                    </div>
+                    <span className="text-slate-400">{ep.description}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activePlanTab === 'components' && (
+              <div className="space-y-2">
+                {planResult.componentTree?.components?.map((c: any, i: number) => (
+                  <div key={i} className="p-3 bg-slate-950/80 border border-white/5 rounded-xl flex justify-between items-center">
+                    <span className="font-mono text-white">&lt;{c.name} /&gt;</span>
+                    <span className="text-blue-400 font-medium">{c.role}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activePlanTab === 'tree' && (
+              <div className="font-mono text-[11px] leading-relaxed text-slate-300 space-y-0.5">
+                {(planResult.folderStructure || planResult.folder_structure || []).map((p: string, i: number) => (
+                  <div key={i}>{p}</div>
+                ))}
+              </div>
+            )}
+
+            {activePlanTab === 'tasks' && (
+              <div className="space-y-2">
+                {(planResult.sprintTasks || planResult.sprint_tasks || []).map((task: any, i: number) => (
+                  <div key={task.id || i} className="flex items-center justify-between p-2.5 bg-slate-950/80 border border-white/5 rounded-xl">
+                    <span className="text-white font-medium">{task.title}</span>
+                    <span className="text-blue-400 text-[10px] font-semibold uppercase">{task.category}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activePlanTab === 'tests' && (
+              <div className="space-y-2">
+                <div className="font-bold text-white">Unit &amp; Integration Test Suites:</div>
+                <ul className="list-disc list-inside space-y-1 text-slate-400">
+                  {(planResult.testingPlan?.unit_tests || []).map((t: string, i: number) => (
+                    <li key={i}>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {activePlanTab === 'deploy' && (
+              <div className="space-y-2">
+                <div className="font-bold text-white">Deployment Checklist:</div>
+                <div className="p-3 bg-slate-950/80 border border-white/5 rounded-xl text-slate-300">
+                  {(planResult.deploymentChecklist?.release_steps || []).join(' • ')}
+                </div>
+              </div>
+            )}
           </div>
-        )}
-
-        {/* Input Navigation Tabs: Templates vs History vs Favorites */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid var(--color-border)', paddingBottom: 6 }}>
-          <button
-            type="button"
-            onClick={() => setActiveInputTab('templates')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-md)',
-              border: 'none',
-              background: activeInputTab === 'templates' ? 'var(--color-surface-elevated)' : 'transparent',
-              color: activeInputTab === 'templates' ? 'var(--color-accent)' : 'var(--color-text-muted)',
-              fontWeight: 600,
-              fontSize: '12px',
-              cursor: 'pointer',
-            }}
-          >
-            <LayoutGrid size={13} />
-            <span>Starter Templates ({STARTER_TEMPLATES.length})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveInputTab('history')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-md)',
-              border: 'none',
-              background: activeInputTab === 'history' ? 'var(--color-surface-elevated)' : 'transparent',
-              color: activeInputTab === 'history' ? 'var(--color-accent)' : 'var(--color-text-muted)',
-              fontWeight: 600,
-              fontSize: '12px',
-              cursor: 'pointer',
-            }}
-          >
-            <History size={13} />
-            <span>Previous Prompts ({history.length})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveInputTab('favorites')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-md)',
-              border: 'none',
-              background: activeInputTab === 'favorites' ? 'var(--color-surface-elevated)' : 'transparent',
-              color: activeInputTab === 'favorites' ? '#f59e0b' : 'var(--color-text-muted)',
-              fontWeight: 600,
-              fontSize: '12px',
-              cursor: 'pointer',
-            }}
-          >
-            <Star size={13} fill={activeInputTab === 'favorites' ? '#f59e0b' : 'none'} />
-            <span>Favorites ({favorites.length})</span>
-          </button>
         </div>
-
-        {/* Tab Content Display */}
-        {activeInputTab === 'templates' && (
-          <TemplateGallery
-            selectedTemplateId={selectedTemplateId}
-            onSelectTemplate={handleSelectTemplate}
-          />
-        )}
-
-        {activeInputTab === 'history' && (
-          <PromptHistory
-            history={history}
-            onSelectPrompt={handleSelectHistoryItem}
-            onClearHistory={() => {
-              setHistory([]);
-              toast('Cleared prompt history', 'info');
-            }}
-            onDeleteItem={(id) => {
-              setHistory(history.filter((h) => h.id !== id));
-            }}
-          />
-        )}
-
-        {activeInputTab === 'favorites' && (
-          <FavoritePrompts
-            favorites={favorites}
-            onSelectPrompt={handleSelectFavoriteItem}
-            onRemoveFavorite={(id) => {
-              setFavorites(favorites.filter((f) => f.id !== id));
-              toast('Removed from favorites', 'info');
-            }}
-          />
-        )}
-      </div>
-
-      {/* Startup Presentation Hub Modal */}
-      <StartupModal
-        isOpen={showStartupModal}
-        onClose={() => setShowStartupModal(false)}
-        appName={planResult?.prd?.title || 'DEVOS App'}
-        prompt={prompt}
-        startupData={startupData}
-      />
-
-      {/* Marketplace Modal */}
-      <MarketplaceModal
-        isOpen={showMarketplaceModal}
-        onClose={() => setShowMarketplaceModal(false)}
-        onSelectAppPrompt={(p, stack) => {
-          setPrompt(p);
-          setTechStack(stack);
-          toast('Loaded prompt from AI Marketplace', 'info');
-        }}
-      />
+      )}
 
       {/* Autonomous Build Modal */}
       <AutonomousBuildModal

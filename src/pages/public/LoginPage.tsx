@@ -7,12 +7,9 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Shield,
-  Zap,
   ArrowRight,
   X,
 } from 'lucide-react';

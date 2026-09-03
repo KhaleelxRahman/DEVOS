@@ -6,7 +6,6 @@ import {
   Bug,
   GitBranch,
   Rocket,
-  Presentation,
   LayoutGrid,
   FileCode2,
   TestTube,
@@ -15,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useProject } from '../hooks/useProject';
-import { EmptyState, Button, Badge } from '../components/common';
+import { EmptyState, Button } from '../components/common';
 import { filesApi, projectsApi } from '../api';
 import { AutonomousAICommandCenter } from '../components/command-center/AutonomousAICommandCenter';
 import { ProfessionalFileExplorer } from '../components/workspace/ProfessionalFileExplorer';
@@ -26,7 +25,6 @@ import { DebugCenterPanel } from '../components/workspace/DebugCenterPanel';
 import { GitHubProPanel } from '../components/workspace/GitHubProPanel';
 import { DeployCenterPanel } from '../components/workspace/DeployCenterPanel';
 import { TestingPanel } from '../components/workspace/TestingPanel';
-import { OfficeKitModal } from '../components/presentation/OfficeKitModal';
 import { MobileFloatingAI } from '../components/mobile/MobileFloatingAI';
 import { FileVersionModal } from '../components/workspace/FileVersionModal';
 import { TeamCollaborationModal } from '../components/collaboration/TeamCollaborationModal';
@@ -214,16 +212,6 @@ export const WorkspacePage: React.FC = () => {
           >
             <Users className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
             <span>Team ({activeProject.members?.length || 1})</span>
-          </Button>
-
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setIsOfficeKitOpen(true)}
-            className="h-8 px-3 rounded-xl bg-purple-500/15 border-purple-500/30 text-purple-300 text-xs font-semibold hover:bg-purple-500/25"
-          >
-            <Presentation className="w-3.5 h-3.5 mr-1.5" />
-            <span>Presentation Mode</span>
           </Button>
 
           {/* Layout switcher */}
@@ -436,13 +424,6 @@ export const WorkspacePage: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Presentation Mode / Presentation Modal */}
-      <OfficeKitModal
-        isOpen={isOfficeKitOpen}
-        onClose={() => setIsOfficeKitOpen(false)}
-        projectName={activeProject.name}
-      />
 
       {/* Cloud File Version History & Snapshot Restore */}
       {activePath && (

@@ -17,7 +17,6 @@ import { WorkspacePage } from './pages/WorkspacePage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { PublicRoute } from './components/auth/PublicRoute';
 import { AuthModal } from './components/auth/AuthModal';
-import { OnboardingModal } from './components/onboarding/OnboardingModal';
 import { UserProfileModal } from './components/auth/UserProfileModal';
 import { Button } from './components/common/Button';
 import {
@@ -353,9 +352,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
       </main>
 
-      {/* SaaS Authentication & Onboarding Modals */}
+      {/* SaaS Authentication & User Profile Modals */}
       <AuthModal />
-      <OnboardingModal />
       <UserProfileModal />
     </div>
   );

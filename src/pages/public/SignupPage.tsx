@@ -8,11 +8,9 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   Loader2,
-  ShieldCheck,
   ArrowRight,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';

@@ -1,10 +1,5 @@
 export { AIAppFactoryDashboard } from './AIAppFactoryDashboard';
 export { PromptInput } from './PromptInput';
 export { VoiceButton } from './VoiceButton';
-export { TemplateGallery, STARTER_TEMPLATES } from './TemplateGallery';
-export type { StarterTemplate } from './TemplateGallery';
-export { PromptHistory } from './PromptHistory';
-export type { PromptHistoryItem } from './PromptHistory';
-export { FavoritePrompts } from './FavoritePrompts';
-export type { FavoritePromptItem } from './FavoritePrompts';
 export { BuildProgressCard } from './BuildProgressCard';
+export { AutonomousBuildModal } from './AutonomousBuildModal';
