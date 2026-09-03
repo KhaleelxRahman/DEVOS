@@ -81,6 +81,26 @@ test.describe("Workspace — stale project recovery (BUG-001)", () => {
     await expect(page.getByLabel("Category")).toHaveValue("Marketplace / commerce");
     await expect(page.getByText("Planning only — no code will be written.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Approve plan" })).toBeVisible();
+
+    await page.route("**/api/v1/projects/*/context", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true, data: { project: { id: LIVE_PROJECT_ID } } }),
+      })
+    );
+    await page.route("**/api/v1/projects/*/testing/jobs", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true, data: { jobs: [] } }),
+      })
+    );
+    await page.getByRole("button", { name: "Approve plan" }).click();
+    await expect(page.getByText("Execution queue")).toBeVisible();
+    await expect(page.getByText("Validate project context")).toBeVisible();
+    await expect(page.getByText("No files changed; no external actions requested").first()).toBeVisible();
+    await expect(page.getByText("Safety note:")).toBeVisible();
   });
 
   test("a deep link to /app/projects/:id lands on the project list instead of a 404", async ({
