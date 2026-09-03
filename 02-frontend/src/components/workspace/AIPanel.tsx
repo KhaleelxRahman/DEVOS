@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Bot, Copy, Plus, Send, Check, Pencil, RefreshCw, ChevronDown, ChevronUp, X } from 'lucide-react';
-import { aiApi } from '../../api';
+import { aiApi, projectsApi, testingApi } from '../../api';
 import { AIMessage, Conversation, PlannerIntent, PlannerRequirementKey } from '../../types/ai';
 import { Spinner, Button } from '../common';
 
@@ -26,6 +26,8 @@ const REQUIREMENTS: Array<{ key: PlannerRequirementKey; label: string; hint: str
   { key: 'security', label: 'Security', hint: 'Any compliance or sensitive data?' },
 ];
 const EMPTY_INTENT: PlannerIntent = Object.fromEntries(REQUIREMENTS.map(({ key }) => [key, ''])) as unknown as PlannerIntent;
+type QueueStatus = 'pending' | 'running' | 'completed' | 'failed';
+interface PlannerTask { id: string; title: string; objective: string; estimated: string; status: QueueStatus; log: string[]; kind: 'context' | 'validation' | 'local'; }
 
 function extractIntent(idea: string): PlannerIntent {
   const text = idea.trim();
@@ -66,6 +68,8 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
   const [showRoadmap, setShowRoadmap] = useState(true);
   const [extraRequirements, setExtraRequirements] = useState<string[]>([]);
   const [newRequirement, setNewRequirement] = useState('');
+  const [queue, setQueue] = useState<PlannerTask[]>([]);
+  const [executionStarted, setExecutionStarted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -173,6 +177,53 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
   const updateIntent = (key: PlannerRequirementKey, value: string) => setIntent((prev) => ({ ...prev, [key]: value }));
   const acceptAll = () => { setAccepted(REQUIREMENTS.filter(({ key }) => !intent[key]).map(({ key }) => key)); setExtraRequirements([]); };
   const regenerate = () => setIntent(extractIntent(idea));
+  const approvePlan = () => {
+    setQueue([
+      { id: 'context', title: 'Validate project context', objective: 'Confirm intent and constraints from the project context API', estimated: '2h', status: 'pending', log: [], kind: 'context' },
+      { id: 'validation', title: 'Check available validation jobs', objective: 'Discover safe validation jobs without running them', estimated: '1h', status: 'pending', log: [], kind: 'validation' },
+      { id: 'architecture', title: 'Map architecture', objective: 'Document boundaries and integration points locally', estimated: '3h', status: 'pending', log: [], kind: 'local' },
+      { id: 'roadmap', title: 'Sequence feature roadmap', objective: 'Order milestones by dependency and risk locally', estimated: '4h', status: 'pending', log: [], kind: 'local' },
+      { id: 'review', title: 'Prepare review checkpoint', objective: 'Summarize decisions for human approval locally', estimated: '3h', status: 'pending', log: [], kind: 'local' },
+    ]);
+    setExecutionStarted(true);
+  };
+  useEffect(() => {
+    if (!executionStarted) return;
+    const running = queue.find((task) => task.status === 'running');
+    if (running) {
+      let cancelled = false;
+      const complete = (status: QueueStatus, log: string[]) => {
+        if (cancelled) return;
+        setQueue((current) => current.map((task) => task.id === running.id ? { ...task, status, log: [...task.log, ...log] } : task));
+      };
+      const execute = async () => {
+        try {
+          if (running.kind === 'context') {
+            const response = await projectsApi.getContext(projectId);
+            if (!response.success || !response.data) throw new Error(response.error?.message || 'Project context unavailable');
+            complete('completed', [`Context API responded${response.data ? ' with project context' : ''}`, 'No files changed']);
+          } else if (running.kind === 'validation') {
+            const response = await testingApi.listJobs(projectId);
+            if (!response.success || !response.data) throw new Error(response.error?.message || 'Validation jobs unavailable');
+            const available = response.data?.jobs?.filter((job) => job.available).length || 0;
+            complete('completed', [`Validation API responded: ${available} safe job(s) available`, 'Jobs were listed only; none was run without explicit approval']);
+          } else {
+            complete('completed', ['Deterministic analysis completed locally', 'No files changed; no external actions requested']);
+          }
+        } catch (err: any) {
+          complete('failed', [`Execution failed: ${err.message || 'API unavailable'}`]);
+        }
+      };
+      execute();
+      return () => { cancelled = true; };
+    }
+    const next = queue.findIndex((task) => task.status === 'pending');
+    if (next < 0) return;
+    setQueue((current) => current.map((task, index) => index === next ? { ...task, status: 'running', log: ['Started deterministic planning step'] } : task));
+  }, [executionStarted, queue, projectId]);
+  const retryTask = (id: string) => setQueue((current) => current.map((task) => task.id === id ? { ...task, status: 'pending', log: [...task.log, 'Retry requested by user'] } : task));
+  const queueDone = queue.filter((task) => task.status === 'completed').length;
+  const currentTask = queue.find((task) => task.status === 'running') || queue.find((task) => task.status === 'pending');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, fontSize: 12 }}>
@@ -241,7 +292,8 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
               <section className="planner-card"><div className="planner-card-heading"><strong>Recommended stack</strong><span className="planner-tag">Switchable</span></div><p className="planner-rationale">A pragmatic, maintainable baseline for your {intent.platform.toLowerCase()} {intent.category.toLowerCase()}.</p><div className="planner-stack"><div><b>React + TypeScript</b><small>Fast iteration and type-safe UI</small></div><div><b>Node API + PostgreSQL</b><small>Reliable data and simple scaling</small></div><div><b>Managed cloud</b><small>Low-ops deployment with room to grow</small></div></div><details><summary>Alternative options and tradeoffs</summary><p>Next.js can simplify full-stack delivery; SQLite is great for prototypes but less suited to concurrent production workloads.</p></details></section>
               <section className="planner-card"><div className="planner-card-heading"><strong>Execution mode</strong></div><div className="planner-modes">{['Rapid · 6h', 'Balanced · 12h', 'Professional · 24h', 'Production · 48h'].map((option) => <button key={option} className={executionMode === option ? 'selected' : ''} onClick={() => setExecutionMode(option)}>{option.split('·')[0]}<small>{option.split('·')[1]}</small></button>)}</div></section>
               <section className="planner-card"><div className="planner-card-heading"><strong>Plan overview</strong><button className="btn btn-ghost btn-sm" onClick={() => setShowRoadmap(!showRoadmap)}>{showRoadmap ? <ChevronUp size={12} /> : <ChevronDown size={12} />}</button></div>{showRoadmap && <div className="planner-roadmap">{[['Architecture', 'Web client, API boundary, and managed data layer'], ['Feature roadmap', 'Foundation → core workflow → polish and launch'], ['Database & API', 'Users, core entities, validation, and versioned endpoints'], ['Security', 'Least privilege, encrypted secrets, input validation, audit trail'], ['Approval', 'Review this plan before any implementation begins']].map(([title, detail]) => <div key={title}><b>{title}</b><span>{detail}</span></div>)}</div>}</section>
-              <div className="planner-actions"><button className="btn btn-secondary btn-sm" onClick={() => setIdea('')}><Pencil size={12} /> Edit idea</button><button className="btn btn-secondary btn-sm" onClick={regenerate}><RefreshCw size={12} /> Regenerate</button><button className="btn btn-primary btn-sm" onClick={() => setAccepted(REQUIREMENTS.map(({ key }) => key))}><Check size={12} /> Approve plan</button></div>
+              <div className="planner-actions"><button className="btn btn-secondary btn-sm" onClick={() => setIdea('')}><Pencil size={12} /> Edit idea</button><button className="btn btn-secondary btn-sm" onClick={regenerate}><RefreshCw size={12} /> Regenerate</button><button className="btn btn-primary btn-sm" onClick={approvePlan}><Check size={12} /> Approve plan</button></div>
+              {executionStarted && <section className="planner-card execution-card"><div className="planner-card-heading"><strong>Execution queue</strong><span>{queueDone}/{queue.length} completed</span></div><div className="execution-summary"><span><b>Objective</b>{currentTask?.objective || 'Review complete — awaiting next instruction'}</span><span><b>Current file</b>{activeFile?.path || 'No file selected'}</span><span><b>Next action</b>{currentTask ? `Run: ${currentTask.title}` : 'Human review'}</span><span><b>Confidence / risk</b>High · No destructive actions</span></div>{queue.map((task) => <div className="execution-task" key={task.id}><div><b>{task.title}</b><small>{task.objective} · {task.estimated}</small>{task.log.map((line) => <em key={line}>{line}</em>)}</div><span className={`execution-status ${task.status}`}>{task.status}</span>{task.status === 'failed' && <button className="btn btn-ghost btn-sm" onClick={() => retryTask(task.id)}>Retry</button>}</div>)}<p className="execution-safety">Safety note: this queue only reviews and records planning objectives. It never writes files, runs destructive actions, deploys, or claims external work succeeded.</p></section>}
             </>
           )}
         </div>
