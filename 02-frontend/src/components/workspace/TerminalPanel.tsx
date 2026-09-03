@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Ban, Eraser, Play } from 'lucide-react';
+import { Ban, Clipboard, Eraser, Play, Plus, TerminalSquare, X } from 'lucide-react';
 import { terminalApi } from '../../api';
 
 interface TerminalPanelProps {
@@ -13,20 +13,30 @@ interface TerminalEntry {
   exitCode: number | null;
   error?: string;
 }
+interface TerminalTab { id: number; label: string; entries: TerminalEntry[]; }
 
 // Mirrors the backend allowlist so users get instant feedback before calling
 // the API. The backend remains the authoritative enforcer.
 const BLOCKED_NOTE = 'Allowed: git, npm, node, python, python3, pip, pip3, pytest, cargo, ls, dir, echo, cat, pwd, tree';
 
 export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
-  const [entries, setEntries] = useState<TerminalEntry[]>([]);
+  const [tabs, setTabs] = useState<TerminalTab[]>([{ id: 1, label: 'Terminal 1', entries: [] }]);
+  const [activeTabId, setActiveTabId] = useState(1);
   const [input, setInput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const activeTab = tabs.find((tab) => tab.id === activeTabId) || tabs[0];
+  const entries = activeTab.entries;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [entries, isRunning]);
+
+  const updateEntries = (next: TerminalEntry[] | ((previous: TerminalEntry[]) => TerminalEntry[])) => {
+    setTabs((previous) => previous.map((tab) => tab.id === activeTabId
+      ? { ...tab, entries: typeof next === 'function' ? next(tab.entries) : next }
+      : tab));
+  };
 
   const run = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,12 +49,12 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
     try {
       const res = await terminalApi.execute(projectId, { command, args });
       const data = res.data!;
-      setEntries((prev) => [
+      updateEntries((prev) => [
         ...prev,
         { input: trimmed, stdout: data.stdout, stderr: data.stderr, exitCode: data.exit_code },
       ]);
     } catch (err: any) {
-      setEntries((prev) => [
+      updateEntries((prev) => [
         ...prev,
         { input: trimmed, stdout: '', stderr: '', exitCode: null, error: err.message || 'Execution failed' },
       ]);
@@ -54,7 +64,12 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+    <div className="terminal-panel">
+      <div className="terminal-tabs">
+        {tabs.map((tab) => <button key={tab.id} className={`terminal-tab ${tab.id === activeTabId ? 'active' : ''}`} onClick={() => setActiveTabId(tab.id)}><TerminalSquare size={12} />{tab.label}{tabs.length > 1 && <X size={11} onClick={(event: React.MouseEvent<SVGSVGElement>) => { event.stopPropagation(); setTabs((previous) => previous.filter((item) => item.id !== tab.id)); if (tab.id === activeTabId) setActiveTabId(tabs.find((item) => item.id !== tab.id)?.id || 1); }} />}</button>)}
+        <button className="terminal-tab-add" aria-label="New terminal" onClick={() => { const id = Math.max(...tabs.map((tab) => tab.id)) + 1; setTabs((previous) => [...previous, { id, label: `Terminal ${id}`, entries: [] }]); setActiveTabId(id); }}><Plus size={13} /></button>
+        <button className="terminal-copy" aria-label="Copy terminal output" onClick={() => void navigator.clipboard.writeText(entries.map((entry) => `$ ${entry.input}\n${entry.stdout || entry.stderr || entry.error || ''}`).join('\n'))}><Clipboard size={12} /> Copy</button>
+      </div>
       <div
         ref={scrollRef}
         style={{
@@ -107,7 +122,7 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
         <button type="submit" className="btn btn-primary btn-sm" disabled={isRunning || !input.trim()} aria-label="Run command">
           <Play size={12} />
         </button>
-        <button type="button" className="btn btn-secondary btn-sm" onClick={() => setEntries([])} aria-label="Clear terminal">
+        <button type="button" className="btn btn-secondary btn-sm" onClick={() => updateEntries([])} aria-label="Clear terminal">
           <Eraser size={12} />
         </button>
       </form>

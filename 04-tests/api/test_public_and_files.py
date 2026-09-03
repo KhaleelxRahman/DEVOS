@@ -278,6 +278,7 @@ async def test_waitlist_rate_limit_enforced(client):
         )
         if last.status_code == 429:
             break
+    assert last is not None, "Expected a response"  
     assert last.status_code == 429, "waitlist rate limit was not enforced"
 
 
@@ -290,4 +291,5 @@ async def test_login_rate_limit_enforced(client):
         )
         if last.status_code == 429:
             break
+    assert last is not None, "Expected a response"
     assert last.status_code == 429, "login rate limit was not enforced"

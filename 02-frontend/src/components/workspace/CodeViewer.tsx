@@ -86,6 +86,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ tabs, activePath, onActi
             }}
           >
             <span style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {editing === tab.path && <span aria-label="Unsaved changes">●</span>}
               {tab.path.split('/').pop()}
             </span>
             <button
@@ -111,8 +112,9 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ tabs, activePath, onActi
       {active?.content && (
         <>
           <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span>
-              {active.content.path} &bull; {active.content.language || 'plaintext'} &bull; {active.content.size} bytes
+            <span className="editor-breadcrumbs">
+              {active.content.path.split('/').map((segment, index, parts) => <React.Fragment key={`${segment}-${index}`}><span>{segment}</span>{index < parts.length - 1 && <b>/</b>}</React.Fragment>)}
+              <em>{active.content.language || 'plaintext'} · {active.content.size} bytes</em>
             </span>
             <span style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
               {isEditingActive ? (

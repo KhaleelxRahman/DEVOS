@@ -117,7 +117,7 @@ export const WorkspacePage: React.FC = () => {
   const panelStyle: React.CSSProperties = { overflow: 'hidden', display: 'flex', flexDirection: 'column' };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 'var(--space-3)' }}>
+    <div className="workspace-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700 }}>
@@ -148,7 +148,7 @@ export const WorkspacePage: React.FC = () => {
           <CodeViewer tabs={tabs} activePath={activePath} onActivate={setActivePath} onClose={closeTab} onSave={saveFile} />
         </Card>
 
-        <Card title="AI Assistant" subtitle="Context Engine" style={panelStyle}>
+        <Card id="ai-command-center" title="AI Assistant" subtitle="Context Engine" style={panelStyle}>
           <AIPanel projectId={activeProject.id} activeFile={activeFileForAI} />
         </Card>
 

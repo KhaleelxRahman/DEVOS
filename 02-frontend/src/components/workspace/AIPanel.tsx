@@ -139,6 +139,16 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
             <Plus size={12} />
           </button>
         </div>
+        <div className="ai-status-strip">
+          <div><span>Current task</span><strong>{isSending ? 'Processing request' : activeFile ? `Reviewing ${activeFile.path.split('/').pop()}` : 'Waiting for instruction'}</strong></div>
+          <div><span>Progress</span><strong>{isSending ? 'In progress' : messages.length ? `${messages.length} events` : 'Ready'}</strong></div>
+          <div><span>Next action</span><strong>{isSending ? 'Awaiting response' : activeFile ? 'Choose an action' : 'Open a file'}</strong></div>
+        </div>
+        <div className="ai-timeline" aria-label="Thinking timeline">
+          <span className={provider ? 'complete' : ''}>Context loaded</span>
+          <span className={activeFile ? 'complete' : ''}>Active file attached</span>
+          <span className={isSending ? 'active' : ''}>Assistant execution</span>
+        </div>
       </div>
 
       {conversations.length > 0 && (
@@ -171,6 +181,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
           ))}
         </div>
       )}
+      <div className="ai-approval"><span>Approval queue</span><small>No pending approvals</small></div>
 
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', minHeight: 0, marginBottom: 8 }} aria-live="polite">
         {messages.length === 0 && !isSending && (

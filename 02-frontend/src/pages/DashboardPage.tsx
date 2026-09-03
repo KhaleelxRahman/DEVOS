@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Bot, Terminal, FolderGit2 } from 'lucide-react';
+import { Plus, Bot, Terminal, FolderGit2, GitBranch, Rocket, Clock3 } from 'lucide-react';
 import { Card, Button, Badge } from '../components/common';
 import { useProject } from '../hooks/useProject';
 import { Link } from 'react-router-dom';
-import { activityApi } from '../api';
+import { activityApi, projectsApi } from '../api';
 import { Activity } from '../types/activity';
+import { Project } from '../types/project';
 import { useSeo } from '../hooks/useSeo';
 
 export const DashboardPage: React.FC = () => {
@@ -12,82 +13,99 @@ export const DashboardPage: React.FC = () => {
 
   const { activeProject } = useProject();
   const [activity, setActivity] = useState<Activity[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     activityApi
       .list()
       .then((res) => setActivity(res.data?.activities || []))
       .catch(() => setActivity([]));
+    projectsApi.list().then((res) => setProjects(res.data?.projects || [])).catch(() => setProjects([]));
   }, []);
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
+    <div className="dashboard-page">
+      <div className="page-heading">
         <div>
-          <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700 }}>Developer Command Center</h1>
+          <p className="eyebrow">Overview</p>
+          <h1>Good to see you, developer.</h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            Unified project workspace with context-aware AI assistance.
+            Your projects, context, and delivery pipeline in one focused workspace.
           </p>
         </div>
         <Link to="/app/projects">
           <Button variant="primary" leftIcon={<Plus size={16} />}>
-            New Project
+            Create Project
           </Button>
         </Link>
       </div>
 
-      {/* Quick Action Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+      <div className="dashboard-grid dashboard-grid-primary">
         <Card
-          title="Active Project"
+          title="Active project"
           subtitle={activeProject ? activeProject.name : 'No project currently selected'}
           action={<Badge variant={activeProject ? 'success' : 'default'}>{activeProject ? 'Loaded' : 'Idle'}</Badge>}
         >
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
-            {activeProject?.description || 'Select or create a project to load files, Git status, and AI context.'}
+            {activeProject?.description || 'Select a project to load files, Git status, and AI context.'}
           </p>
           <Link to="/app/workspace">
             <Button variant="secondary" size="sm" leftIcon={<FolderGit2 size={14} />}>
-              Open Workspace
+              Open workspace
             </Button>
           </Link>
         </Card>
 
         <Card
-          title="Project Context AI"
-          subtitle="Context-Aware Intelligence"
+          title="AI queue"
+          subtitle="Context-aware intelligence"
           action={<Badge variant="accent"><Bot size={12} /> Ready</Badge>}
         >
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
-            Ask questions about code, debugging, or workflows with automatic project context.
+            Your assistant is ready to explain, debug, refactor, and test the active file.
           </p>
           <Link to="/app/workspace">
             <Button variant="secondary" size="sm" leftIcon={<Bot size={14} />}>
-              Ask Assistant
+              Open AI command center
             </Button>
           </Link>
         </Card>
 
         <Card
-          title="Development Terminal"
+          title="Build status"
           subtitle="Project-scoped execution"
           action={<Badge variant="default"><Terminal size={12} /> Sandbox</Badge>}
         >
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
-            Execute development builds and tests safely within your active project workspace.
+            Run allowlisted commands and testing jobs from the integrated terminal.
           </p>
           <Link to="/app/workspace">
             <Button variant="secondary" size="sm" leftIcon={<Terminal size={14} />}>
-              Launch Terminal
+              Launch terminal
             </Button>
           </Link>
         </Card>
       </div>
 
-      <Card title="Recent Activity" subtitle="Tracked developer activity">
+      <div className="dashboard-grid dashboard-grid-status">
+        <Card title="Git status" subtitle="Working tree">
+          <div className="status-value"><GitBranch size={18} /> {activeProject ? activeProject.default_branch || 'main' : '—'}</div>
+          <p className="status-caption">{activeProject ? 'Connected to the active project' : 'Choose a project to inspect Git'}</p>
+        </Card>
+        <Card title="Deploy status" subtitle="Release readiness">
+          <div className="status-value"><Rocket size={18} /> {activeProject ? 'Ready' : 'Waiting'}</div>
+          <p className="status-caption">Deployment controls stay scoped to your project.</p>
+        </Card>
+        <Card title="Recent projects" subtitle={`${projects.length} available`}>
+          {projects.slice(0, 3).map((project) => <div className="project-row" key={project.id}><FolderGit2 size={14} /><span>{project.name}</span><Clock3 size={12} /></div>)}
+          {!projects.length && <p className="status-caption">Create your first project to get started.</p>}
+        </Card>
+      </div>
+
+      <Card title="Recent activity" subtitle="Tracked developer activity">
         {activity.length === 0 ? (
           <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            No activity yet. Open a workspace, run commands, or chat with the assistant.
+            No activity yet. Open a workspace, run a command, or chat with the assistant.
           </p>
         ) : (
           activity.slice(0, 8).map((a) => (

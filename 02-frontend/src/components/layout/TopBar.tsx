@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, Bot, GitBranch, FolderGit2, Menu, X } from 'lucide-react';
+import { Terminal, Bot, GitBranch, FolderGit2, Menu, X, Search } from 'lucide-react';
 import { Badge } from '../common/Badge';
 
 export interface TopBarProps {
@@ -22,11 +22,16 @@ export const TopBar: React.FC<TopBarProps> = ({
           {menuOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
         <Terminal size={18} color="var(--color-accent)" />
-        <span>DEVOS v1.0.0</span>
-        <span className="top-bar-badge">v1.0 MVP</span>
+        <span>DEVOS</span>
+        <span className="top-bar-badge">WORKSPACE</span>
       </div>
 
       <div className="top-bar-center">
+        <div className="command-bar" role="search">
+          <Search size={14} />
+          <span>Search files, commands, and projects</span>
+          <kbd>⌘ K</kbd>
+        </div>
         {activeProjectName ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
             <FolderGit2 size={16} color="var(--color-text-secondary)" />
@@ -36,7 +41,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             </Badge>
           </div>
         ) : (
-          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>No Active Project</span>
+          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>No active project</span>
         )}
       </div>
 

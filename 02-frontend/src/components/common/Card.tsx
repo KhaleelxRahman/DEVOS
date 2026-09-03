@@ -17,12 +17,12 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div className={`card ${className}`.trim()} {...props}>
       {(title || action) && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
+        <div className="card-header">
           <div>
-            {title && <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, color: 'var(--color-text-primary)' }}>{title}</h3>}
-            {subtitle && <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>{subtitle}</p>}
+            {title && <h3 className="card-title">{title}</h3>}
+            {subtitle && <p className="card-subtitle">{subtitle}</p>}
           </div>
-          {action && <div>{action}</div>}
+          {action && <div className="card-action">{action}</div>}
         </div>
       )}
       {children}
