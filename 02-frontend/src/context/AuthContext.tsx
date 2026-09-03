@@ -45,11 +45,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    // Local state is authoritative for the current UI session; do not make
+    // navigation depend on the availability of the logout endpoint.
+    localStorage.removeItem('devos_token');
+    setUser(null);
     void authApi.logout()
-      .catch(() => undefined)
-      .finally(() => {
-        localStorage.removeItem('devos_token');
-        setUser(null);
+      .catch((error: unknown) => {
+        // The server session may already be expired; the local session is
+        // cleared above regardless of network availability.
+        if (import.meta.env.DEV) console.warn('Logout request failed after local cleanup', error);
       });
   };
 
