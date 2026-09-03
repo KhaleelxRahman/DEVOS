@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Bot, Copy, Plus, Send } from 'lucide-react';
+import { Bot, Copy, Plus, Send, Check, Pencil, RefreshCw, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { aiApi } from '../../api';
-import { AIMessage, Conversation } from '../../types/ai';
+import { AIMessage, Conversation, PlannerIntent, PlannerRequirementKey } from '../../types/ai';
 import { Spinner, Button } from '../common';
 
 interface AIPanelProps {
@@ -10,6 +10,44 @@ interface AIPanelProps {
 }
 
 const AI_ACTIONS = ['explain', 'debug', 'refactor', 'test', 'document', 'security', 'optimize'] as const;
+const REQUIREMENTS: Array<{ key: PlannerRequirementKey; label: string; hint: string }> = [
+  { key: 'projectName', label: 'Project name', hint: 'What should we call it?' },
+  { key: 'category', label: 'Category', hint: 'What kind of product is this?' },
+  { key: 'platform', label: 'Platform', hint: 'Web, mobile, desktop, or API?' },
+  { key: 'targetUsers', label: 'Target users', hint: 'Who will use it?' },
+  { key: 'auth', label: 'Authentication', hint: 'Accounts, SSO, or public?' },
+  { key: 'database', label: 'Database', hint: 'What data must persist?' },
+  { key: 'deployment', label: 'Deployment', hint: 'Where will it run?' },
+  { key: 'payment', label: 'Payments', hint: 'Any billing or purchases?' },
+  { key: 'notifications', label: 'Notifications', hint: 'Email, push, or in-app updates?' },
+  { key: 'ai', label: 'AI features', hint: 'How should AI help?' },
+  { key: 'storage', label: 'File storage', hint: 'Uploads or generated files?' },
+  { key: 'offline', label: 'Offline support', hint: 'Should it work without a connection?' },
+  { key: 'security', label: 'Security', hint: 'Any compliance or sensitive data?' },
+];
+const EMPTY_INTENT: PlannerIntent = Object.fromEntries(REQUIREMENTS.map(({ key }) => [key, ''])) as unknown as PlannerIntent;
+
+function extractIntent(idea: string): PlannerIntent {
+  const text = idea.trim();
+  const lower = text.toLowerCase();
+  const pick = (terms: string[], value: string) => terms.some((term) => lower.includes(term)) ? value : '';
+  const firstSentence = text.split(/[.!?]/)[0].trim();
+  return {
+    projectName: firstSentence ? firstSentence.slice(0, 42) : '',
+    category: pick(['marketplace', 'store', 'shop', 'commerce', 'food delivery', 'delivery app'], 'Marketplace / commerce') || pick(['dashboard', 'admin'], 'Dashboard') || pick(['social', 'community'], 'Community') || pick(['learn', 'course', 'education'], 'Education') || (text ? 'Productivity tool' : ''),
+    platform: pick(['ios', 'android', 'mobile'], 'Mobile') || pick(['api', 'backend'], 'API') || 'Web',
+    targetUsers: pick(['team', 'teams', 'company', 'business'], 'Teams and organizations') || pick(['student', 'learner'], 'Students and learners') || '',
+    auth: pick(['login', 'account', 'user', 'auth', 'sign in'], 'Email/password accounts') || '',
+    database: pick(['data', 'profile', 'order', 'product', 'save', 'track'], 'Relational application data') || '',
+    deployment: pick(['cloud', 'deploy', 'production', 'host'], 'Managed cloud deployment') || '',
+    payment: pick(['pay', 'payment', 'checkout', 'subscription', 'billing'], 'Payment provider integration') || 'Not indicated',
+    notifications: pick(['email', 'notify', 'notification', 'alert', 'push'], 'Email and in-app notifications') || '',
+    ai: pick(['ai', 'assistant', 'recommend', 'summar'], 'AI-assisted workflows') || 'Not indicated',
+    storage: pick(['upload', 'file', 'image', 'photo', 'document'], 'Object storage for uploads') || '',
+    offline: pick(['offline', 'without internet', 'sync'], 'Offline-first sync') || 'Not indicated',
+    security: pick(['private', 'secure', 'security', 'hipaa', 'gdpr', 'sensitive'], 'Encryption, roles, and audit logs') || '',
+  };
+}
 
 export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
   const [provider, setProvider] = useState<{ provider: string; is_mock: boolean; model: string } | null>(null);
@@ -20,6 +58,14 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [mode, setMode] = useState<'assistant' | 'planner'>('planner');
+  const [idea, setIdea] = useState('');
+  const [intent, setIntent] = useState<PlannerIntent>(EMPTY_INTENT);
+  const [accepted, setAccepted] = useState<PlannerRequirementKey[]>([]);
+  const [executionMode, setExecutionMode] = useState('Balanced · 12h');
+  const [showRoadmap, setShowRoadmap] = useState(true);
+  const [extraRequirements, setExtraRequirements] = useState<string[]>([]);
+  const [newRequirement, setNewRequirement] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,6 +162,18 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
     }
   };
 
+  const startPlanning = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!idea.trim()) return;
+    setIntent(extractIntent(idea));
+    setAccepted([]);
+    setExtraRequirements([]);
+  };
+  const missing = REQUIREMENTS.filter(({ key }) => !intent[key] && !accepted.includes(key));
+  const updateIntent = (key: PlannerRequirementKey, value: string) => setIntent((prev) => ({ ...prev, [key]: value }));
+  const acceptAll = () => { setAccepted(REQUIREMENTS.filter(({ key }) => !intent[key]).map(({ key }) => key)); setExtraRequirements([]); };
+  const regenerate = () => setIntent(extractIntent(idea));
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, fontSize: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -139,6 +197,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
             <Plus size={12} />
           </button>
         </div>
+      </div>
         <div className="ai-status-strip">
           <div><span>Current task</span><strong>{isSending ? 'Processing request' : activeFile ? `Reviewing ${activeFile.path.split('/').pop()}` : 'Waiting for instruction'}</strong></div>
           <div><span>Progress</span><strong>{isSending ? 'In progress' : messages.length ? `${messages.length} events` : 'Ready'}</strong></div>
@@ -149,9 +208,46 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
           <span className={activeFile ? 'complete' : ''}>Active file attached</span>
           <span className={isSending ? 'active' : ''}>Assistant execution</span>
         </div>
+      <div className="ai-mode-tabs" role="tablist">
+        <button className={mode === 'assistant' ? 'active' : ''} onClick={() => setMode('assistant')} role="tab">Assistant</button>
+        <button className={mode === 'planner' ? 'active' : ''} onClick={() => setMode('planner')} role="tab">Plan an idea</button>
       </div>
 
-      {conversations.length > 0 && (
+      {mode === 'planner' && (
+        <div className="planner-panel">
+          <div className="planner-intro"><strong>Conversational planner</strong><span>Planning only — no code will be written.</span></div>
+          <form onSubmit={startPlanning} className="planner-idea-form">
+            <textarea className="input" value={idea} onChange={(e) => setIdea(e.target.value)} rows={3} placeholder="Tell me what you want to build..." aria-label="Project idea" />
+            <Button type="submit" variant="primary" size="sm" disabled={!idea.trim()}>Extract requirements</Button>
+          </form>
+          {idea && intent.projectName && (
+            <>
+              <div className="planner-state">
+                <span><b>Thinking</b> deterministic local analysis</span><span><b>Confidence</b> {missing.length < 5 ? 'High' : 'Medium'}</span>
+                <span><b>Questions</b> {missing.length}</span><span><b>Completed</b> {REQUIREMENTS.length - missing.length}</span>
+                <span><b>Risk</b> {missing.length > 6 ? 'Open questions' : 'Manageable'}</span><span><b>Estimate</b> {executionMode.split('·')[1] || '12h'}</span>
+              </div>
+              <section className="planner-card">
+                <div className="planner-card-heading"><strong>Intent extracted</strong><button className="btn btn-ghost btn-sm" onClick={() => setIntent(EMPTY_INTENT)}><Pencil size={12} /> Edit</button></div>
+                <div className="planner-intent-grid">{REQUIREMENTS.map(({ key, label }) => (
+                  <label key={key}><span>{label}</span><input className="input" value={intent[key]} onChange={(e) => updateIntent(key, e.target.value)} placeholder="Not specified" /></label>
+                ))}</div>
+              </section>
+              <section className="planner-card">
+                <div className="planner-card-heading"><strong>Missing requirements · {missing.length + extraRequirements.length}</strong><button className="btn btn-secondary btn-sm" onClick={acceptAll}><Check size={12} /> Accept all</button></div>
+                {missing.length || extraRequirements.length ? <div className="planner-checklist">{missing.map(({ key, label, hint }) => <div key={key}><span><b>{label}</b><small>{hint}</small></span><button className="btn btn-ghost btn-sm" onClick={() => setAccepted((prev) => [...prev, key])}><Check size={12} /> Accept</button><button className="btn btn-ghost btn-sm" onClick={() => updateIntent(key, 'To decide')}><X size={12} /></button></div>)}{extraRequirements.map((requirement) => <div key={requirement}><span><b>{requirement}</b><small>Added by you</small></span><button className="btn btn-ghost btn-sm" onClick={() => setExtraRequirements((prev) => prev.filter((item) => item !== requirement))}><X size={12} /> Remove</button></div>)}</div> : <span className="planner-success"><Check size={13} /> Requirements accepted</span>}
+                <div className="planner-add-requirement"><input className="input" value={newRequirement} onChange={(e) => setNewRequirement(e.target.value)} placeholder="Add a requirement..." /><button className="btn btn-secondary btn-sm" onClick={() => { if (newRequirement.trim()) { setExtraRequirements((prev) => [...prev, newRequirement.trim()]); setNewRequirement(''); } }}>Add</button></div>
+              </section>
+              <section className="planner-card"><div className="planner-card-heading"><strong>Recommended stack</strong><span className="planner-tag">Switchable</span></div><p className="planner-rationale">A pragmatic, maintainable baseline for your {intent.platform.toLowerCase()} {intent.category.toLowerCase()}.</p><div className="planner-stack"><div><b>React + TypeScript</b><small>Fast iteration and type-safe UI</small></div><div><b>Node API + PostgreSQL</b><small>Reliable data and simple scaling</small></div><div><b>Managed cloud</b><small>Low-ops deployment with room to grow</small></div></div><details><summary>Alternative options and tradeoffs</summary><p>Next.js can simplify full-stack delivery; SQLite is great for prototypes but less suited to concurrent production workloads.</p></details></section>
+              <section className="planner-card"><div className="planner-card-heading"><strong>Execution mode</strong></div><div className="planner-modes">{['Rapid · 6h', 'Balanced · 12h', 'Professional · 24h', 'Production · 48h'].map((option) => <button key={option} className={executionMode === option ? 'selected' : ''} onClick={() => setExecutionMode(option)}>{option.split('·')[0]}<small>{option.split('·')[1]}</small></button>)}</div></section>
+              <section className="planner-card"><div className="planner-card-heading"><strong>Plan overview</strong><button className="btn btn-ghost btn-sm" onClick={() => setShowRoadmap(!showRoadmap)}>{showRoadmap ? <ChevronUp size={12} /> : <ChevronDown size={12} />}</button></div>{showRoadmap && <div className="planner-roadmap">{[['Architecture', 'Web client, API boundary, and managed data layer'], ['Feature roadmap', 'Foundation → core workflow → polish and launch'], ['Database & API', 'Users, core entities, validation, and versioned endpoints'], ['Security', 'Least privilege, encrypted secrets, input validation, audit trail'], ['Approval', 'Review this plan before any implementation begins']].map(([title, detail]) => <div key={title}><b>{title}</b><span>{detail}</span></div>)}</div>}</section>
+              <div className="planner-actions"><button className="btn btn-secondary btn-sm" onClick={() => setIdea('')}><Pencil size={12} /> Edit idea</button><button className="btn btn-secondary btn-sm" onClick={regenerate}><RefreshCw size={12} /> Regenerate</button><button className="btn btn-primary btn-sm" onClick={() => setAccepted(REQUIREMENTS.map(({ key }) => key))}><Check size={12} /> Approve plan</button></div>
+            </>
+          )}
+        </div>
+      )}
+
+      {mode === 'assistant' && conversations.length > 0 && (
         <select
           className="input"
           style={{ fontSize: 12, padding: '4px 8px', marginBottom: 6 }}
@@ -166,7 +262,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
         </select>
       )}
 
-      {activeFile && (
+      {mode === 'assistant' && activeFile && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
           {AI_ACTIONS.map((action) => (
             <button
@@ -181,9 +277,9 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
           ))}
         </div>
       )}
-      <div className="ai-approval"><span>Approval queue</span><small>No pending approvals</small></div>
+      {mode === 'assistant' && <div className="ai-approval"><span>Approval queue</span><small>No pending approvals</small></div>}
 
-      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', minHeight: 0, marginBottom: 8 }} aria-live="polite">
+      {mode === 'assistant' && <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', minHeight: 0, marginBottom: 8 }} aria-live="polite">
         {messages.length === 0 && !isSending && (
           <p style={{ color: 'var(--color-text-muted)' }}>
             Ask about your project. The assistant uses your README, file tree, active file, and Git status as
@@ -207,9 +303,9 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
           </div>
         )}
         {error && <p style={{ color: 'var(--color-error)' }} role="alert">{error}</p>}
-      </div>
+      </div>}
 
-      <form onSubmit={send} style={{ display: 'flex', gap: 6 }}>
+      {mode === 'assistant' && <form onSubmit={send} style={{ display: 'flex', gap: 6 }}>
         <input
           type="text"
           className="input"
@@ -223,7 +319,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile }) => {
         <Button type="submit" variant="primary" size="sm" disabled={isSending || !input.trim()} aria-label="Send message">
           <Send size={12} />
         </Button>
-      </form>
+      </form>}
     </div>
   );
 };

@@ -22,3 +22,24 @@ export interface AIChatPayload {
   conversation_id?: string;
   current_file?: string;
 }
+
+export type PlannerRequirementKey =
+  | 'projectName' | 'category' | 'platform' | 'targetUsers' | 'auth'
+  | 'database' | 'deployment' | 'payment' | 'notifications' | 'ai'
+  | 'storage' | 'offline' | 'security';
+
+export interface PlannerIntent {
+  projectName: string;
+  category: string;
+  platform: string;
+  targetUsers: string;
+  auth: string;
+  database: string;
+  deployment: string;
+  payment: string;
+  notifications: string;
+  ai: string;
+  storage: string;
+  offline: string;
+  security: string;
+}

@@ -62,6 +62,27 @@ test.describe("Workspace — stale project recovery (BUG-001)", () => {
     ).toBeVisible();
   });
 
+  test("the AI planner extracts requirements without starting code generation", async ({ page }) => {
+    await mockWorkspaceApi(page);
+    await mockProjectGetSuccess(page, LIVE_PROJECT_ID);
+    await page.addInitScript(
+      ([token, projectId]) => {
+        localStorage.setItem("devos_token", token!);
+        localStorage.setItem("devos_active_project_id", projectId!);
+      },
+      ["e2e-token", LIVE_PROJECT_ID] as const
+    );
+
+    await page.goto("/app/workspace");
+    await page.getByLabel("Project idea").fill("Build a Food Delivery App with payments and notifications");
+    await page.getByRole("button", { name: "Extract requirements" }).click();
+
+    await expect(page.getByText("Intent extracted")).toBeVisible();
+    await expect(page.getByLabel("Category")).toHaveValue("Marketplace / commerce");
+    await expect(page.getByText("Planning only — no code will be written.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Approve plan" })).toBeVisible();
+  });
+
   test("a deep link to /app/projects/:id lands on the project list instead of a 404", async ({
     page,
   }) => {
