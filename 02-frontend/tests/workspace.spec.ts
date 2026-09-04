@@ -3,6 +3,8 @@ import {
   mockAuthMe,
   mockProjectGetNotFound,
   mockProjectGetSuccess,
+  mockGithubConnected,
+  sampleProject,
   mockWorkspaceApi,
 } from "./support/mocks";
 
@@ -106,6 +108,50 @@ test.describe("Workspace — stale project recovery (BUG-001)", () => {
     await expect(page.getByText("Validate project context")).toBeVisible();
     await expect(page.getByText("No files changed; no external actions requested").first()).toBeVisible();
     await expect(page.getByText("Safety note:")).toBeVisible();
+  });
+
+  test("repository dashboard shows API-backed metadata and honest unavailable surfaces", async ({ page }) => {
+    await mockWorkspaceApi(page);
+    await mockGithubConnected(page, "octocat");
+    await mockProjectGetSuccess(page, LIVE_PROJECT_ID, {
+      ...sampleProject,
+      id: LIVE_PROJECT_ID,
+      repository_url: "https://github.com/octocat/demo",
+    });
+    await page.route("**/api/v1/github/repositories", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          data: {
+            connected: true,
+            repositories: [{
+              id: 1,
+              name: "demo",
+              full_name: "octocat/demo",
+              private: false,
+              default_branch: "main",
+              description: "API-backed repository",
+              html_url: "https://github.com/octocat/demo",
+              stars: 3,
+              forks: 1,
+              language: "TypeScript",
+            }],
+          },
+        }),
+      })
+    );
+    await page.addInitScript(([token, projectId]) => {
+      localStorage.setItem("devos_token", token!);
+      localStorage.setItem("devos_active_project_id", projectId!);
+    }, ["e2e-token", LIVE_PROJECT_ID] as const);
+
+    await page.goto("/app/workspace");
+    await expect(page.getByText("Repository dashboard")).toBeVisible();
+    await expect(page.getByText("octocat/demo")).toBeVisible();
+    await page.getByRole("tab", { name: "Pull requests" }).click();
+    await expect(page.getByText("Pull requests data is not available from the connected GitHub API.")).toBeVisible();
   });
 
   test("approved plans generate files incrementally and require overwrite confirmation", async ({ page }) => {

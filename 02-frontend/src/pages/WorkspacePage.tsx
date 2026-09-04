@@ -12,6 +12,7 @@ import { AIPanel } from '../components/workspace/AIPanel';
 import { TestingPanel } from '../components/workspace/TestingPanel';
 import { useToast } from '../components/common/Toast';
 import { useSeo } from '../hooks/useSeo';
+import { RepositoryDashboard } from '../components/workspace/RepositoryDashboard';
 
 export const WorkspacePage: React.FC = () => {
   useSeo({ title: 'Workspace', noindex: true });
@@ -163,6 +164,7 @@ export const WorkspacePage: React.FC = () => {
           <TestingPanel projectId={activeProject.id} />
         </Card>
       </div>
+      <RepositoryDashboard project={activeProject} />
     </div>
   );
 };
