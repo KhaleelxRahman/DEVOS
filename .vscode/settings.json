@@ -9,17 +9,33 @@
     "source.organizeImports": "explicit"
   },
   "files.exclude": {
+    "**/.venv": true,
+    "**/.coverage": true,
     "**/.pytest_cache": true,
     "**/.ruff_cache": true,
+    "**/__pycache__": true,
     "**/node_modules": true,
     "**/dist": true,
+    "**/.dist": true,
+    "**/coverage": true,
+    "**/*.log": true,
     "**/test-results": true,
-    "**/playwright-report": true
+    "**/playwright-report": true,
+    "**/.env.generated": true
   },
   "search.exclude": {
+    "**/.venv": true,
+    "**/.coverage": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/__pycache__": true,
     "**/node_modules": true,
     "**/dist": true,
+    "**/.dist": true,
     "**/coverage": true,
-    "**/test-results": true
+    "**/*.log": true,
+    "**/test-results": true,
+    "**/playwright-report": true,
+    "**/.env.generated": true
   }
 }

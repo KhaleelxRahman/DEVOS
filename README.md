@@ -18,7 +18,7 @@
 | --- | --- |
 | Backend, API, Git, workspace | Ready |
 | Frontend build and responsive UI | Ready |
-| Automated tests | 48 passing |
+| Automated validation | 30 Playwright + 50 backend/unit tests |
 | GitHub OAuth and repository dashboard | Implemented |
 | Production deployment | Human-owned configuration required |
 
