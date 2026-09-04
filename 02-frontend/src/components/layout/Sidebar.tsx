@@ -18,6 +18,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void; collapsed?: boolean; o
           to="/app/dashboard"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           onClick={onNavigate}
+          title={collapsed ? 'Dashboard' : undefined}
         >
           <LayoutDashboard size={16} />
           {!collapsed && <span>Dashboard</span>}
@@ -26,6 +27,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void; collapsed?: boolean; o
           to="/app/projects"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           onClick={onNavigate}
+          title={collapsed ? 'Projects' : undefined}
         >
           <FolderGit2 size={16} />
           {!collapsed && <span>Projects</span>}
@@ -34,19 +36,20 @@ export const Sidebar: React.FC<{ onNavigate?: () => void; collapsed?: boolean; o
           to="/app/workspace"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           onClick={onNavigate}
+          title={collapsed ? 'Workspace' : undefined}
         >
           <Code2 size={16} />
           {!collapsed && <span>Workspace</span>}
         </NavLink>
-        <NavLink to="/app/workspace#ai-command-center" className="sidebar-item" onClick={onNavigate}>
+        <NavLink to="/app/workspace#ai-command-center" className="sidebar-item" onClick={onNavigate} title={collapsed ? 'AI Command Center' : undefined}>
           <Bot size={16} />
           {!collapsed && <span>AI Command Center</span>}
         </NavLink>
-        <NavLink to="/app/projects?github=1" className="sidebar-item" onClick={onNavigate}>
+        <NavLink to="/app/projects?github=1" className="sidebar-item" onClick={onNavigate} title={collapsed ? 'GitHub' : undefined}>
           <Github size={16} />
           {!collapsed && <span>GitHub</span>}
         </NavLink>
-        <NavLink to="/app/projects?deploy=1" className="sidebar-item" onClick={onNavigate}>
+        <NavLink to="/app/projects?deploy=1" className="sidebar-item" onClick={onNavigate} title={collapsed ? 'Deploy' : undefined}>
           <Rocket size={16} />
           {!collapsed && <span>Deploy</span>}
         </NavLink>
@@ -58,6 +61,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void; collapsed?: boolean; o
           to="/app/settings"
           className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           onClick={onNavigate}
+          title={collapsed ? 'Settings' : undefined}
         >
           <Settings size={16} />
           {!collapsed && <span>Settings</span>}

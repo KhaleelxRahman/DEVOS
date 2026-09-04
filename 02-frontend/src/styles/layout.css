@@ -183,12 +183,14 @@
 .sidebar-item:hover {
   background-color: var(--color-surface-hover);
   color: var(--color-text-primary);
+  transform: translateX(2px);
 }
 
 .sidebar-item.active {
-  background-color: var(--color-accent-subtle);
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.16), rgba(37, 99, 235, 0.08));
   color: var(--color-accent-bright);
   border-color: rgba(59, 130, 246, 0.2);
+  box-shadow: inset 3px 0 0 var(--color-accent), 0 0 20px rgba(56, 189, 248, 0.08);
 }
 
 .main-content {
@@ -205,7 +207,8 @@
     inset: 60px auto 0 0;
     z-index: 20;
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    transition: transform var(--transition-normal);
+    box-shadow: var(--shadow-lg);
   }
   .sidebar.collapsed {
     width: 248px;
@@ -221,7 +224,8 @@
     inset: 60px 0 0;
     z-index: 15;
     border: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(2, 6, 23, 0.62);
+    backdrop-filter: blur(4px);
   }
   .main-content { padding: var(--space-4); }
   .top-bar-center { min-width: 0; overflow: hidden; }
