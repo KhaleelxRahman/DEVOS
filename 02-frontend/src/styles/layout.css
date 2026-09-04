@@ -306,6 +306,12 @@
   background: var(--color-background);
 }
 .ai-message.user { border-color: rgba(56, 189, 248, .2); }
+.ai-message-heading { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; color: var(--color-text-secondary); font-size: 11px; }
+.ai-message-heading strong { color: var(--color-text-primary); }
+.ai-message-heading time { margin-left: auto; color: var(--color-text-disabled); font-size: 10px; }
+.ai-avatar { display: inline-flex; align-items: center; justify-content: center; width: 19px; height: 19px; border-radius: 6px; background: var(--color-accent-subtle); color: var(--color-accent); font-size: 10px; }
+.ai-message.assistant .ai-avatar { color: var(--color-success); background: var(--color-success-bg); }
+.ai-streaming-cursor { display: inline-block; width: 6px; height: 14px; margin-left: 2px; vertical-align: text-bottom; background: var(--color-accent); animation: pulse 1s steps(2, jump-none) infinite; }
 .ai-message-content {
   margin: 4px 0 0;
   white-space: pre-wrap;

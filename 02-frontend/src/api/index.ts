@@ -93,7 +93,7 @@ export const aiApi = {
   deleteConversation: (projectId: string, id: string) =>
     apiClient.delete(`/projects/${projectId}/ai/conversations/${id}`),
   getMessages: (projectId: string, conversationId: string) =>
-    apiClient.get<{ messages: { role: string; content: string; provider?: string }[] }>(`/projects/${projectId}/ai/conversations/${conversationId}/messages`),
+    apiClient.get<{ messages: { role: string; content: string; provider?: string; created_at?: string }[] }>(`/projects/${projectId}/ai/conversations/${conversationId}/messages`),
   getProvider: (projectId: string) =>
     apiClient.get<{ provider: string; model: string; is_mock: boolean; configured: boolean }>(`/projects/${projectId}/ai/provider`),
   runAction: (projectId: string, payload: { action: string; code: string; file_path?: string; language?: string }) =>

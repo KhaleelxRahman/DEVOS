@@ -107,7 +107,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
       setError('');
       try {
         const res = await aiApi.getMessages(projectId, id);
-        setMessages((res.data?.messages || []).map((m) => ({ role: m.role as AIMessage['role'], content: m.content })));
+        setMessages((res.data?.messages || []).map((m) => ({ role: m.role as AIMessage['role'], content: m.content, created_at: m.created_at })));
       } catch (err: any) {
         setError(err.message || 'Failed to load conversation');
       }
@@ -151,7 +151,8 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
     if (!message || isSending) return;
     setInput('');
     lastPromptRef.current = message;
-    setMessages((prev) => [...prev, { role: 'user', content: message }, { role: 'assistant', content: '' }]);
+    const createdAt = new Date().toISOString();
+    setMessages((prev) => [...prev, { role: 'user', content: message, created_at: createdAt }, { role: 'assistant', content: '', created_at: createdAt }]);
     setIsSending(true);
     setError('');
     const controller = new AbortController();
@@ -197,7 +198,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
 
   const runAction = async (action: string) => {
     if (!activeFile || isSending) return;
-    setMessages((prev) => [...prev, { role: 'user', content: `/${action} ${activeFile.path}` }]);
+    setMessages((prev) => [...prev, { role: 'user', content: `/${action} ${activeFile.path}`, created_at: new Date().toISOString() }]);
     setIsSending(true);
     setError('');
     try {
@@ -207,7 +208,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
         file_path: activeFile.path,
         language: activeFile.language,
       });
-      setMessages((prev) => [...prev, { role: 'assistant', content: res.data!.content }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: res.data!.content, created_at: new Date().toISOString() }]);
     } catch (err: any) {
       setError(err.message || 'AI action failed');
     } finally {
@@ -510,10 +511,13 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
         )}
         {messages.map((m, i) => (
           <div key={i} className={`ai-message ${m.role === 'user' ? 'user' : 'assistant'}`}>
-            <div style={{ color: m.role === 'user' ? 'var(--color-accent)' : 'var(--color-success)', fontWeight: 600, fontSize: 11 }}>
-              {m.role === 'user' ? 'You' : 'Assistant'}
+            <div className="ai-message-heading">
+              <span className="ai-avatar" aria-hidden="true">{m.role === 'user' ? 'Y' : <Bot size={11} />}</span>
+              <strong>{m.role === 'user' ? 'You' : 'Assistant'}</strong>
+              {m.created_at && <time dateTime={m.created_at}>{new Date(m.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</time>}
             </div>
             {m.role === 'assistant' ? <MarkdownContent content={m.content} /> : <div className="ai-message-content">{m.content}</div>}
+            {m.role === 'assistant' && isSending && i === messages.length - 1 && <span className="ai-streaming-cursor" aria-label="Assistant is responding" />}
             {m.role === 'assistant' && (
               <button className="ai-message-copy" onClick={() => void navigator.clipboard.writeText(m.content)} aria-label="Copy assistant response">
                 <Copy size={11} /> Copy

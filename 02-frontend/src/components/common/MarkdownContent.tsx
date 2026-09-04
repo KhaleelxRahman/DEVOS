@@ -72,6 +72,33 @@ export const MarkdownContent: React.FC<MarkdownContentProps> = ({ content }) => 
       blocks.push(<ul key={`ul-${index}`}>{items}</ul>);
       continue;
     }
+    if (/^\d+\.\s+/.test(line)) {
+      const items: React.ReactNode[] = [];
+      while (index < lines.length && /^\d+\.\s+/.test(lines[index])) {
+        items.push(<li key={index}>{inline(lines[index].replace(/^\d+\.\s+/, ''))}</li>);
+        index += 1;
+      }
+      blocks.push(<ol key={`ol-${index}`}>{items}</ol>);
+      continue;
+    }
+    if (line.includes('|') && index + 1 < lines.length && /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$/.test(lines[index + 1])) {
+      const parseRow = (value: string) => value.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim());
+      const headers = parseRow(line);
+      const rows: string[][] = [];
+      index += 2;
+      while (index < lines.length && lines[index].includes('|') && lines[index].trim()) {
+        rows.push(parseRow(lines[index]));
+        index += 1;
+      }
+      blocks.push(
+        <div className="markdown-table-wrap" key={`table-${index}`}>
+          <table><thead><tr>{headers.map((header, cellIndex) => <th key={cellIndex}>{inline(header)}</th>)}</tr></thead>
+            <tbody>{rows.map((row, rowIndex) => <tr key={rowIndex}>{headers.map((_, cellIndex) => <td key={cellIndex}>{inline(row[cellIndex] || '')}</td>)}</tr>)}</tbody>
+          </table>
+        </div>,
+      );
+      continue;
+    }
     blocks.push(<p key={index}>{inline(line)}</p>);
     index += 1;
   }

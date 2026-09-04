@@ -366,7 +366,13 @@
 .markdown-content p { margin: 0 0 8px; }
 .markdown-content h1, .markdown-content h2, .markdown-content h3 { color: var(--color-text-primary); margin: 10px 0 6px; }
 .markdown-content ul { margin: 4px 0 8px; padding-left: 20px; }
+.markdown-content ol { margin: 4px 0 8px; padding-left: 22px; }
 .markdown-content blockquote { margin: 8px 0; padding-left: 10px; border-left: 2px solid var(--color-accent); color: var(--color-text-muted); }
+.markdown-table-wrap { max-width: 100%; overflow-x: auto; margin: 10px 0; border: 1px solid var(--color-border); border-radius: 7px; }
+.markdown-content table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.markdown-content th, .markdown-content td { padding: 6px 8px; border-bottom: 1px solid var(--color-border-subtle); text-align: left; }
+.markdown-content th { color: var(--color-text-primary); background: var(--color-surface-raised); font-weight: 600; }
+.markdown-content tr:last-child td { border-bottom: 0; }
 .markdown-inline-code { padding: 1px 4px; border-radius: 4px; background: var(--color-surface-elevated); font-family: var(--font-mono); }
 .markdown-code-block { margin: 8px 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-background); }
 .markdown-code-toolbar { display: flex; justify-content: space-between; padding: 5px 8px; border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); font: 10px var(--font-mono); }
