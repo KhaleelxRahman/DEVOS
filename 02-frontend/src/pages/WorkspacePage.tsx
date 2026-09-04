@@ -3,7 +3,7 @@ import { FolderGit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../hooks/useProject';
 import { EmptyState, Card } from '../components/common';
-import { filesApi, projectsApi } from '../api';
+import { filesApi, projectsApi, Artifact } from '../api';
 import { FileExplorer } from '../components/workspace/FileExplorer';
 import { CodeViewer, OpenTab } from '../components/workspace/CodeViewer';
 import { TerminalPanel } from '../components/workspace/TerminalPanel';
@@ -94,6 +94,10 @@ export const WorkspacePage: React.FC = () => {
   };
 
   const saveFile = async (path: string, content: string): Promise<boolean> => {
+    if (path.startsWith('artifact://')) {
+      toast('Artifacts are read-only in Monaco. Download or copy to save changes.', 'info');
+      return false;
+    }
     try {
       const res = await filesApi.saveFile(activeProject.id, path, content);
       setTabs((prev) =>
@@ -105,6 +109,23 @@ export const WorkspacePage: React.FC = () => {
       toast(err.message || `Failed to save ${path}`, 'error');
       return false;
     }
+  };
+
+  const openArtifactInMonaco = (artifact: Artifact) => {
+    const path = `artifact://${artifact.id}/${artifact.name}`;
+    setTabs((previous) => previous.some((tab) => tab.path === path) ? previous : [...previous, {
+      path,
+      content: {
+        path,
+        name: artifact.name,
+        content: artifact.content,
+        language: artifact.kind === 'markdown' ? 'markdown' : artifact.kind === 'json' ? 'json' : artifact.kind === 'html' ? 'html' : artifact.kind === 'svg' ? 'xml' : undefined,
+        size: new Blob([artifact.content]).size,
+      },
+      isLoading: false,
+      error: '',
+    }]);
+    setActivePath(path);
   };
 
   const updateOpenFile = (path: string, content: string) => {
@@ -188,7 +209,7 @@ export const WorkspacePage: React.FC = () => {
         </Card>
       </div>
       <Card title="Artifacts" subtitle="Generated code, markdown, JSON, and previews" style={{ marginTop: 'var(--space-3)', minHeight: 220 }}>
-        <ArtifactPanel projectId={activeProject.id} />
+        <ArtifactPanel projectId={activeProject.id} onOpenInMonaco={openArtifactInMonaco} />
       </Card>
       <RepositoryDashboard project={activeProject} />
     </div>
