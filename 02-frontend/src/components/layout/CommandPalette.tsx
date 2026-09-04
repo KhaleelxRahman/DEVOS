@@ -18,17 +18,23 @@ const commands = [
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
   const filtered = commands.filter((command) => command.label.toLowerCase().includes(query.toLowerCase()));
 
   useEffect(() => {
     if (!open) return;
     setQuery('');
+    setActiveIndex(0);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [open, onClose]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [query]);
 
   if (!open) return null;
 
@@ -37,12 +43,32 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
       <section className="command-palette" role="dialog" aria-modal="true" aria-label="Command palette" onMouseDown={(event) => event.stopPropagation()}>
         <div className="command-palette-input">
           <Command size={17} />
-          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search commands..." aria-label="Search commands" />
+          <input
+            autoFocus
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                setActiveIndex((index) => filtered.length ? (index + 1) % filtered.length : 0);
+              }
+              if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                setActiveIndex((index) => filtered.length ? (index - 1 + filtered.length) % filtered.length : 0);
+              }
+              if (event.key === 'Enter' && filtered[activeIndex]) {
+                navigate(filtered[activeIndex].path);
+                onClose();
+              }
+            }}
+            placeholder="Search commands..."
+            aria-label="Search commands"
+          />
           <kbd>ESC</kbd>
         </div>
         <div className="command-palette-list">
-          {filtered.map(({ label, hint, icon: Icon, path }) => (
-            <button key={label} className="command-palette-item" onClick={() => { navigate(path); onClose(); }}>
+          {filtered.map(({ label, hint, icon: Icon, path }, index) => (
+            <button key={label} className={`command-palette-item ${index === activeIndex ? 'selected' : ''}`} onClick={() => { navigate(path); onClose(); }}>
               <Icon size={16} />
               <span>{label}</span>
               <small>{hint}</small>

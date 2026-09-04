@@ -234,6 +234,7 @@
 .command-palette-list { max-height: 360px; overflow-y: auto; padding: var(--space-2); }
 .command-palette-item { display: flex; align-items: center; gap: var(--space-3); width: 100%; padding: var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--color-text-secondary); text-align: left; cursor: pointer; }
 .command-palette-item:hover, .command-palette-item:focus-visible { background: var(--color-accent-subtle); color: var(--color-text-primary); outline: 0; }
+.command-palette-item.selected { background: var(--color-accent-subtle); color: var(--color-text-primary); }
 .command-palette-item span { flex: 1; }.command-palette-item small { color: var(--color-text-muted); }.command-palette-empty { padding: var(--space-5); color: var(--color-text-muted); text-align: center; }
 .command-palette footer { display: flex; justify-content: space-between; padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-border); color: var(--color-text-muted); font-size: 11px; }
 
@@ -261,6 +262,42 @@
 .ai-composer .input:focus {
   outline: 0;
   box-shadow: none;
+}
+
+.ai-message {
+  position: relative;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+}
+.ai-message.user { border-color: rgba(56, 189, 248, .2); }
+.ai-message-content {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.ai-message-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  cursor: pointer;
+}
+.ai-message-copy:hover { color: var(--color-text-primary); background: var(--color-surface-hover); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 
 /* Workspace Grid */

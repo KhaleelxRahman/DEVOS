@@ -454,13 +454,18 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
           </p>
         )}
         {messages.map((m, i) => (
-          <div key={i} style={{ marginBottom: 8 }}>
+          <div key={i} className={`ai-message ${m.role === 'user' ? 'user' : 'assistant'}`}>
             <div style={{ color: m.role === 'user' ? 'var(--color-accent)' : 'var(--color-success)', fontWeight: 600, fontSize: 11 }}>
               {m.role === 'user' ? 'You' : 'Assistant'}
             </div>
-            <pre style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--color-text-secondary)', fontFamily: 'inherit' }}>
+            <pre className="ai-message-content">
               {m.content}
             </pre>
+            {m.role === 'assistant' && (
+              <button className="ai-message-copy" onClick={() => void navigator.clipboard.writeText(m.content)} aria-label="Copy assistant response">
+                <Copy size={11} /> Copy
+              </button>
+            )}
           </div>
         ))}
         {isSending && (
