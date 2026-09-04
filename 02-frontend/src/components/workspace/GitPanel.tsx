@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { GitBranch, GitCommitHorizontal, RefreshCw } from 'lucide-react';
 import { gitApi } from '../../api';
 import { GitStatus } from '../../types/git';
-import { Spinner, Button } from '../common';
+import { Spinner, Button, Badge } from '../common';
 
 interface GitPanelProps {
   projectId: string;
@@ -14,6 +14,10 @@ interface LogEntry {
   date: string;
   message: string;
 }
+
+const changedFilesCount = (status: GitStatus | null) => status
+  ? status.modified.length + status.added.length + status.deleted.length + status.untracked.length
+  : 0;
 
 export const GitPanel: React.FC<GitPanelProps> = ({ projectId }) => {
   const [status, setStatus] = useState<GitStatus | null>(null);
@@ -100,14 +104,20 @@ export const GitPanel: React.FC<GitPanelProps> = ({ projectId }) => {
         <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-text-secondary)' }}>
           <GitBranch size={13} />
           <strong style={{ color: 'var(--color-text-primary)' }}>{branches?.current || status?.branch || '—'}</strong>
-          {status?.is_clean && <span style={{ color: 'var(--color-success)' }}>clean</span>}
+          <Badge variant={status?.is_clean ? 'success' : 'warning'}>{status?.is_clean ? 'Clean' : `${changedFilesCount(status)} change${changedFilesCount(status) === 1 ? '' : 's'}`}</Badge>
+          {status && ((status.ahead || 0) > 0 || (status.behind || 0) > 0) && <span className="git-sync-badge">{(status.ahead || 0) > 0 ? `↑${status.ahead}` : ''}{(status.behind || 0) > 0 ? ` ↓${status.behind}` : ''}</span>}
         </span>
         <button className="btn btn-secondary btn-sm" onClick={load} disabled={isBusy} aria-label="Refresh git status">
           <RefreshCw size={12} />
         </button>
       </div>
 
-      {error && <p style={{ color: 'var(--color-error)', margin: '4px 0' }} role="alert">{error}</p>}
+      {error && (
+        <div className="git-error" role="alert">
+          <span>{error}</span>
+          <Button variant="secondary" size="sm" onClick={() => void load()} disabled={isBusy}>Retry</Button>
+        </div>
+      )}
       {notice && <p style={{ color: 'var(--color-success)', margin: '4px 0' }} role="status">{notice}</p>}
 
       {branches && branches.branches.length > 0 && (

@@ -5,6 +5,8 @@ export interface GitStatus {
   added: string[];
   deleted: string[];
   untracked: string[];
+  ahead?: number;
+  behind?: number;
 }
 
 export interface GitCommit {
