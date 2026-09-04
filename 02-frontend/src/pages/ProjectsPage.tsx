@@ -48,8 +48,8 @@ export const ProjectsPage: React.FC = () => {
         setDescription('');
         navigate('/app/workspace');
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : 'Unable to create project', 'error');
     } finally {
       setIsSubmitting(false);
     }
