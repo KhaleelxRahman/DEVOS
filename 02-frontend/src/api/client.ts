@@ -5,6 +5,7 @@ import { ApiResponse } from '../types/api';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.PROD ? 'https://devos-backend-f3ub.onrender.com/api/v1' : '/api/v1');
+export { API_BASE_URL };
 
 export class ApiError extends Error {
   code: string;
@@ -108,6 +109,44 @@ class ApiClient {
 
   public delete<T>(endpoint: string, headers?: HeadersInit): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { method: 'DELETE', headers });
+  }
+
+  public async stream(
+    endpoint: string,
+    body: unknown,
+    onEvent: (event: string, data: Record<string, unknown>) => void,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getHeaders({}, true),
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (!response.ok || !response.body) {
+      const data = await response.json().catch(() => null);
+      throw new ApiError(
+        data?.error?.message || response.statusText || 'Streaming request failed',
+        data?.error?.code || `HTTP_${response.status}`,
+        response.status,
+      );
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+      const frames = buffer.split('\n\n');
+      buffer = frames.pop() || '';
+      frames.forEach((frame) => {
+        const event = frame.match(/^event: (.+)$/m)?.[1];
+        const data = frame.match(/^data: (.+)$/m)?.[1];
+        if (event && data) onEvent(event, JSON.parse(data) as Record<string, unknown>);
+      });
+      if (done) break;
+    }
   }
 }
 

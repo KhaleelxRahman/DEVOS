@@ -187,6 +187,35 @@ async def test_ai_conversation_ownership_enforced(client):
 
 
 @pytest.mark.asyncio
+async def test_ai_stream_persists_messages_and_artifacts(client):
+    headers, project_id, _ = await _setup(client)
+    base = f"/api/v1/projects/{project_id}/ai"
+
+    stream = await client.post(
+        f"{base}/chat/stream", json={"message": "stream this"}, headers=headers
+    )
+    assert stream.status_code == 200, stream.text
+    assert "event: start" in stream.text
+    assert "event: delta" in stream.text
+    assert "event: complete" in stream.text
+    assert "stream this" in stream.text
+
+    artifact = await client.post(
+        f"{base}/artifacts",
+        json={"name": "answer.md", "kind": "markdown", "content": "# Answer"},
+        headers=headers,
+    )
+    assert artifact.status_code == 200, artifact.text
+    artifact_id = artifact.json()["data"]["id"]
+    listed = await client.get(f"{base}/artifacts", headers=headers)
+    assert listed.status_code == 200
+    assert listed.json()["data"]["artifacts"][0]["content"] == "# Answer"
+
+    deleted = await client.delete(f"{base}/artifacts/{artifact_id}", headers=headers)
+    assert deleted.status_code == 200
+
+
+@pytest.mark.asyncio
 async def test_ai_actions_validation(client):
     headers, project_id, _ = await _setup(client)
     base = f"/api/v1/projects/{project_id}/ai"

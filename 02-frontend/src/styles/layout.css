@@ -223,8 +223,8 @@
 .sidebar-brand { display: flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-3) var(--space-6); font-weight: 700; letter-spacing: .04em; }
 .sidebar-brand-mark { display: grid; place-items: center; width: 30px; height: 30px; color: var(--color-background); background: var(--color-accent); border-radius: 9px; }
 .sidebar-footer { padding: var(--space-3); border-top: 1px solid var(--color-border); }
-.workspace-page { display: flex; flex-direction: column; height: 100%; gap: var(--space-3); }
-.workspace-page > .workspace-grid { flex: 1; min-height: 0 !important; }
+.workspace-page { display: flex; flex-direction: column; height: 100%; gap: var(--space-3); overflow-y: auto; }
+.workspace-page > .workspace-grid { flex: 0 0 auto; min-height: 480px !important; }
 .workspace-page > .workspace-grid > .card { min-height: 0; }
 .command-palette-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; padding-top: 14vh; background: rgba(3, 7, 18, .72); backdrop-filter: blur(5px); }
 .command-palette { width: min(620px, calc(100vw - 32px)); align-self: flex-start; overflow: hidden; background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg), var(--shadow-glow); }
@@ -339,6 +339,7 @@
     grid-template-rows: repeat(5, minmax(280px, auto)) !important;
     min-height: 0 !important;
   }
+  .workspace-page > .workspace-grid { min-height: 0 !important; }
   .workspace-grid > * {
     grid-column: auto !important;
   }

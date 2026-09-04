@@ -78,6 +78,12 @@ export const gitApi = {
 
 export const aiApi = {
   chat: (projectId: string, payload: AIChatPayload) => apiClient.post<{ message: any; conversation_id: string }>(`/projects/${projectId}/ai/chat`, payload),
+  chatStream: (
+    projectId: string,
+    payload: AIChatPayload,
+    onEvent: (event: string, data: Record<string, unknown>) => void,
+    signal?: AbortSignal,
+  ) => apiClient.stream(`/projects/${projectId}/ai/chat/stream`, payload, onEvent, signal),
   getConversations: (projectId: string) => apiClient.get<{ conversations: Conversation[] }>(`/projects/${projectId}/ai/conversations`),
   createConversation: (projectId: string) => apiClient.post<Conversation>(`/projects/${projectId}/ai/conversations`),
   getMessages: (projectId: string, conversationId: string) =>
@@ -86,7 +92,27 @@ export const aiApi = {
     apiClient.get<{ provider: string; model: string; is_mock: boolean; configured: boolean }>(`/projects/${projectId}/ai/provider`),
   runAction: (projectId: string, payload: { action: string; code: string; file_path?: string; language?: string }) =>
     apiClient.post<{ role: string; content: string; provider: string }>(`/projects/${projectId}/ai/actions`, payload),
+  listArtifacts: (projectId: string) =>
+    apiClient.get<{ artifacts: Artifact[] }>(`/projects/${projectId}/ai/artifacts`),
+  createArtifact: (projectId: string, payload: Omit<Artifact, 'id' | 'project_id' | 'created_at' | 'updated_at'>) =>
+    apiClient.post<Artifact>(`/projects/${projectId}/ai/artifacts`, payload),
+  deleteArtifact: (projectId: string, artifactId: string) =>
+    apiClient.delete(`/projects/${projectId}/ai/artifacts/${artifactId}`),
 };
+
+export interface Artifact {
+  id: string;
+  project_id: string;
+  conversation_id?: string | null;
+  message_id?: string | null;
+  name: string;
+  kind: 'code' | 'markdown' | 'json' | 'html' | 'mermaid' | 'svg' | 'text';
+  content: string;
+  mime_type?: string | null;
+  metadata?: Record<string, unknown> | null;
+  created_at: string;
+  updated_at?: string | null;
+}
 
 export const terminalApi = {
   execute: (projectId: string, payload: TerminalExecutePayload) => apiClient.post<TerminalResult>(`/projects/${projectId}/terminal/execute`, payload),

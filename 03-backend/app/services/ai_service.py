@@ -7,6 +7,7 @@ presented as coming from a real provider.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
@@ -27,6 +28,22 @@ class BaseAIProvider(ABC):
         context: dict[str, Any],
         history: list[dict[str, str]],
     ) -> AIMessageResponse: ...
+
+    async def stream_response(
+        self,
+        prompt: str,
+        context: dict[str, Any],
+        history: list[dict[str, str]],
+    ) -> AsyncIterator[str]:
+        """Yield response text in bounded chunks.
+
+        Providers can override this with native provider streaming. The
+        fallback preserves the streaming contract for providers that only
+        expose a complete-response API.
+        """
+        response = await self.generate_response(prompt, context, history)
+        for index in range(0, len(response.content), 64):
+            yield response.content[index : index + 64]
 
 
 def _render_context(context: dict[str, Any]) -> str:
@@ -238,6 +255,15 @@ class AIService:
         history: list[dict[str, str]] | None = None,
     ) -> AIMessageResponse:
         return await self.provider.generate_response(prompt, context, history or [])
+
+    async def stream_chat(
+        self,
+        prompt: str,
+        context: dict[str, Any],
+        history: list[dict[str, str]] | None = None,
+    ) -> AsyncIterator[str]:
+        async for chunk in self.provider.stream_response(prompt, context, history or []):
+            yield chunk
 
     async def run_action(
         self,

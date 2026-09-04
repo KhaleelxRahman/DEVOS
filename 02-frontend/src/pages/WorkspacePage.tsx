@@ -13,6 +13,7 @@ import { TestingPanel } from '../components/workspace/TestingPanel';
 import { useToast } from '../components/common/Toast';
 import { useSeo } from '../hooks/useSeo';
 import { RepositoryDashboard } from '../components/workspace/RepositoryDashboard';
+import { ArtifactPanel } from '../components/workspace/ArtifactPanel';
 
 export const WorkspacePage: React.FC = () => {
   useSeo({ title: 'Workspace', noindex: true });
@@ -164,6 +165,9 @@ export const WorkspacePage: React.FC = () => {
           <TestingPanel projectId={activeProject.id} />
         </Card>
       </div>
+      <Card title="Artifacts" subtitle="Generated code, markdown, JSON, and previews" style={{ marginTop: 'var(--space-3)', minHeight: 220 }}>
+        <ArtifactPanel projectId={activeProject.id} />
+      </Card>
       <RepositoryDashboard project={activeProject} />
     </div>
   );

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Bot, Copy, Plus, Send, Check, Pencil, RefreshCw, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Bot, Copy, Plus, Send, Check, Pencil, RefreshCw, ChevronDown, ChevronUp, X, Square, Paperclip } from 'lucide-react';
 import { aiApi, filesApi, gitApi, projectsApi, testingApi } from '../../api';
 import { AIMessage, Conversation, PlannerIntent, PlannerRequirementKey } from '../../types/ai';
-import { Spinner, Button } from '../common';
+import { Spinner, Button, MarkdownContent } from '../common';
 
 interface AIPanelProps {
   projectId: string;
@@ -64,6 +64,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [input, setInput] = useState('');
+  const [attachmentName, setAttachmentName] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
@@ -82,7 +83,10 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
   const [qaIssues, setQaIssues] = useState<QaIssue[]>([]);
   const [qaSummary, setQaSummary] = useState('');
   const cancelledRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const lastPromptRef = useRef<string>('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const attachmentRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     aiApi.getProvider(projectId).then((res) => setProvider(res.data || null)).catch((err) => setError(err.message || 'Unable to load AI provider'));
@@ -121,29 +125,49 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
     const message = input.trim();
     if (!message || isSending) return;
     setInput('');
-    setMessages((prev) => [...prev, { role: 'user', content: message }]);
+    lastPromptRef.current = message;
+    setMessages((prev) => [...prev, { role: 'user', content: message }, { role: 'assistant', content: '' }]);
     setIsSending(true);
     setError('');
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
-      const res = await aiApi.chat(projectId, {
+      await aiApi.chatStream(projectId, {
         message,
         conversation_id: conversationId || undefined,
         current_file: activeFile?.path,
-      });
-      const data = res.data!;
-      setConversationId(data.conversation_id);
-      setMessages((prev) => [...prev, { role: 'assistant', content: data.message.content }]);
-      if (!conversations.some((c) => c.id === data.conversation_id)) {
-        aiApi
-          .getConversations(projectId)
-          .then((r) => setConversations(r.data?.conversations || []))
-          .catch((err) => setError(err.message || 'Unable to refresh conversations'));
-      }
+      }, (event, data) => {
+        if (event === 'start' && typeof data.conversation_id === 'string') setConversationId(data.conversation_id);
+        if (event === 'delta' && typeof data.content === 'string') {
+          setMessages((prev) => {
+            const next = [...prev];
+            const index = next.length - 1;
+            next[index] = { ...next[index], content: `${next[index].content}${data.content}` };
+            return next;
+          });
+        }
+        if (event === 'complete' && typeof data.conversation_id === 'string') {
+          setConversationId(data.conversation_id);
+          if (!conversations.some((c) => c.id === data.conversation_id)) {
+            aiApi.getConversations(projectId)
+              .then((r) => setConversations(r.data?.conversations || []))
+              .catch((err) => setError(err.message || 'Unable to refresh conversations'));
+          }
+        }
+        if (event === 'error' && typeof data.message === 'string') setError(data.message);
+      }, controller.signal);
     } catch (err: any) {
-      setError(err.message || 'AI request failed');
+      if (err.name !== 'AbortError') setError(err.message || 'AI request failed');
     } finally {
+      abortRef.current = null;
       setIsSending(false);
     }
+  };
+
+  const stopGeneration = () => abortRef.current?.abort();
+  const regenerateResponse = () => {
+    if (!lastPromptRef.current || isSending) return;
+    setInput(lastPromptRef.current);
   };
 
   const runAction = async (action: string) => {
@@ -458,9 +482,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
             <div style={{ color: m.role === 'user' ? 'var(--color-accent)' : 'var(--color-success)', fontWeight: 600, fontSize: 11 }}>
               {m.role === 'user' ? 'You' : 'Assistant'}
             </div>
-            <pre className="ai-message-content">
-              {m.content}
-            </pre>
+            {m.role === 'assistant' ? <MarkdownContent content={m.content} /> : <div className="ai-message-content">{m.content}</div>}
             {m.role === 'assistant' && (
               <button className="ai-message-copy" onClick={() => void navigator.clipboard.writeText(m.content)} aria-label="Copy assistant response">
                 <Copy size={11} /> Copy
@@ -477,6 +499,16 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
       </div>}
 
       {mode === 'assistant' && <form onSubmit={send} className="ai-composer">
+        <input
+          ref={attachmentRef}
+          type="file"
+          hidden
+          accept=".md,.txt,.json,.js,.ts,.tsx,.py,.pdf,image/*"
+          onChange={(event) => setAttachmentName(event.target.files?.[0]?.name || '')}
+        />
+        <button type="button" className="btn btn-secondary btn-sm" onClick={() => attachmentRef.current?.click()} aria-label="Attach a file">
+          <Paperclip size={12} />
+        </button>
         <textarea
           className="input"
           rows={1}
@@ -496,9 +528,17 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
           }}
           disabled={isSending}
         />
-        <Button type="submit" variant="primary" size="sm" disabled={isSending || !input.trim()} aria-label="Send message">
-          <Send size={12} />
+        <span className="ai-composer-meta" aria-live="polite">
+          {attachmentName ? `${attachmentName} · ` : ''}{input.length}/4000 · ~{Math.ceil(input.length / 4)} tokens
+        </span>
+        <Button type={isSending ? 'button' : 'submit'} variant="primary" size="sm" disabled={!isSending && !input.trim()} onClick={isSending ? stopGeneration : undefined} aria-label={isSending ? 'Stop generation' : 'Send message'}>
+          {isSending ? <Square size={12} /> : <Send size={12} />}
         </Button>
+        {!isSending && messages.some((message) => message.role === 'assistant') && (
+          <button type="button" className="btn btn-secondary btn-sm" onClick={regenerateResponse} aria-label="Regenerate last response">
+            <RefreshCw size={12} />
+          </button>
+        )}
       </form>}
     </div>
   );
