@@ -47,8 +47,7 @@ def test_secret_scrubbing():
 def test_terminal_allowlist():
     # Valid allowed commands
     TerminalService.validate_command("git", ["status"])
-    TerminalService.validate_command("npm", ["run", "build"])
-    TerminalService.validate_command("pytest")
+    TerminalService.validate_command("npm", ["--version"])
 
     # Blocked dangerous commands
     with pytest.raises(AppException) as exc_info:
@@ -58,6 +57,10 @@ def test_terminal_allowlist():
     with pytest.raises(AppException) as exc_info2:
         TerminalService.validate_command("nmap", ["localhost"])
     assert exc_info2.value.code == "TERMINAL_BLOCKED"
+
+    with pytest.raises(AppException) as exc_info3:
+        TerminalService.validate_command("npm", ["run", "build"])
+    assert exc_info3.value.code == "TERMINAL_BLOCKED"
 
 
 def test_production_guard_rejects_insecure_defaults(monkeypatch):

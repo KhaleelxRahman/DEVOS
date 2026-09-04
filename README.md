@@ -4,7 +4,7 @@
 
 [![DEVOS v1.0.0 banner](./01-docs/assets/devos-banner.svg)](./01-docs/README.md)
 
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.13%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=111827)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
@@ -98,7 +98,7 @@ npm run build
 
 ## Screenshots
 
-The public landing page includes an accessible workspace illustration. Add reviewed product screenshots to `docs/assets/` before publishing external marketing material.
+The public landing page includes an accessible workspace illustration. Add reviewed product screenshots to `01-docs/assets/` before publishing external marketing material.
 
 ## Live Demo
 
