@@ -41,6 +41,7 @@
   box-shadow: var(--shadow-glass);
   backdrop-filter: blur(18px) saturate(130%);
   z-index: 10;
+  padding-top: env(safe-area-inset-top);
 }
 
 .top-bar-brand {
@@ -229,11 +230,15 @@
     background: rgba(2, 6, 23, 0.62);
     backdrop-filter: blur(4px);
   }
-  .main-content { padding: var(--space-4); }
+  .main-content { padding: var(--space-4); padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom)); }
   .top-bar-center { min-width: 0; overflow: hidden; }
   .top-bar-center span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .top-bar-actions { display: none; }
   .command-bar { display: none; }
+  .top-bar { min-height: 60px; height: auto; }
+  .workspace-page { min-width: 0; }
+  .workspace-page > .workspace-grid { width: 100%; }
+  .artifact-preview { min-height: 260px; }
 }
 
 .command-bar {
@@ -383,4 +388,13 @@
   .workspace-grid > * {
     grid-column: auto !important;
   }
+  .workspace-grid .card { min-width: 0; }
+}
+
+@media (max-width: 480px) {
+  .main-content { padding-left: 10px; padding-right: 10px; }
+  .top-bar { padding-left: 10px; padding-right: 10px; }
+  .command-palette-backdrop { padding-top: 8vh; }
+  .command-palette { width: calc(100vw - 16px); }
+  .command-palette-item { min-height: 44px; }
 }
