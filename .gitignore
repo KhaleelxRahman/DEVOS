@@ -38,3 +38,5 @@ playwright/.cache/
 *.db-journal
 *.sqlite3
 DEVOS/
+
+.env*
