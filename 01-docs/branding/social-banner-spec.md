@@ -1,8 +1,7 @@
 # DEVOS Social and GitHub Banner Specification
 
-**Product:** DEVOS v1.0.0  
+**Product:** DEVOS v1.0.0
 **Version:** 1.0
-
 ## Purpose
 
 These specifications define consistent, legible brand compositions for repository
@@ -45,4 +44,3 @@ previews, professional profiles, and social sharing.
   do not imply that new social artwork exists until it has been designed and
   reviewed.
 - Store future approved marketing exports under `01-docs/assets/marketing/`.
-

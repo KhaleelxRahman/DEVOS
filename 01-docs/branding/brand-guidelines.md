@@ -1,10 +1,9 @@
 # DEVOS Brand Guidelines
 
-**Product:** DEVOS v1.0.0  
-**Full name:** Developer Operating System  
-**Status:** Brand identity foundation  
+**Product:** DEVOS v1.0.0
+**Full name:** Developer Operating System
+**Status:** Brand identity foundation
 **Version:** 1.0
-
 ## Purpose
 
 This document defines the identity, logo usage, composition, and accessibility rules
@@ -68,4 +67,3 @@ or combine the mark with unapproved slogans.
 - Preserve the `viewBox`; do not bake display dimensions into the SVG master.
 - Keep brand assets in `01-docs/assets/` and web exports in
   `02-frontend/public/`.
-

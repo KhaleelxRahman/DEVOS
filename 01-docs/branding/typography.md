@@ -1,8 +1,7 @@
 # DEVOS Typography
 
-**Product:** DEVOS v1.0.0  
+**Product:** DEVOS v1.0.0
 **Version:** 1.0
-
 ## Purpose
 
 This specification defines the readable, technical type hierarchy used by DEVOS
@@ -58,4 +57,3 @@ below 14 px in primary workflows.
   application.
 - Avoid adding font dependencies for a single component.
 - Do not use light or thin weights for essential information on dark surfaces.
-

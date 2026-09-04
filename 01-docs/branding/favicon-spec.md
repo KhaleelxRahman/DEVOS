@@ -1,8 +1,7 @@
 # DEVOS Favicon and App Icon Specification
 
-**Product:** DEVOS v1.0.0  
+**Product:** DEVOS v1.0.0
 **Version:** 1.0
-
 ## Purpose
 
 This document defines browser favicon, PWA, and app-icon exports derived from the
@@ -51,4 +50,3 @@ at 100% and at native browser size.
   assets until replacement artwork is approved.
 - Keep filenames stable when updating production assets.
 - Verify manifest references and HTML `<link>` elements together.
-

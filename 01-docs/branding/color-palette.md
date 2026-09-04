@@ -1,8 +1,7 @@
 # DEVOS Color Palette
 
-**Product:** DEVOS v1.0.0  
+**Product:** DEVOS v1.0.0
 **Version:** 1.0
-
 ## Purpose
 
 This palette standardizes brand, interface, status, and accessible text colors across
@@ -52,4 +51,3 @@ DEVOS. Product CSS tokens remain the implementation source of truth.
 - Do not introduce gradients for essential text or controls.
 - Dark mode is the default; light-mode brand applications must preserve the same
   semantic meaning and contrast requirements.
-

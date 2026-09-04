@@ -1,8 +1,7 @@
 # DEVOS Icon Specification
 
-**Product:** DEVOS v1.0.0  
+**Product:** DEVOS v1.0.0
 **Version:** 1.0
-
 ## Purpose
 
 This specification keeps interface icons consistent across the workspace, Git
@@ -41,4 +40,3 @@ controls, terminal, planner, and public site.
 - Avoid inline path duplication; use the shared component and token conventions.
 - Do not animate icons continuously. Use short transitions only to communicate a
   state change.
-
