@@ -53,6 +53,8 @@ export const filesApi = {
     apiClient.put<FileContent>(`/projects/${projectId}/files/${filePath}`, { content }),
   rename: (projectId: string, path: string, newName: string) =>
     apiClient.post<{ path: string }>(`/projects/${projectId}/files/rename`, { path, new_name: newName }),
+  move: (projectId: string, path: string, destinationParent: string) =>
+    apiClient.post<{ path: string }>(`/projects/${projectId}/files/move`, { path, destination_parent: destinationParent }),
   deleteEntry: (projectId: string, filePath: string) =>
     apiClient.delete(`/projects/${projectId}/files/${filePath}`),
   upload: (projectId: string, parentPath: string, files: FileList | globalThis.File[]) => {

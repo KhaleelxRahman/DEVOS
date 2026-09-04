@@ -113,6 +113,22 @@ export const WorkspacePage: React.FC = () => {
       : tab));
   };
 
+  const renameOpenPath = (oldPath: string, newPath: string) => {
+    setTabs((previous) => previous.map((tab) => {
+      if (tab.path !== oldPath && !tab.path.startsWith(`${oldPath}/`)) return tab;
+      const path = tab.path === oldPath ? newPath : `${newPath}${tab.path.slice(oldPath.length)}`;
+      return { ...tab, path, content: tab.content ? { ...tab.content, path, name: path.split('/').pop() || path } : null };
+    }));
+    if (activePath === oldPath || activePath?.startsWith(`${oldPath}/`)) {
+      setActivePath(`${newPath}${activePath.slice(oldPath.length)}`);
+    }
+  };
+
+  const deleteOpenPath = (deletedPath: string) => {
+    setTabs((previous) => previous.filter((tab) => tab.path !== deletedPath && !tab.path.startsWith(`${deletedPath}/`)));
+    if (activePath === deletedPath || activePath?.startsWith(`${deletedPath}/`)) setActivePath(null);
+  };
+
   const activeTab = tabs.find((t) => t.path === activePath);
   const activeFileForAI: { path: string; content: string; language?: string } | null =
     activeTab?.content
@@ -150,7 +166,7 @@ export const WorkspacePage: React.FC = () => {
         className="workspace-grid"
       >
         <Card title="Files" subtitle="Project Explorer" style={panelStyle}>
-          <FileExplorer projectId={activeProject.id} onSelectFile={openFile} activeFile={activePath} refreshToken={fileRefreshToken} />
+          <FileExplorer projectId={activeProject.id} onSelectFile={openFile} activeFile={activePath} refreshToken={fileRefreshToken} onPathRenamed={renameOpenPath} onPathDeleted={deleteOpenPath} />
         </Card>
 
         <Card title="Code Viewer" subtitle="View & edit" style={panelStyle}>

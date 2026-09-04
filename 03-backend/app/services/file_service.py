@@ -265,6 +265,38 @@ class FileService:
             os.remove(abs_path)
 
     @staticmethod
+    def move(project_id: str, relative_path: str, destination_parent: str) -> str:
+        source_abs = FileService.validate_safe_path(project_id, relative_path)
+        destination_dir = FileService.validate_safe_path(project_id, destination_parent)
+        project_root = os.path.abspath(ProjectService.get_project_storage_path(project_id))
+        if os.path.abspath(source_abs) == project_root:
+            raise FileAccessDeniedException("Cannot move the project root")
+        if not os.path.exists(source_abs):
+            raise FileNotFoundException()
+        if not os.path.isdir(destination_dir):
+            raise FileNotFoundException()
+        source_parent = os.path.dirname(source_abs)
+        if os.path.abspath(source_parent) == os.path.abspath(destination_dir):
+            return relative_path.replace("\\", "/")
+        if os.path.isdir(source_abs):
+            source_real = os.path.realpath(source_abs)
+            destination_real = os.path.realpath(destination_dir)
+            if os.path.commonpath((source_real, destination_real)) == source_real:
+                raise FileAccessDeniedException("Cannot move a folder into itself")
+        destination_abs = os.path.join(destination_dir, os.path.basename(source_abs))
+        destination_abs = FileService.validate_safe_path(
+            project_id,
+            os.path.relpath(destination_abs, project_root).replace("\\", "/"),
+        )
+        if os.path.exists(destination_abs):
+            raise FileAccessDeniedException(
+                "A file or folder with this name already exists"
+            )
+        os.rename(source_abs, destination_abs)
+        destination_rel = os.path.relpath(destination_abs, project_root)
+        return destination_rel.replace("\\", "/")
+
+    @staticmethod
     def save_upload(
         project_id: str, parent_rel: str, filename: str, data: bytes
     ) -> str:

@@ -89,6 +89,11 @@ class RenameRequest(BaseModel):
     new_name: str = Field(min_length=1, max_length=255)
 
 
+class MoveRequest(BaseModel):
+    path: str = Field(min_length=1, max_length=512)
+    destination_parent: str = Field(default="", max_length=512)
+
+
 @router.post("/file", response_model=ApiResponse[FileContentResponse])
 async def create_file(
     project_id: str,
@@ -176,6 +181,26 @@ async def rename_entry(
         db,
         current_user.id,
         "file_renamed",
+        project_id,
+        {"from": payload.path, "to": new_path},
+    )
+    await db.commit()
+    return ApiResponse(success=True, data={"path": new_path})
+
+
+@router.post("/move", response_model=ApiResponse[dict])
+async def move_entry(
+    project_id: str,
+    payload: MoveRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await ProjectService.get_for_user(db, project_id, current_user.id)
+    new_path = FileService.move(project_id, payload.path, payload.destination_parent)
+    await ActivityService.record(
+        db,
+        current_user.id,
+        "file_moved",
         project_id,
         {"from": payload.path, "to": new_path},
     )

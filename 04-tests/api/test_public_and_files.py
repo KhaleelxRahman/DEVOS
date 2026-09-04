@@ -149,11 +149,25 @@ async def test_file_folder_create_read_save_rename_delete(client):
     assert res.status_code == 200, res.text
     assert res.json()["data"]["path"] == "src/main.py"
 
+    res = await client.post(
+        f"/api/v1/projects/{pid}/files/folder",
+        json={"parent_path": "", "name": "lib"},
+        headers=headers,
+    )
+    assert res.status_code == 200, res.text
+    res = await client.post(
+        f"/api/v1/projects/{pid}/files/move",
+        json={"path": "src/main.py", "destination_parent": "lib"},
+        headers=headers,
+    )
+    assert res.status_code == 200, res.text
+    assert res.json()["data"]["path"] == "lib/main.py"
+
     res = await client.delete(
-        f"/api/v1/projects/{pid}/files/src/main.py", headers=headers
+        f"/api/v1/projects/{pid}/files/lib/main.py", headers=headers
     )
     assert res.status_code == 200
-    res = await client.get(f"/api/v1/projects/{pid}/files/src/main.py", headers=headers)
+    res = await client.get(f"/api/v1/projects/{pid}/files/lib/main.py", headers=headers)
     assert res.status_code == 404
 
 
