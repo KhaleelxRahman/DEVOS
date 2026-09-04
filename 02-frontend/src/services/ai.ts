@@ -1,13 +1,5 @@
-export async function getAISuggestion(code: string){
+import { apiClient } from '../api/client';
 
-  const response = await fetch("/api/v1/ai/suggest",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({code})
-  });
-
-  return response.json();
-
+export function getAISuggestion(code: string) {
+  return apiClient.post('/ai/suggest', { code });
 }

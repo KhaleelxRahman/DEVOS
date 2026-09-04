@@ -1,13 +1,5 @@
-export async function searchProjectContext(query:string){
+import { apiClient } from '../api/client';
 
-  const response=await fetch("/api/v1/context/search",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({query})
-  });
-
-  return response.json();
-
+export function searchProjectContext(query: string) {
+  return apiClient.post('/context/search', { query });
 }
