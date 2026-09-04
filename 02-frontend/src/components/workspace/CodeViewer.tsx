@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Save, X, Pencil } from 'lucide-react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Braces, Check, ChevronDown, FileCode2, FoldVertical, Redo2, Save, Search, Undo2, X } from 'lucide-react';
+import type { editor as MonacoEditor, IDisposable } from 'monaco-editor';
 import { FileContent } from '../../types/file';
 import { Spinner } from '../common';
+
+const Monaco = lazy(() => import('@monaco-editor/react'));
 
 interface OpenTab {
   path: string;
@@ -16,163 +19,186 @@ interface CodeViewerProps {
   onActivate: (path: string) => void;
   onClose: (path: string) => void;
   onSave: (path: string, content: string) => Promise<boolean>;
+  onContentChange?: (path: string, content: string) => void;
 }
 
 export type { OpenTab };
 
-export const CodeViewer: React.FC<CodeViewerProps> = ({ tabs, activePath, onActivate, onClose, onSave }) => {
-  const [editing, setEditing] = useState<string | null>(null);
-  const [draft, setDraft] = useState('');
+type EditorTheme = 'devos-glass' | 'vs-dark' | 'hc-black';
+const EDITOR_THEME_KEY = 'devos_editor_theme';
+
+const languageFromPath = (path: string, fallback?: string) => {
+  if (fallback) return fallback;
+  const extension = path.split('.').pop()?.toLowerCase();
+  const languages: Record<string, string> = {
+    ts: 'typescript', tsx: 'typescript', js: 'javascript', jsx: 'javascript',
+    py: 'python', json: 'json', css: 'css', scss: 'scss', html: 'html',
+    md: 'markdown', yaml: 'yaml', yml: 'yaml', sh: 'shell', sql: 'sql',
+  };
+  return (extension && languages[extension]) || 'plaintext';
+};
+
+export const CodeViewer: React.FC<CodeViewerProps> = ({ tabs, activePath, onActivate, onClose, onSave, onContentChange }) => {
+  const [dirtyPaths, setDirtyPaths] = useState<Set<string>>(() => new Set());
   const [saving, setSaving] = useState(false);
+  const [wordWrap, setWordWrap] = useState(false);
+  const [theme, setTheme] = useState<EditorTheme>(() => {
+    const stored = localStorage.getItem(EDITOR_THEME_KEY);
+    return stored === 'vs-dark' || stored === 'hc-black' || stored === 'devos-glass' ? stored : 'devos-glass';
+  });
+  const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
+  const changeDisposableRef = useRef<IDisposable | null>(null);
+  const saveTimerRef = useRef<number | null>(null);
+  const valueRef = useRef('');
+  const baselineRef = useRef('');
+  const active = tabs.find((tab) => tab.path === activePath) || null;
 
-  const active = tabs.find((t) => t.path === activePath) || null;
-
-  // Leaving the tab or closing it discards the in-progress edit.
   useEffect(() => {
-    setEditing(null);
-    setDraft('');
-  }, [activePath, tabs.length]);
+    if (active?.content && !dirtyPaths.has(active.path)) {
+      baselineRef.current = active.content.content;
+      valueRef.current = active.content.content;
+    }
+  }, [activePath, active?.isLoading]);
 
-  const startEdit = () => {
-    if (!active?.content) return;
-    setDraft(active.content.content);
-    setEditing(active.path);
+  useEffect(() => {
+    localStorage.setItem(EDITOR_THEME_KEY, theme);
+  }, [theme]);
+
+  useEffect(() => () => {
+    changeDisposableRef.current?.dispose();
+    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+  }, []);
+
+  const markDirty = (path: string, dirty: boolean) => {
+    setDirtyPaths((previous) => {
+      const next = new Set(previous);
+      if (dirty) next.add(path);
+      else next.delete(path);
+      return next;
+    });
   };
 
-  const saveEdit = async () => {
-    if (!editing) return;
+  const saveCurrent = async (path = activePath) => {
+    if (!path || !dirtyPaths.has(path) || saving) return;
     setSaving(true);
-    const ok = await onSave(editing, draft);
+    const ok = await onSave(path, valueRef.current);
     setSaving(false);
     if (ok) {
-      setEditing(null);
-      setDraft('');
+      baselineRef.current = valueRef.current;
+      markDirty(path, false);
     }
   };
 
-  const requestClose = (path: string) => {
-    if (editing === path && !window.confirm(`Discard unsaved changes to ${path}?`)) {
-      return;
-    }
-    onClose(path);
+  const handleMount = (editor: MonacoEditor.IStandaloneCodeEditor) => {
+    editorRef.current = editor;
+    editor.addAction({
+      id: 'devos-save-file',
+      label: 'DEVOS: Save File',
+      keybindings: [2048 | 49],
+      run: () => { void saveCurrent(); },
+    });
+    editor.addAction({
+      id: 'devos-go-to-line',
+      label: 'DEVOS: Go to Line',
+      keybindings: [2048 | 71],
+      run: () => editor.trigger('keyboard', 'editor.action.gotoLine', null),
+    });
   };
+
+  const handleChange = (value: string | undefined) => {
+    if (!active || value === undefined) return;
+    valueRef.current = value;
+    markDirty(active.path, value !== baselineRef.current);
+    onContentChange?.(active.path, value);
+    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = window.setTimeout(() => {
+      if (value !== baselineRef.current) void saveCurrent(active.path);
+    }, 1200);
+  };
+
+  const trigger = (action: string) => editorRef.current?.trigger('toolbar', action, null);
 
   if (tabs.length === 0) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-text-muted)', gap: 8 }}>
-        <span style={{ fontSize: 13 }}>Select a file from the explorer to view its contents</span>
-      </div>
-    );
+    return <div className="editor-empty"><FileCode2 size={22} /><span>Select a file from the explorer to open it in the editor</span></div>;
   }
 
-  const isEditingActive = Boolean(active && editing === active.path);
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      <div style={{ display: 'flex', gap: 2, overflowX: 'auto', borderBottom: '1px solid var(--color-border)', marginBottom: 8 }} role="tablist">
+    <div className="code-viewer">
+      <div className="editor-tabs" role="tablist" aria-label="Open files">
         {tabs.map((tab) => (
-          <div
-            key={tab.path}
-            role="tab"
-            aria-selected={tab.path === activePath}
-            className={`editor-tab ${tab.path === activePath ? 'active' : ''}`}
-            tabIndex={0}
-            onClick={() => onActivate(tab.path)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                onActivate(tab.path);
-              }
-            }}
-          >
-            <span style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {editing === tab.path && <span aria-label="Unsaved changes">●</span>}
-              {tab.path.split('/').pop()}
-            </span>
-            <button
-              className="editor-tab-close"
-              aria-label={`Close ${tab.path}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                requestClose(tab.path);
-              }}
-            >
-              <X size={12} />
-            </button>
+          <div key={tab.path} role="tab" aria-selected={tab.path === activePath} className={`editor-tab ${tab.path === activePath ? 'active' : ''}`} tabIndex={0} onClick={() => onActivate(tab.path)} onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onActivate(tab.path); }
+          }}>
+            {dirtyPaths.has(tab.path) && <span className="editor-dirty-dot" aria-label="Unsaved changes">●</span>}
+            <span>{tab.path.split('/').pop()}</span>
+            <button className="editor-tab-close" aria-label={`Close ${tab.path}`} onClick={(event) => { event.stopPropagation(); onClose(tab.path); }}><X size={12} /></button>
           </div>
         ))}
       </div>
-
-      {active?.isLoading && (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
-          <Spinner size={20} />
-        </div>
-      )}
-      {active?.error && <p style={{ color: 'var(--color-error)', fontSize: 12 }} role="alert">{active.error}</p>}
+      {active?.isLoading && <div className="editor-loading"><Spinner size={20} /></div>}
+      {active?.error && <p className="editor-error" role="alert">{active.error}</p>}
       {active?.content && (
         <>
-          <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="editor-breadcrumbs">
+          <div className="editor-toolbar">
+            <span className="editor-breadcrumbs" title={active.content.path}>
               {active.content.path.split('/').map((segment, index, parts) => <React.Fragment key={`${segment}-${index}`}><span>{segment}</span>{index < parts.length - 1 && <b>/</b>}</React.Fragment>)}
-              <em>{active.content.language || 'plaintext'} · {active.content.size} bytes</em>
+              <em>{languageFromPath(active.content.path, active.content.language)} · {active.content.size} bytes</em>
             </span>
-            <span style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
-              {isEditingActive ? (
-                <>
-                  <button className="btn btn-primary btn-sm" onClick={saveEdit} disabled={saving} aria-label="Save file">
-                    <Save size={12} /> {saving ? 'Saving…' : 'Save'}
-                  </button>
-                  <button className="btn btn-secondary btn-sm" onClick={() => { setEditing(null); setDraft(''); }} disabled={saving}>
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <button className="btn btn-secondary btn-sm" onClick={startEdit} aria-label={`Edit ${active.content.path}`}>
-                  <Pencil size={12} /> Edit
-                </button>
-              )}
-            </span>
+            <div className="editor-actions">
+              <button type="button" className="editor-action" onClick={() => trigger('actions.find')} aria-label="Find in file" title="Find (Ctrl+F)"><Search size={13} /></button>
+              <button type="button" className="editor-action" onClick={() => trigger('editor.action.startFindReplaceAction')} aria-label="Find and replace" title="Replace (Ctrl+H)"><Braces size={13} /></button>
+              <button type="button" className="editor-action" onClick={() => trigger('editor.action.gotoLine')} aria-label="Go to line" title="Go to line (Ctrl+G)">#</button>
+              <button type="button" className={`editor-action ${wordWrap ? 'selected' : ''}`} onClick={() => setWordWrap((value) => !value)} aria-pressed={wordWrap} aria-label="Toggle word wrap" title="Toggle word wrap"><FoldVertical size={13} /></button>
+              <button type="button" className="editor-action" onClick={() => trigger('undo')} aria-label="Undo" title="Undo"><Undo2 size={13} /></button>
+              <button type="button" className="editor-action" onClick={() => trigger('redo')} aria-label="Redo" title="Redo"><Redo2 size={13} /></button>
+              <label className="editor-theme-select" title="Editor theme"><ChevronDown size={11} /><select value={theme} onChange={(event) => setTheme(event.target.value as EditorTheme)} aria-label="Editor theme"><option value="devos-glass">DEVOS Glass</option><option value="vs-dark">VS Code Dark</option><option value="hc-black">High Contrast</option></select></label>
+              <button type="button" className="btn btn-primary btn-sm" onClick={() => void saveCurrent()} disabled={saving || !dirtyPaths.has(active.path)} aria-label="Save file"><Save size={12} /> {saving ? 'Saving…' : 'Save'}</button>
+            </div>
           </div>
-          {isEditingActive ? (
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              aria-label={`Editing ${active.content.path}`}
-              spellCheck={false}
-              style={{
-                flex: 1,
-                minHeight: 0,
-                margin: 0,
-                padding: 12,
-                background: 'var(--color-background)',
-                border: '1px solid var(--color-border-strong)',
-                borderRadius: 6,
-                fontSize: 12,
-                lineHeight: 1.5,
-                color: 'var(--color-text-primary)',
-                fontFamily: 'var(--font-mono, monospace)',
-                resize: 'none',
-              }}
-            />
-          ) : (
-            <pre
-              tabIndex={0}
-              style={{
-                flex: 1,
-                overflow: 'auto',
-                minHeight: 0,
-                margin: 0,
-                padding: 12,
-                background: 'var(--color-background)',
-                borderRadius: 6,
-                fontSize: 12,
-                lineHeight: 1.5,
-                color: 'var(--color-text-secondary)',
-              }}
-            >
-              <code>{active.content.content}</code>
-            </pre>
-          )}
+          <div className="editor-monaco" aria-label={`Editing ${active.content.path}`}>
+            <Suspense fallback={<div className="editor-loading"><Spinner size={20} /></div>}>
+              <Monaco
+                height="100%"
+                theme={theme}
+                language={languageFromPath(active.content.path, active.content.language)}
+                value={active.content.content}
+                beforeMount={(monaco) => {
+                  monaco.editor.defineTheme('devos-glass', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [],
+                    colors: {
+                      'editor.background': '#0b0f19',
+                      'editor.foreground': '#dbeafe',
+                      'editorLineNumber.foreground': '#52627a',
+                      'editorLineNumber.activeForeground': '#60a5fa',
+                      'editor.selectionBackground': '#1d4ed866',
+                      'editorCursor.foreground': '#60a5fa',
+                    },
+                  });
+                }}
+                onMount={handleMount}
+                onChange={handleChange}
+                options={{
+                  automaticLayout: true,
+                  minimap: { enabled: true, scale: 1 },
+                  folding: true,
+                  bracketPairColorization: { enabled: true },
+                  autoIndent: 'full',
+                  formatOnPaste: true,
+                  formatOnType: true,
+                  wordWrap: wordWrap ? 'on' : 'off',
+                  padding: { top: 8, bottom: 8 },
+                  fontSize: 12,
+                  fontFamily: 'var(--font-mono)',
+                  scrollBeyondLastLine: false,
+                  readOnly: false,
+                  tabSize: 2,
+                }}
+              />
+            </Suspense>
+          </div>
+          <div className="editor-statusbar"><span><Check size={11} /> Auto-save enabled</span><span>{dirtyPaths.has(active.path) ? 'Unsaved changes' : 'Saved'}</span></div>
         </>
       )}
     </div>

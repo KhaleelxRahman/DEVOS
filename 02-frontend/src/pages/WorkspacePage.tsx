@@ -107,6 +107,12 @@ export const WorkspacePage: React.FC = () => {
     }
   };
 
+  const updateOpenFile = (path: string, content: string) => {
+    setTabs((prev) => prev.map((tab) => tab.path === path && tab.content
+      ? { ...tab, content: { ...tab.content, content, size: new Blob([content]).size } }
+      : tab));
+  };
+
   const activeTab = tabs.find((t) => t.path === activePath);
   const activeFileForAI: { path: string; content: string; language?: string } | null =
     activeTab?.content
@@ -148,7 +154,7 @@ export const WorkspacePage: React.FC = () => {
         </Card>
 
         <Card title="Code Viewer" subtitle="View & edit" style={panelStyle}>
-          <CodeViewer tabs={tabs} activePath={activePath} onActivate={setActivePath} onClose={closeTab} onSave={saveFile} />
+          <CodeViewer tabs={tabs} activePath={activePath} onActivate={setActivePath} onClose={closeTab} onSave={saveFile} onContentChange={updateOpenFile} />
         </Card>
 
         <Card id="ai-command-center" title="AI Assistant" subtitle="Context Engine" style={panelStyle}>
