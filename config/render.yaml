@@ -13,4 +13,12 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: BACKEND_CORS_ORIGINS
+        value: '["https://devos-ebon.vercel.app","https://devos-khaleelxrahmans-projects.vercel.app"]'
+      - key: FRONTEND_APP_URL
+        value: https://devos-ebon.vercel.app
+      - key: GITHUB_REDIRECT_URI
+        value: https://devos-backend-f3ub.onrender.com/api/v1/github/callback
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
         sync: false
