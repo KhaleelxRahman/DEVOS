@@ -18,7 +18,7 @@
 | --- | --- |
 | Backend, API, Git, workspace | Ready |
 | Frontend build and responsive UI | Ready |
-| Automated validation | 30 Playwright + 50 backend/unit tests |
+| Automated validation | 30 Playwright + 53 backend tests |
 | GitHub OAuth and repository dashboard | Implemented |
 | Production deployment | Human-owned configuration required |
 
@@ -102,13 +102,17 @@ The public landing page includes an accessible workspace illustration. Add revie
 
 ## Live Demo
 
-No production demo URL has been verified yet. Configure the deployment first,
-then replace this note with the owned public URL.
+- **Frontend:** [devos-ebon.vercel.app](https://devos-ebon.vercel.app)
+- **Backend health:** [devos-backend-f3ub.onrender.com/api/v1/health](https://devos-backend-f3ub.onrender.com/api/v1/health)
+
+The deployed frontend and backend health endpoint were verified on September 4,
+2026. Deployment configuration remains environment-owned and must not be
+replaced with local development defaults.
 
 ## Release Status
 
-**DEVOS v1.0.0 Release Candidate**. Production deployment and public demo URL
-remain human-owned configuration steps.
+**DEVOS v1.0.0 Release Candidate**. Production credentials, provider keys, and
+deployment configuration remain human-owned environment settings.
 
 ## Tech Stack
 
