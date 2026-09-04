@@ -19,6 +19,10 @@ os.environ.setdefault(
     "PROJECTS_STORAGE_PATH",
     os.path.join(os.path.dirname(__file__), "test_projects_storage"),
 )
+os.environ.setdefault(
+    "BACKEND_CORS_ORIGINS",
+    '["https://devos-ebon.vercel.app"]',
+)
 
 from app.main import app  # noqa: E402
 from app.db.base import Base  # noqa: E402
@@ -42,6 +46,21 @@ REGISTER_PAYLOAD = {
     "password": "supersecret1",
 }
 LOGIN_PAYLOAD = {"email": "dev@example.com", "password": "supersecret1"}
+
+
+@pytest.mark.asyncio
+async def test_login_preflight_allows_configured_origin(client):
+    res = await client.options(
+        "/api/v1/auth/login",
+        headers={
+            "Origin": "https://devos-ebon.vercel.app",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert res.status_code == 200
+    assert res.headers["access-control-allow-origin"] == "https://devos-ebon.vercel.app"
+    assert res.headers["access-control-allow-credentials"] == "true"
 
 
 @pytest.mark.asyncio
