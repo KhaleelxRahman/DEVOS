@@ -58,6 +58,17 @@ app = FastAPI(
     redoc_url=f"{settings.API_V1_STR}/redoc",
 )
 
+# Apply CORS before registering routes so browser preflight requests are handled
+# consistently for every API endpoint, including authentication.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
+
 # Rate limiting setup
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
@@ -65,17 +76,6 @@ app.add_exception_handler(
     RateLimitExceeded,
     cast(ExceptionHandlerT, _rate_limit_exceeded_handler),
 )
-
-# CORS Configuration
-if settings.BACKEND_CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.BACKEND_CORS_ORIGINS,
-        allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type"],
-    )
-
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
