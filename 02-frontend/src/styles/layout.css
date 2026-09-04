@@ -266,6 +266,9 @@
 .command-palette-item:hover, .command-palette-item:focus-visible { background: var(--color-accent-subtle); color: var(--color-text-primary); outline: 0; }
 .command-palette-item.selected { background: var(--color-accent-subtle); color: var(--color-text-primary); }
 .command-palette-item span { flex: 1; }.command-palette-item small { color: var(--color-text-muted); }.command-palette-empty { padding: var(--space-5); color: var(--color-text-muted); text-align: center; }
+.command-palette-recent { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--color-border-subtle); color: var(--color-text-disabled); font-size: 10px; }
+.command-palette-recent span { color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+.command-palette-recent small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .command-palette footer { display: flex; justify-content: space-between; padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-border); color: var(--color-text-muted); font-size: 11px; }
 
 .ai-composer {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Command, FolderPlus, LayoutDashboard, Settings, Sparkles, Terminal, Github, ListTodo, MessageSquare, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,11 +19,34 @@ const commands = [
   { label: 'Open settings', hint: 'Settings', icon: Settings, path: '/app/settings' },
 ];
 
+type Command = (typeof commands)[number];
+
+const fuzzyScore = (command: Command, query: string) => {
+  if (!query.trim()) return 0;
+  const haystack = `${command.label} ${command.hint}`.toLowerCase();
+  const needle = query.toLowerCase().replace(/\s+/g, '');
+  let cursor = 0;
+  let score = 0;
+  for (const character of needle) {
+    const match = haystack.indexOf(character, cursor);
+    if (match === -1) return -1;
+    score += match === cursor ? 3 : 1;
+    cursor = match + 1;
+  }
+  if (command.label.toLowerCase().startsWith(query.toLowerCase())) score += 10;
+  return score;
+};
+
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
-  const filtered = commands.filter((command) => command.label.toLowerCase().includes(query.toLowerCase()));
+  const [recent, setRecent] = useState<string[]>([]);
+  const filtered = useMemo(() => commands
+    .map((command) => ({ command, score: fuzzyScore(command, query) }))
+    .filter(({ score }) => !query.trim() || score >= 0)
+    .sort((left, right) => right.score - left.score)
+    .map(({ command }) => command), [query]);
 
   useEffect(() => {
     if (!open) return;
@@ -41,6 +64,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   }, [query]);
 
   if (!open) return null;
+
+  const execute = (command: Command) => {
+    setRecent((previous) => [command.label, ...previous.filter((label) => label !== command.label)].slice(0, 5));
+    navigate(command.path);
+    onClose();
+  };
 
   return (
     <div className="command-palette-backdrop" role="presentation" onMouseDown={onClose}>
@@ -61,8 +90,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
                 setActiveIndex((index) => filtered.length ? (index - 1 + filtered.length) % filtered.length : 0);
               }
               if (event.key === 'Enter' && filtered[activeIndex]) {
-                navigate(filtered[activeIndex].path);
-                onClose();
+                execute(filtered[activeIndex]);
               }
             }}
             placeholder="Search commands..."
@@ -71,13 +99,20 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
           <kbd>ESC</kbd>
         </div>
         <div className="command-palette-list">
-          {filtered.map(({ label, hint, icon: Icon, path }, index) => (
-            <button key={label} className={`command-palette-item ${index === activeIndex ? 'selected' : ''}`} onClick={() => { navigate(path); onClose(); }}>
+          {filtered.map(({ label, hint, icon: Icon }, index) => (
+            <button key={label} className={`command-palette-item ${index === activeIndex ? 'selected' : ''}`} onClick={() => {
+              const command = commands.find((item) => item.label === label);
+              if (command) execute(command);
+            }}>
               <Icon size={16} />
               <span>{label}</span>
               <small>{hint}</small>
             </button>
           ))}
+          {!query && recent.length > 0 && <div className="command-palette-recent" aria-label="Recent commands">
+            <span>Recent</span>
+            {recent.map((label) => <small key={label}>{label}</small>)}
+          </div>}
           {!filtered.length && <p className="command-palette-empty">No commands found.</p>}
         </div>
         <footer><span>Navigate with your keyboard</span><span><kbd>CTRL</kbd> <kbd>K</kbd> to toggle</span></footer>
