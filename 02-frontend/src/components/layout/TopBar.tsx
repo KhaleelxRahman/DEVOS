@@ -1,6 +1,7 @@
-import React from 'react';
-import { Terminal, Bot, GitBranch, FolderGit2, Menu, X, Search } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Terminal, Bot, GitBranch, FolderGit2, Menu, X, Search, Settings, Wifi, WifiOff } from 'lucide-react';
 import { Badge } from '../common/Badge';
+import { Link } from 'react-router-dom';
 
 export interface TopBarProps {
   activeProjectName?: string;
@@ -15,6 +16,18 @@ export const TopBar: React.FC<TopBarProps> = ({
   menuOpen = false,
   onMenuToggle,
 }) => {
+  const [online, setOnline] = useState(() => navigator.onLine);
+
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    return () => {
+      window.removeEventListener('online', update);
+      window.removeEventListener('offline', update);
+    };
+  }, []);
+
   return (
     <header className="top-bar">
       <div className="top-bar-brand">
@@ -39,6 +52,9 @@ export const TopBar: React.FC<TopBarProps> = ({
             <Badge variant="default" icon={<GitBranch size={12} />}>
               {gitBranch}
             </Badge>
+            <Badge variant="default" icon={online ? <Wifi size={12} /> : <WifiOff size={12} />}>
+              {online ? 'Online' : 'Offline'}
+            </Badge>
           </div>
         ) : (
           <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>No active project</span>
@@ -49,6 +65,9 @@ export const TopBar: React.FC<TopBarProps> = ({
         <Badge variant="accent" icon={<Bot size={12} />}>
           AI Ready
         </Badge>
+        <Link className="top-bar-icon-action" to="/app/settings" aria-label="Open settings" title="Settings">
+          <Settings size={15} />
+        </Link>
       </div>
     </header>
   );

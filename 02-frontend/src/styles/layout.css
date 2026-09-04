@@ -86,6 +86,8 @@
   align-items: center;
   gap: var(--space-2);
 }
+.top-bar-icon-action { display: inline-grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text-secondary); background: rgba(255,255,255,.02); transition: transform var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast); }
+.top-bar-icon-action:hover, .top-bar-icon-action:focus-visible { color: var(--color-text-primary); border-color: var(--color-border-strong); transform: translateY(-1px); outline: none; }
 
 .app-body {
   display: flex;
