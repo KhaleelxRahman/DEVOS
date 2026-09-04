@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Ban, Clipboard, Eraser, Play, Plus, TerminalSquare, X } from 'lucide-react';
+import { Ban, CheckCircle2, Clipboard, Eraser, History, Play, Plus, TerminalSquare, X } from 'lucide-react';
 import { terminalApi } from '../../api';
 
 interface TerminalPanelProps {
@@ -24,6 +24,8 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
   const [activeTabId, setActiveTabId] = useState(1);
   const [input, setInput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeTab = tabs.find((tab) => tab.id === activeTabId) || tabs[0];
   const entries = activeTab.entries;
@@ -45,6 +47,8 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
 
     const [command, ...args] = trimmed.split(/\s+/);
     setInput('');
+    setHistory((previous) => [...previous.filter((item) => item !== trimmed), trimmed].slice(-50));
+    setHistoryIndex(-1);
     setIsRunning(true);
     try {
       const res = await terminalApi.execute(projectId, { command, args });
@@ -63,12 +67,58 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
     }
   };
 
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (!history.length) return;
+      const nextIndex = event.key === 'ArrowUp'
+        ? Math.min(historyIndex + 1, history.length - 1)
+        : Math.max(historyIndex - 1, -1);
+      setHistoryIndex(nextIndex);
+      setInput(nextIndex === -1 ? '' : history[history.length - 1 - nextIndex]);
+      return;
+    }
+    if (event.key === 'l' && event.ctrlKey) {
+      event.preventDefault();
+      updateEntries([]);
+    }
+    if (event.key === 'c' && event.ctrlKey && event.shiftKey) {
+      event.preventDefault();
+      void navigator.clipboard.writeText(entries.map((entry) => `$ ${entry.input}\n${entry.stdout || entry.stderr || entry.error || ''}`).join('\n'));
+    }
+  };
+
+  const copyOutput = () => {
+    void navigator.clipboard.writeText(entries.map((entry) => `$ ${entry.input}\n${entry.stdout || entry.stderr || entry.error || ''}`).join('\n'));
+  };
+
   return (
     <div className="terminal-panel">
-      <div className="terminal-tabs">
-        {tabs.map((tab) => <button key={tab.id} className={`terminal-tab ${tab.id === activeTabId ? 'active' : ''}`} onClick={() => setActiveTabId(tab.id)}><TerminalSquare size={12} />{tab.label}{tabs.length > 1 && <X size={11} onClick={(event: React.MouseEvent<SVGSVGElement>) => { event.stopPropagation(); setTabs((previous) => previous.filter((item) => item.id !== tab.id)); if (tab.id === activeTabId) setActiveTabId(tabs.find((item) => item.id !== tab.id)?.id || 1); }} />}</button>)}
+      <div className="terminal-tabs" role="tablist" aria-label="Terminal sessions">
+        {tabs.map((tab) => <button key={tab.id} role="tab" aria-selected={tab.id === activeTabId} className={`terminal-tab ${tab.id === activeTabId ? 'active' : ''}`} onClick={() => setActiveTabId(tab.id)}>
+          <TerminalSquare size={12} />{tab.label}
+          {tabs.length > 1 && <span
+            role="button"
+            tabIndex={0}
+            className="terminal-tab-close"
+            aria-label={`Close ${tab.label}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              setTabs((previous) => previous.filter((item) => item.id !== tab.id));
+              if (tab.id === activeTabId) setActiveTabId(tabs.find((item) => item.id !== tab.id)?.id || 1);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                event.stopPropagation();
+                setTabs((previous) => previous.filter((item) => item.id !== tab.id));
+                if (tab.id === activeTabId) setActiveTabId(tabs.find((item) => item.id !== tab.id)?.id || 1);
+              }
+            }}
+          ><X size={11} /></span>}
+        </button>)}
         <button className="terminal-tab-add" aria-label="New terminal" onClick={() => { const id = Math.max(...tabs.map((tab) => tab.id)) + 1; setTabs((previous) => [...previous, { id, label: `Terminal ${id}`, entries: [] }]); setActiveTabId(id); }}><Plus size={13} /></button>
-        <button className="terminal-copy" aria-label="Copy terminal output" onClick={() => void navigator.clipboard.writeText(entries.map((entry) => `$ ${entry.input}\n${entry.stdout || entry.stderr || entry.error || ''}`).join('\n'))}><Clipboard size={12} /> Copy</button>
+        <button className="terminal-copy" aria-label="Copy terminal output" onClick={copyOutput}><Clipboard size={12} /> Copy</button>
       </div>
       <div
         ref={scrollRef}
@@ -100,12 +150,11 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
                 <Ban size={12} /> {entry.error}
               </div>
             )}
-            {entry.exitCode !== null && entry.exitCode !== 0 && (
-              <div style={{ color: 'var(--color-error)' }}>exit code: {entry.exitCode}</div>
-            )}
+            {entry.exitCode === 0 && <div className="terminal-entry-status success"><CheckCircle2 size={12} /> completed</div>}
+            {entry.exitCode !== null && entry.exitCode !== 0 && <div className="terminal-entry-status failure"><Ban size={12} /> exit code: {entry.exitCode}</div>}
           </div>
         ))}
-        {isRunning && <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>Running...</p>}
+        {isRunning && <p className="terminal-running"><span className="terminal-running-dot" />Running command…</p>}
       </div>
 
       <form onSubmit={run} style={{ display: 'flex', gap: 6 }}>
@@ -116,9 +165,11 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
           placeholder="git status"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleInputKeyDown}
           aria-label="Terminal command"
           disabled={isRunning}
         />
+        {history.length > 0 && <span className="terminal-history-hint" title="Use arrow keys to browse command history"><History size={12} /> {history.length}</span>}
         <button type="submit" className="btn btn-primary btn-sm" disabled={isRunning || !input.trim()} aria-label="Run command">
           <Play size={12} />
         </button>
