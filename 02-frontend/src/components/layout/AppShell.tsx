@@ -8,6 +8,7 @@ import { CommandPalette } from './CommandPalette';
 export const AppShell: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('devos_sidebar_collapsed') === 'true');
   const { activeProject } = useProject();
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
@@ -24,6 +25,9 @@ export const AppShell: React.FC = () => {
       window.removeEventListener('keydown', closeOnEscape);
     };
   }, [menuOpen]);
+  useEffect(() => {
+    localStorage.setItem('devos_sidebar_collapsed', String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
   return (
     <div className="app-shell">
       <TopBar
@@ -33,7 +37,7 @@ export const AppShell: React.FC = () => {
         onMenuToggle={() => setMenuOpen((open) => !open)}
       />
       <div className="app-body">
-        <Sidebar onNavigate={() => setMenuOpen(false)} />
+        <Sidebar onNavigate={() => setMenuOpen(false)} collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((collapsed) => !collapsed)} />
         {menuOpen && <button className="mobile-nav-backdrop" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
         <main className="main-content">
           <Outlet />

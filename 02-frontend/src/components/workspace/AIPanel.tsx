@@ -471,15 +471,24 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
         {error && <p style={{ color: 'var(--color-error)' }} role="alert">{error}</p>}
       </div>}
 
-      {mode === 'assistant' && <form onSubmit={send} style={{ display: 'flex', gap: 6 }}>
-        <input
-          type="text"
+      {mode === 'assistant' && <form onSubmit={send} className="ai-composer">
+        <textarea
           className="input"
-          style={{ flex: 1, fontSize: 12, padding: '6px 10px' }}
+          rows={1}
           placeholder="Ask the assistant..."
           value={input}
           aria-label="Message the AI assistant"
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            e.currentTarget.style.height = 'auto';
+            e.currentTarget.style.height = `${Math.min(e.currentTarget.scrollHeight, 120)}px`;
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              e.currentTarget.form?.requestSubmit();
+            }
+          }}
           disabled={isSending}
         />
         <Button type="submit" variant="primary" size="sm" disabled={isSending || !input.trim()} aria-label="Send message">
