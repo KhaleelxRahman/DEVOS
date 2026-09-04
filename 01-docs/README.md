@@ -24,6 +24,12 @@
 
 - [Troubleshooting](./help/TROUBLESHOOTING.md)
 
+## Legal and governance
+
+- [Copyright and legal notice](../COPYRIGHT.md)
+- [Third-party notices](../NOTICE)
+- [Source header templates](./legal/source-header-templates.md)
+
 ## Brand system
 
 - [Brand guidelines](./branding/brand-guidelines.md)

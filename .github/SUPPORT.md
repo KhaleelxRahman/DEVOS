@@ -1,8 +1,8 @@
 # Support
 
-- Read the [documentation index](../docs/README.md).
+- Read the [documentation index](../01-docs/README.md).
 
-- Check [troubleshooting](../docs/help/TROUBLESHOOTING.md).
+- Check [troubleshooting](../01-docs/help/TROUBLESHOOTING.md).
 
 - Search existing issues before opening a new one.
 

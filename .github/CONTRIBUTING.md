@@ -12,4 +12,4 @@
 
 5. Describe security implications and verification evidence.
 
-See the [documentation index](../docs/README.md).
+See the [documentation index](../01-docs/README.md).
