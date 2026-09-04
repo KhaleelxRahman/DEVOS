@@ -41,7 +41,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
-  const [recent, setRecent] = useState<string[]>([]);
+  const [recent, setRecent] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('devos_recent_commands') || '[]'); }
+    catch { return []; }
+  });
   const filtered = useMemo(() => commands
     .map((command) => ({ command, score: fuzzyScore(command, query) }))
     .filter(({ score }) => !query.trim() || score >= 0)
@@ -66,9 +69,24 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   if (!open) return null;
 
   const execute = (command: Command) => {
-    setRecent((previous) => [command.label, ...previous.filter((label) => label !== command.label)].slice(0, 5));
+    setRecent((previous) => {
+      const next = [command.label, ...previous.filter((label) => label !== command.label)].slice(0, 8);
+      localStorage.setItem('devos_recent_commands', JSON.stringify(next));
+      return next;
+    });
     navigate(command.path);
     onClose();
+  };
+  const highlight = (label: string) => {
+    if (!query.trim()) return label;
+    const needle = query.toLowerCase().replace(/\s+/g, '');
+    let cursor = 0;
+    return label.split('').map((character, index) => {
+      const match = needle.indexOf(character.toLowerCase(), cursor);
+      if (match === -1) return <React.Fragment key={index}>{character}</React.Fragment>;
+      cursor = match + 1;
+      return <mark key={index}>{character}</mark>;
+    });
   };
 
   return (
@@ -89,6 +107,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
                 event.preventDefault();
                 setActiveIndex((index) => filtered.length ? (index - 1 + filtered.length) % filtered.length : 0);
               }
+              if (event.key === 'Home') { event.preventDefault(); setActiveIndex(0); }
+              if (event.key === 'End') { event.preventDefault(); setActiveIndex(Math.max(filtered.length - 1, 0)); }
+              if (event.key === 'Tab' && filtered.length) { event.preventDefault(); setActiveIndex((index) => (index + 1) % filtered.length); }
               if (event.key === 'Enter' && filtered[activeIndex]) {
                 execute(filtered[activeIndex]);
               }
@@ -105,7 +126,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
               if (command) execute(command);
             }}>
               <Icon size={16} />
-              <span>{label}</span>
+              <span>{highlight(label)}</span>
               <small>{hint}</small>
             </button>
           ))}
