@@ -1,1 +1,35 @@
-{"version":"2.0.0","tasks":[]}
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Frontend: lint",
+      "type": "shell",
+      "command": "npm run lint --prefix 02-frontend",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "Frontend: type-check",
+      "type": "shell",
+      "command": "npm run type-check --prefix 02-frontend",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "Frontend: build",
+      "type": "shell",
+      "command": "npm run build --prefix 02-frontend",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "Frontend: Playwright",
+      "type": "shell",
+      "command": "npm run test:e2e --prefix 02-frontend",
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: API tests",
+      "type": "shell",
+      "command": "python -m pytest 04-tests/api",
+      "problemMatcher": []
+    }
+  ]
+}

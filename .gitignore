@@ -21,6 +21,7 @@ htmlcov/
 *.log
 .vercel
 .env*
+.env.generated
 03-backend/data/
 05-qa-agent/test-results/
 05-qa-agent/screenshots/

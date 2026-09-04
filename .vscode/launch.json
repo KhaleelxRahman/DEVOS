@@ -1,1 +1,34 @@
-{"version":"0.2.0","configurations":[]}
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "DEVOS API",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "cwd": "${workspaceFolder}/03-backend",
+      "args": [
+        "app.main:app",
+        "--reload",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000"
+      ],
+      "envFile": "${workspaceFolder}/03-backend/.env"
+    },
+    {
+      "name": "DEVOS Frontend",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "02-frontend"
+      ],
+      "console": "integratedTerminal"
+    }
+  ]
+}
