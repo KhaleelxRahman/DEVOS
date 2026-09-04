@@ -24,6 +24,15 @@
 
 - [Troubleshooting](./help/TROUBLESHOOTING.md)
 
+## Brand system
+
+- [Brand guidelines](./branding/brand-guidelines.md)
+- [Color palette](./branding/color-palette.md)
+- [Typography](./branding/typography.md)
+- [Icon specification](./branding/icon-specification.md)
+- [Favicon and app icon specification](./branding/favicon-spec.md)
+- [Social banner specification](./branding/social-banner-spec.md)
+
 ## Archived specifications
 
 The following planning documents are retained for historical reference and are
