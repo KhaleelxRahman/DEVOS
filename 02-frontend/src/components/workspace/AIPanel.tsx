@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Bot, Copy, Plus, Send, Check, Pencil, RefreshCw, ChevronDown, ChevronUp, X, Square, Paperclip } from 'lucide-react';
+import { Bot, Copy, Plus, Send, Check, Pencil, RefreshCw, ChevronDown, ChevronUp, X, Square, Paperclip, Pin, Trash2 } from 'lucide-react';
 import { aiApi, filesApi, gitApi, projectsApi, testingApi } from '../../api';
 import { AIMessage, Conversation, PlannerIntent, PlannerRequirementKey } from '../../types/ai';
 import { Spinner, Button, MarkdownContent } from '../common';
@@ -65,6 +65,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [input, setInput] = useState('');
   const [attachmentName, setAttachmentName] = useState('');
+  const [conversationSearch, setConversationSearch] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
@@ -118,6 +119,30 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
     setConversationId(null);
     setMessages([]);
     setError('');
+  };
+
+  const refreshConversations = async (query = conversationSearch) => {
+    const response = await aiApi.getConversations(projectId, query);
+    setConversations(response.data?.conversations || []);
+  };
+
+  const renameConversation = async (conversation: Conversation) => {
+    const title = window.prompt('Conversation name', conversation.title);
+    if (!title || !title.trim()) return;
+    await aiApi.updateConversation(projectId, conversation.id, { title: title.trim() });
+    await refreshConversations();
+  };
+
+  const togglePinConversation = async (conversation: Conversation) => {
+    await aiApi.updateConversation(projectId, conversation.id, { is_pinned: !conversation.is_pinned });
+    await refreshConversations();
+  };
+
+  const removeConversation = async (conversation: Conversation) => {
+    if (!window.confirm(`Delete "${conversation.title}"?`)) return;
+    await aiApi.deleteConversation(projectId, conversation.id);
+    if (conversationId === conversation.id) startNew();
+    await refreshConversations();
   };
 
   const send = async (e: React.FormEvent) => {
@@ -437,19 +462,25 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
         </div>
       )}
 
-      {mode === 'assistant' && conversations.length > 0 && (
-        <select
-          className="input"
-          style={{ fontSize: 12, padding: '4px 8px', marginBottom: 6 }}
-          value={conversationId || ''}
-          aria-label="Conversation history"
-          onChange={(e) => (e.target.value ? loadConversation(e.target.value) : startNew())}
-        >
-          <option value="">New conversation</option>
-          {conversations.map((c) => (
-            <option key={c.id} value={c.id}>{c.title}</option>
+      {mode === 'assistant' && (
+        <div className="conversation-history" aria-label="Conversation history">
+          <div className="conversation-history-search">
+            <input className="input" value={conversationSearch} onChange={(event) => {
+              setConversationSearch(event.target.value);
+              void refreshConversations(event.target.value);
+            }} placeholder="Search conversations..." aria-label="Search conversations" />
+            <button type="button" className="btn btn-secondary btn-sm" onClick={startNew} aria-label="New conversation"><Plus size={12} /></button>
+          </div>
+          {conversations.map((conversation) => (
+            <div key={conversation.id} className={`conversation-history-item ${conversationId === conversation.id ? 'active' : ''}`}>
+              <button type="button" onClick={() => loadConversation(conversation.id)}>{conversation.is_pinned ? <Pin size={11} /> : null}<span>{conversation.title}</span></button>
+              <small>{conversation.updated_at || conversation.created_at ? new Date(conversation.updated_at || conversation.created_at).toLocaleDateString() : ''}</small>
+              <button type="button" onClick={() => void togglePinConversation(conversation)} aria-label={conversation.is_pinned ? 'Unpin conversation' : 'Pin conversation'}><Pin size={11} /></button>
+              <button type="button" onClick={() => void renameConversation(conversation)} aria-label="Rename conversation"><Pencil size={11} /></button>
+              <button type="button" onClick={() => void removeConversation(conversation)} aria-label="Delete conversation"><Trash2 size={11} /></button>
+            </div>
           ))}
-        </select>
+        </div>
       )}
 
       {mode === 'assistant' && activeFile && (

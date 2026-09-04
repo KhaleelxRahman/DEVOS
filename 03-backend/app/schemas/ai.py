@@ -51,5 +51,11 @@ class ConversationResponse(BaseModel):
     title: str
     created_at: datetime
     updated_at: datetime | None = None
+    is_pinned: bool = False
 
     model_config = {"from_attributes": True}
+
+
+class ConversationUpdateRequest(BaseModel):
+    title: str | None = None
+    is_pinned: bool | None = None

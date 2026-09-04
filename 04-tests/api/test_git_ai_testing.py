@@ -216,6 +216,32 @@ async def test_ai_stream_persists_messages_and_artifacts(client):
 
 
 @pytest.mark.asyncio
+async def test_ai_conversation_lifecycle_controls(client):
+    headers, project_id, _ = await _setup(client)
+    base = f"/api/v1/projects/{project_id}/ai"
+    created = await client.post(f"{base}/conversations", headers=headers)
+    assert created.status_code == 200
+    conversation = created.json()["data"]
+    conversation_id = conversation["id"]
+
+    renamed = await client.patch(
+        f"{base}/conversations/{conversation_id}",
+        json={"title": "Pinned build notes", "is_pinned": True},
+        headers=headers,
+    )
+    assert renamed.status_code == 200
+    assert renamed.json()["data"]["title"] == "Pinned build notes"
+    assert renamed.json()["data"]["is_pinned"] is True
+
+    searched = await client.get(f"{base}/conversations?q=pinned", headers=headers)
+    assert [item["id"] for item in searched.json()["data"]["conversations"]] == [conversation_id]
+
+    deleted = await client.delete(f"{base}/conversations/{conversation_id}", headers=headers)
+    assert deleted.status_code == 200
+    assert (await client.get(f"{base}/conversations/{conversation_id}/messages", headers=headers)).status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_ai_actions_validation(client):
     headers, project_id, _ = await _setup(client)
     base = f"/api/v1/projects/{project_id}/ai"

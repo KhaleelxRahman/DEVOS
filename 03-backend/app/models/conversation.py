@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import Boolean, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
@@ -35,6 +35,7 @@ class Conversation(Base, TimestampMixin):
     title: Mapped[str] = mapped_column(
         String(255), default="New Conversation", nullable=False
     )
+    is_pinned: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
     project: Mapped["Project"] = relationship("Project", back_populates="conversations")

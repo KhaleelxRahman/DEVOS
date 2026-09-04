@@ -14,6 +14,7 @@ export interface Conversation {
   title: string;
   created_at: string;
   updated_at?: string;
+  is_pinned?: boolean;
   messages?: AIMessage[];
 }
 

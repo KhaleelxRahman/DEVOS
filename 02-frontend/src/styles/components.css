@@ -331,4 +331,14 @@
 .markdown-code-toolbar button { display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent; color: var(--color-text-muted); cursor: pointer; }
 .markdown-code-block pre { margin: 0; padding: 10px; overflow: auto; color: var(--color-text-secondary); font: 11px/1.5 var(--font-mono); }
 .ai-composer-meta { position: absolute; right: 48px; bottom: 4px; color: var(--color-text-muted); font-size: 9px; pointer-events: none; }
+.conversation-history { display: grid; gap: 4px; margin-bottom: 8px; max-height: 150px; overflow: auto; }
+.conversation-history-search { display: flex; gap: 4px; }
+.conversation-history-search .input { min-width: 0; padding: 5px 7px; font-size: 11px; }
+.conversation-history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto auto; align-items: center; gap: 4px; padding: 4px; border: 1px solid transparent; border-radius: 6px; color: var(--color-text-muted); }
+.conversation-history-item.active, .conversation-history-item:hover { background: var(--color-surface-hover); border-color: var(--color-border); }
+.conversation-history-item > button:first-child { display: flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; border: 0; background: transparent; color: var(--color-text-secondary); text-align: left; cursor: pointer; }
+.conversation-history-item > button:first-child span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conversation-history-item > button:not(:first-child) { display: inline-grid; place-items: center; padding: 3px; border: 0; background: transparent; color: var(--color-text-muted); cursor: pointer; }
+.conversation-history-item > button:hover { color: var(--color-text-primary); }
+.conversation-history-item small { font-size: 9px; }
 @media (max-width: 820px) { .artifact-panel { flex-direction: column; } .artifact-list { width: 100%; max-height: 120px; } }

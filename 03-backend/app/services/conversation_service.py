@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppException
@@ -38,20 +38,24 @@ class ConversationService:
 
     @staticmethod
     async def list_for_project(
-        db: AsyncSession, project_id: str, user_id: str
+        db: AsyncSession, project_id: str, user_id: str, query: str | None = None
     ) -> list[Conversation]:
-        stmt = (
-            select(Conversation)
-            .where(
-                Conversation.project_id == project_id, Conversation.user_id == user_id
-            )
-            .order_by(
-                Conversation.updated_at.desc().nullslast(),
-                Conversation.created_at.desc(),
-            )
+        stmt = select(Conversation).where(
+            Conversation.project_id == project_id, Conversation.user_id == user_id
+        )
+        if query and query.strip():
+            stmt = stmt.where(Conversation.title.ilike(f"%{query.strip()}%"))
+        stmt = stmt.order_by(
+            Conversation.is_pinned.desc(),
+            Conversation.updated_at.desc().nullslast(),
+            Conversation.created_at.desc(),
         )
         result = await db.execute(stmt)
         return list(result.scalars().all())
+
+    @staticmethod
+    async def delete(db: AsyncSession, conversation: Conversation) -> None:
+        await db.delete(conversation)
 
     @staticmethod
     async def add_message(

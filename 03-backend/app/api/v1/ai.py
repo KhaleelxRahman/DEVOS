@@ -24,6 +24,7 @@ from app.schemas.ai import (
     AIProviderStatusResponse,
     ConversationListResponse,
     ConversationResponse,
+    ConversationUpdateRequest,
     MessageListResponse,
 )
 from app.schemas.artifact import ArtifactCreateRequest, ArtifactListResponse, ArtifactResponse
@@ -34,6 +35,7 @@ from app.services.context_service import ContextService
 from app.services.conversation_service import ConversationService
 from app.services.project_service import ProjectService
 from app.services.artifact_service import ArtifactService
+from app.core.errors import ValidationException
 
 router = APIRouter(prefix="/projects/{project_id}/ai", tags=["ai"])
 
@@ -115,6 +117,8 @@ async def chat(
     )
 
     await ConversationService.add_message(db, conversation.id, "user", payload.message)
+    if conversation.title == "New Conversation":
+        conversation.title = payload.message.strip()[:80] or "New Conversation"
     await ConversationService.add_message(
         db, conversation.id, response.role, response.content
     )
@@ -155,6 +159,8 @@ async def chat_stream(
     history_payload = [{"role": m.role, "content": m.content} for m in history]
     service = AIService.from_settings()
     await ConversationService.add_message(db, conversation.id, "user", payload.message)
+    if conversation.title == "New Conversation":
+        conversation.title = payload.message.strip()[:80] or "New Conversation"
     await db.commit()
     conversation_id = conversation.id
 
@@ -264,12 +270,13 @@ async def delete_artifact(
 @router.get("/conversations", response_model=ApiResponse[ConversationListResponse])
 async def list_conversations(
     project_id: str,
+    q: str | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     await ProjectService.get_for_user(db, project_id, current_user.id)
     conversations = await ConversationService.list_for_project(
-        db, project_id, current_user.id
+        db, project_id, current_user.id, q
     )
     return ApiResponse(
         success=True,
@@ -293,6 +300,42 @@ async def create_conversation(
     return ApiResponse(
         success=True, data=ConversationResponse.model_validate(conversation)
     )
+
+
+@router.patch("/conversations/{conversation_id}", response_model=ApiResponse[ConversationResponse])
+async def update_conversation(
+    project_id: str,
+    conversation_id: str,
+    payload: ConversationUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await ProjectService.get_for_user(db, project_id, current_user.id)
+    conversation = await ConversationService.get_for_user(db, conversation_id, project_id, current_user.id)
+    if payload.title is not None:
+        title = payload.title.strip()
+        if not title:
+            raise ValidationException("Conversation title cannot be empty")
+        conversation.title = title[:255]
+    if payload.is_pinned is not None:
+        conversation.is_pinned = payload.is_pinned
+    await db.commit()
+    await db.refresh(conversation)
+    return ApiResponse(success=True, data=ConversationResponse.model_validate(conversation))
+
+
+@router.delete("/conversations/{conversation_id}", response_model=ApiResponse[dict])
+async def delete_conversation(
+    project_id: str,
+    conversation_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await ProjectService.get_for_user(db, project_id, current_user.id)
+    conversation = await ConversationService.get_for_user(db, conversation_id, project_id, current_user.id)
+    await ConversationService.delete(db, conversation)
+    await db.commit()
+    return ApiResponse(success=True, data={"deleted": True})
 
 
 @router.get(

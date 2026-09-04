@@ -84,8 +84,12 @@ export const aiApi = {
     onEvent: (event: string, data: Record<string, unknown>) => void,
     signal?: AbortSignal,
   ) => apiClient.stream(`/projects/${projectId}/ai/chat/stream`, payload, onEvent, signal),
-  getConversations: (projectId: string) => apiClient.get<{ conversations: Conversation[] }>(`/projects/${projectId}/ai/conversations`),
+  getConversations: (projectId: string, query?: string) => apiClient.get<{ conversations: Conversation[] }>(`/projects/${projectId}/ai/conversations${query ? `?q=${encodeURIComponent(query)}` : ''}`),
   createConversation: (projectId: string) => apiClient.post<Conversation>(`/projects/${projectId}/ai/conversations`),
+  updateConversation: (projectId: string, id: string, payload: { title?: string; is_pinned?: boolean }) =>
+    apiClient.patch<Conversation>(`/projects/${projectId}/ai/conversations/${id}`, payload),
+  deleteConversation: (projectId: string, id: string) =>
+    apiClient.delete(`/projects/${projectId}/ai/conversations/${id}`),
   getMessages: (projectId: string, conversationId: string) =>
     apiClient.get<{ messages: { role: string; content: string; provider?: string }[] }>(`/projects/${projectId}/ai/conversations/${conversationId}/messages`),
   getProvider: (projectId: string) =>
