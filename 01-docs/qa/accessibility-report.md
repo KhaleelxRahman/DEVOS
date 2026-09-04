@@ -1,10 +1,9 @@
 # DEVOS Accessibility Report
 
-**Product:** DEVOS v1.0.0  
-**Audit:** Phase 17 accessibility review  
-**Status:** Repository-based review with automated evidence  
+**Product:** DEVOS v1.0.0
+**Audit:** Phase 17 accessibility review
+**Status:** Repository-based review with automated evidence
 **Date:** 2026-09-04
-
 ## Verified practices
 
 - Routes use semantic headings and links.
@@ -45,4 +44,3 @@ coverage for 320, 375, 768, and 1024 px is not configured.
 No blocking accessibility defect was identified from repository inspection and
 existing automated tests. A full production accessibility certification was not
 claimed because browser scanner and multi-viewport runs were not executed.
-

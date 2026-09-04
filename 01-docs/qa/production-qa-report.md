@@ -1,10 +1,9 @@
 # DEVOS Production QA Report
 
-**Product:** DEVOS v1.0.0  
-**Audit:** Phase 17 production QA  
-**Status:** Evidence-based audit  
+**Product:** DEVOS v1.0.0
+**Audit:** Phase 17 production QA
+**Status:** Evidence-based audit
 **Date:** 2026-09-04
-
 ## Executive summary
 
 The local application validation gate is green. The Vercel production alias
@@ -78,4 +77,3 @@ because the Render backend probe timed out.
 - The Playwright configuration runs Chromium at 1280 × 720 only.
 - Dedicated 320, 375, 768, and 1024 px automated viewport runs are not present.
 - Render availability was inconclusive because the probes timed out.
-
