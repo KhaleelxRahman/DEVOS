@@ -85,6 +85,10 @@ class Settings(BaseSettings):
 
 def _validate_production_safety(s: Settings) -> Settings:
     """Fail fast when a production deployment is missing required settings."""
+    if s.AUTH_SECRET in {"", "CHANGE_ME_IN_ENV"} or s.AUTH_SECRET.startswith("PASTE_"):
+        if s.ENVIRONMENT == "production":
+            raise ValueError("Insecure production configuration: AUTH_SECRET must be set")
+        return s
     if s.ENVIRONMENT != "production":
         return s
     problems: list[str] = []

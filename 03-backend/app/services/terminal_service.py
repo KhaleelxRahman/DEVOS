@@ -14,11 +14,8 @@ from app.services.project_service import ProjectService
 ALLOWED_COMMANDS = {
     "git",
     "npm",
-    "node",
     "python",
     "python3",
-    "pytest",
-    "cargo",
     "dir",
     "ls",
     "echo",
@@ -128,7 +125,7 @@ class TerminalService:
                 code="TERMINAL_BLOCKED",
                 status_code=403,
             )
-        if cmd_clean in {"python", "python3", "node"} and any(
+        if cmd_clean in {"python", "python3"} and any(
             arg in {"-c", "--eval", "-e", "--eval-file"} for arg in command_args
         ):
             safe_python_exit = (
@@ -145,6 +142,25 @@ class TerminalService:
                     code="TERMINAL_BLOCKED",
                     status_code=403,
                 )
+        if cmd_clean in {"python", "python3"} and not (
+            len(command_args) == 2
+            and command_args[0] == "-c"
+            and re.fullmatch(r"import sys; sys\.exit\([0-9]{1,3}\)", command_args[1])
+        ):
+            raise AppException(
+                "Only the bounded interpreter health check is permitted",
+                code="TERMINAL_BLOCKED",
+                status_code=403,
+            )
+        if cmd_clean == "npm" and (
+            not command_args
+            or command_args[0] not in {"--version", "version", "audit", "outdated"}
+        ):
+            raise AppException(
+                "Only read-only npm diagnostics are permitted",
+                code="TERMINAL_BLOCKED",
+                status_code=403,
+            )
         if cmd_clean == "npm" and any(
             arg in {"install", "exec", "publish"} for arg in command_args
         ):
