@@ -20,6 +20,7 @@ export const WorkspacePage: React.FC = () => {
   const navigate = useNavigate();
   const [tabs, setTabs] = useState<OpenTab[]>([]);
   const [activePath, setActivePath] = useState<string | null>(null);
+  const [fileRefreshToken, setFileRefreshToken] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -141,7 +142,7 @@ export const WorkspacePage: React.FC = () => {
         className="workspace-grid"
       >
         <Card title="Files" subtitle="Project Explorer" style={panelStyle}>
-          <FileExplorer projectId={activeProject.id} onSelectFile={openFile} activeFile={activePath} />
+          <FileExplorer projectId={activeProject.id} onSelectFile={openFile} activeFile={activePath} refreshToken={fileRefreshToken} />
         </Card>
 
         <Card title="Code Viewer" subtitle="View & edit" style={panelStyle}>
@@ -149,7 +150,7 @@ export const WorkspacePage: React.FC = () => {
         </Card>
 
         <Card id="ai-command-center" title="AI Assistant" subtitle="Context Engine" style={panelStyle}>
-          <AIPanel projectId={activeProject.id} activeFile={activeFileForAI} />
+          <AIPanel projectId={activeProject.id} activeFile={activeFileForAI} onWorkspaceChanged={() => setFileRefreshToken((value) => value + 1)} />
         </Card>
 
         <Card title="Terminal" subtitle="Sandboxed · allowlisted commands" style={{ ...panelStyle, gridColumn: 'span 2' }}>

@@ -27,6 +27,7 @@ import { DocumentationPage } from './pages/DocumentationPage';
 import { HelpPage } from './pages/HelpPage';
 import { useAuth } from './hooks/useAuth';
 import { Spinner } from './components/common/Spinner';
+import { AppErrorBoundary } from './components/common/ErrorBoundary';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -60,49 +61,51 @@ export const App: React.FC = () => {
       <AuthProvider>
         <ProjectProvider>
           <ToastProvider>
-            <Routes>
-              {/* ===== Public website ===== */}
-              <Route element={<SiteLayout />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/faq" element={<FaqPage />} />
-                <Route path="/docs" element={<DocumentationPage />} />
-                <Route path="/help" element={<HelpPage />} />
-                <Route path="/waitlist" element={<WaitlistPage />} />
-                <Route path="/thank-you" element={<ThankYouPage />} />
-                <Route path="/privacy" element={<PrivacyPage />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Route>
+            <AppErrorBoundary>
+              <Routes>
+                {/* ===== Public website ===== */}
+                <Route element={<SiteLayout />}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/faq" element={<FaqPage />} />
+                  <Route path="/docs" element={<DocumentationPage />} />
+                  <Route path="/help" element={<HelpPage />} />
+                  <Route path="/waitlist" element={<WaitlistPage />} />
+                  <Route path="/thank-you" element={<ThankYouPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Route>
 
-              {/* ===== Auth pages (public but standalone layout) ===== */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+                {/* ===== Auth pages (public but standalone layout) ===== */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
 
-              {/* ===== Authenticated DEVOS v1.0.0 workspace ===== */}
-              <Route
-                path="/app"
-                element={
-                  <ProtectedRoute>
-                    <AppShell />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Navigate to="/app/dashboard" replace />} />
-                <Route path="dashboard" element={<DashboardPage />} />
-                <Route path="projects" element={<ProjectsPage />} />
-                <Route path="projects/:projectId" element={<ProjectDetailPage />} />
-                <Route path="workspace" element={<WorkspacePage />} />
-                <Route path="settings" element={<SettingsPage />} />
-              </Route>
+                {/* ===== Authenticated DEVOS v1.0.0 workspace ===== */}
+                <Route
+                  path="/app"
+                  element={
+                    <ProtectedRoute>
+                      <AppShell />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Navigate to="/app/dashboard" replace />} />
+                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="projects" element={<ProjectsPage />} />
+                  <Route path="projects/:projectId" element={<ProjectDetailPage />} />
+                  <Route path="workspace" element={<WorkspacePage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                </Route>
 
-              {/* Legacy app paths redirect into /app/* */}
-              <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
-              <Route path="/projects" element={<Navigate to="/app/projects" replace />} />
-              <Route path="/workspace" element={<Navigate to="/app/workspace" replace />} />
-              <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
-            </Routes>
+                {/* Legacy app paths redirect into /app/* */}
+                <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
+                <Route path="/projects" element={<Navigate to="/app/projects" replace />} />
+                <Route path="/workspace" element={<Navigate to="/app/workspace" replace />} />
+                <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
+              </Routes>
+            </AppErrorBoundary>
             <CookieConsentBanner />
           </ToastProvider>
         </ProjectProvider>

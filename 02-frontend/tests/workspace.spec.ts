@@ -82,6 +82,11 @@ test.describe("Workspace — stale project recovery (BUG-001)", () => {
     await expect(page.getByText("Planning only — no code will be written.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Approve plan" })).toBeVisible();
 
+    await page.getByRole("button", { name: "Run QA audit" }).click();
+    await expect(page.getByText("QA self-healing engine")).toBeVisible();
+    await expect(page.getByText("Safe fixes only")).toBeVisible();
+    await expect(page.getByText(/QA audit complete/i)).toBeVisible();
+
     await page.route("**/api/v1/projects/*/context", (route) =>
       route.fulfill({
         status: 200,
@@ -101,6 +106,39 @@ test.describe("Workspace — stale project recovery (BUG-001)", () => {
     await expect(page.getByText("Validate project context")).toBeVisible();
     await expect(page.getByText("No files changed; no external actions requested").first()).toBeVisible();
     await expect(page.getByText("Safety note:")).toBeVisible();
+  });
+
+  test("approved plans generate files incrementally and require overwrite confirmation", async ({ page }) => {
+    await mockWorkspaceApi(page);
+    await mockProjectGetSuccess(page, LIVE_PROJECT_ID);
+    await page.addInitScript(([token, projectId]) => {
+      localStorage.setItem("devos_token", token!);
+      localStorage.setItem("devos_active_project_id", projectId!);
+    }, ["e2e-token", LIVE_PROJECT_ID] as const);
+
+    const created: string[] = [];
+    await page.route(`**/api/v1/projects/${LIVE_PROJECT_ID}/context`, (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data: { project: {} } }) }));
+    await page.route(`**/api/v1/projects/${LIVE_PROJECT_ID}/testing/jobs`, (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data: { jobs: [] } }) }));
+    await page.route(`**/api/v1/projects/${LIVE_PROJECT_ID}/files`, (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data: { files: [] } }) }));
+    await page.route(`**/api/v1/projects/${LIVE_PROJECT_ID}/files/folder`, (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data: { path: "docs" } }) }));
+    await page.route(`**/api/v1/projects/${LIVE_PROJECT_ID}/files/file`, async (route) => {
+      const body = route.request().postDataJSON();
+      created.push(`${body.parent_path ? `${body.parent_path}/` : ""}${body.name}`);
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data: { path: created.at(-1), content: body.content } }) });
+    });
+
+    await page.goto("/app/workspace");
+    await page.getByLabel("Project idea").fill("Build a documentation portal");
+    await page.getByRole("button", { name: "Extract requirements" }).click();
+    await page.getByRole("button", { name: "Approve plan" }).click();
+    await expect(page.getByText("Execution queue")).toBeVisible();
+    await expect(page.getByText("Generate project README", { exact: true })).toBeVisible();
+    await expect.poll(() => created.length).toBeGreaterThan(0);
+    await expect(page.getByText("Workspace updated").first()).toBeVisible();
   });
 
   test("a deep link to /app/projects/:id lands on the project list instead of a 404", async ({

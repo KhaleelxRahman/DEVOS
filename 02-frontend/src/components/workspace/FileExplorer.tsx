@@ -9,6 +9,7 @@ interface FileExplorerProps {
   projectId: string;
   onSelectFile: (path: string) => void;
   activeFile: string | null;
+  refreshToken?: number;
 }
 
 const NAME_RE = /^[^/\\]+$/;
@@ -56,7 +57,7 @@ const TreeNode: React.FC<{
   );
 };
 
-export const FileExplorer: React.FC<FileExplorerProps> = ({ projectId, onSelectFile, activeFile }) => {
+export const FileExplorer: React.FC<FileExplorerProps> = ({ projectId, onSelectFile, activeFile, refreshToken }) => {
   const [tree, setTree] = useState<FileNode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -83,7 +84,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectId, onSelectF
 
   useEffect(() => {
     load();
-  }, [load]);
+  }, [load, refreshToken]);
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
