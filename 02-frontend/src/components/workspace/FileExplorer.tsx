@@ -205,7 +205,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectId, onSelectF
         <button type="submit" className="btn btn-secondary btn-sm" aria-label="Search"><Search size={12} /></button>
         <div className="explorer-menu-anchor" ref={menuRef}>
           <button type="button" className="btn btn-primary btn-sm" aria-label="New file, folder, or upload" aria-expanded={menuOpen} disabled={busy} onClick={() => setMenuOpen((value) => !value)}>+</button>
-          {menuOpen && <div className="explorer-menu" role="menu">
+          {menuOpen && <div className="explorer-menu" role="menu" onMouseDown={(event) => event.stopPropagation()}>
             <button type="button" role="menuitem" className="tree-row" onClick={() => { setMenuOpen(false); void createFile(); }}><FilePlus2 size={14} /> New File</button>
             <button type="button" role="menuitem" className="tree-row" onClick={() => { setMenuOpen(false); void createFolder(); }}><FolderPlus size={14} /> New Folder</button>
             <button type="button" role="menuitem" className="tree-row" onClick={() => { setMenuOpen(false); fileInputRef.current?.click(); }}><Upload size={14} /> Upload</button>
