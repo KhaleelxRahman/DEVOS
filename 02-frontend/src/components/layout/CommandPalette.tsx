@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Command, FolderPlus, LayoutDashboard, Settings, Sparkles, Terminal, Github, ListTodo, MessageSquare, Search } from 'lucide-react';
+import { Command, FolderPlus, Terminal, Settings, Sparkles, Github, ListTodo, MessageSquare, Search, Rocket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface CommandPaletteProps {
@@ -8,14 +8,15 @@ interface CommandPaletteProps {
 }
 
 const commands = [
-  { label: 'Open dashboard', hint: 'Pages', icon: LayoutDashboard, path: '/app/dashboard' },
-  { label: 'Create project', hint: 'Projects', icon: FolderPlus, path: '/app/projects' },
-  { label: 'Search projects', hint: 'Projects', icon: Search, path: '/app/projects' },
+  { label: 'New conversation', hint: 'AI', icon: Sparkles, path: '/app/dashboard' },
   { label: 'Open workspace', hint: 'Pages', icon: Terminal, path: '/app/workspace' },
+  { label: 'Search projects', hint: 'Projects', icon: Search, path: '/app/projects' },
+  { label: 'Create project', hint: 'Projects', icon: FolderPlus, path: '/app/projects' },
   { label: 'AI command center', hint: 'AI', icon: Sparkles, path: '/app/workspace#ai-command-center' },
   { label: 'Open conversations', hint: 'AI', icon: MessageSquare, path: '/app/workspace#ai-command-center' },
   { label: 'Open planner', hint: 'AI', icon: ListTodo, path: '/app/workspace#ai-command-center' },
-  { label: 'Open GitHub', hint: 'GitHub', icon: Github, path: '/app/github' },
+  { label: 'Open GitHub', hint: 'GitHub', icon: Github, path: '/app/projects?github=1' },
+  { label: 'Open deployment', hint: 'Deploy', icon: Rocket, path: '/app/projects?deploy=1' },
   { label: 'Open settings', hint: 'Settings', icon: Settings, path: '/app/settings' },
 ];
 

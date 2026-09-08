@@ -4,12 +4,13 @@ import { TopBar } from './TopBar';
 import { Sidebar } from './Sidebar';
 import { useProject } from '../../hooks/useProject';
 import { CommandPalette } from './CommandPalette';
+import { Project } from '../../types/project';
 
 export const AppShell: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('devos_sidebar_collapsed') === 'true');
-  const { activeProject } = useProject();
+  const { activeProject, setActiveProject } = useProject();
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -19,10 +20,15 @@ export const AppShell: React.FC = () => {
         setPaletteOpen((open) => !open);
       }
     };
+    const handleSetActiveProject = (event: CustomEvent<Project>) => {
+      setActiveProject(event.detail);
+    };
     window.addEventListener('keydown', closeOnEscape);
+    window.addEventListener('devos:setActiveProject', handleSetActiveProject as EventListener);
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', closeOnEscape);
+      window.removeEventListener('devos:setActiveProject', handleSetActiveProject as EventListener);
     };
   }, [menuOpen]);
   useEffect(() => {
