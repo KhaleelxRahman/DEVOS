@@ -24,6 +24,7 @@ from app.core.errors import (
 from app.db.base import Base
 from app.db.session import engine
 from app.schemas.common import ApiResponse, HealthResponse
+from app import bootstrap_migrate
 
 # Starlette's `add_exception_handler` expects a handler whose second parameter
 # is the base `Exception` type. slowapi's and our custom handlers declare
@@ -41,8 +42,14 @@ _validate_production_safety(settings)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Ensure database tables exist. Idempotent; Alembic remains the tool of
-    # record for schema evolution on existing deployments.
+    # Apply the Alembic migration chain first (idempotent, works on legacy
+    # create_all-provisioned databases and on fresh databases alike). This is
+    # independent of the hosting start command so migrations always run on
+    # deploy. create_all afterwards fills any residual missing objects.
+    try:
+        bootstrap_migrate.run()
+    except Exception:
+        logger.exception("Database migration bootstrap failed; continuing with create_all")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("DEVOS v1.0.0 database schema verified/created")

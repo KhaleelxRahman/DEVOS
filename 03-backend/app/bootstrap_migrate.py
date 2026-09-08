@@ -3,9 +3,10 @@
 The deployment database was originally provisioned by the lifespan's
 ``Base.metadata.create_all`` (app/main.py), which creates missing tables
 but never alters existing ones. A database provisioned by an older build
-therefore lacks columns that newer models added, and ``alembic upgrade
-head`` cannot be run directly on it because the create-table migrations
-would collide with the already-existing tables.
+therefore lacks columns that newer models added (e.g.
+``conversations.is_pinned``), and ``alembic upgrade head`` cannot be run
+directly on it because the create-table migrations would collide with the
+already-existing tables.
 
 This bootstrap handles every deployment state:
 
@@ -15,13 +16,13 @@ This bootstrap handles every deployment state:
   stamped as already applied (their
   objects exist via create_all), then
   the chain continues so column-level
-  migrations (e.g. conversations.is_pinned)
-  are applied.
+  migrations are applied.
 * Normal database (``alembic_version``
   present)                           -> plain ``alembic upgrade head``.
 
-Run as ``python -m app.bootstrap_migrate`` from the backend root before
-starting uvicorn.
+It runs on every app start from within ``app.main``'s lifespan (so it is
+independent of the hosting start command), and can also be invoked
+directly as ``python -m app.bootstrap_migrate`` from the backend root.
 """
 
 import asyncio
@@ -47,7 +48,7 @@ async def _deployment_state() -> tuple[bool, bool]:
         return await connection.run_sync(_inspect_tables)
 
 
-def main() -> None:
+def run() -> None:
     config = Config("alembic.ini")
     has_version_table, has_users_table = asyncio.run(_deployment_state())
     if not has_version_table and has_users_table:
@@ -58,4 +59,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run()
