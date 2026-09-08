@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
     # independent of the hosting start command so migrations always run on
     # deploy. create_all afterwards fills any residual missing objects.
     try:
-        bootstrap_migrate.run()
+        bootstrap_migrate.run_migrations_in_subprocess()
     except Exception:
         logger.exception("Database migration bootstrap failed; continuing with create_all")
     async with engine.begin() as conn:
