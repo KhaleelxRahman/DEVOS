@@ -156,9 +156,9 @@
 .terminal-running { display: flex; align-items: center; gap: 6px; color: var(--color-text-muted); margin: 0; }
 .terminal-running-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); box-shadow: 0 0 10px var(--color-accent); animation: pulse 1s ease-in-out infinite; }
 .terminal-history-hint { display: inline-flex; align-items: center; gap: 3px; color: var(--color-text-disabled); font: 10px var(--font-mono); white-space: nowrap; }
-.ai-status-strip { display: grid; gap: 6px; padding: 8px; margin-bottom: 8px; background: var(--color-background); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.ai-status-strip { flex-shrink: 0; display: grid; gap: 6px; padding: 8px; margin-bottom: 8px; background: var(--color-background); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .ai-status-strip div { display: flex; justify-content: space-between; gap: 8px; }.ai-status-strip span, .ai-approval span { color: var(--color-text-muted); }.ai-status-strip strong { color: var(--color-text-secondary); font-size: 11px; font-weight: 500; text-align: right; }.ai-timeline { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; color: var(--color-text-disabled); font-size: 10px; }.ai-timeline span::before { content: '○'; margin-right: 4px; }.ai-timeline .complete, .ai-timeline .active { color: var(--color-success); }.ai-timeline .complete::before { content: '✓'; }.ai-timeline .active { color: var(--color-accent); }.ai-approval { display: flex; justify-content: space-between; gap: 8px; padding: 7px 8px; margin-bottom: 8px; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); font-size: 11px; }.ai-approval small { color: var(--color-text-disabled); }
-.ai-mode-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-background); }
+.ai-mode-tabs { flex-shrink: 0; display: flex; gap: 2px; padding: 2px; margin-bottom: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-background); }
 .ai-mode-tabs button { flex: 1; border: 0; border-radius: 5px; padding: 5px; color: var(--color-text-muted); background: transparent; font-size: 11px; cursor: pointer; }
 .ai-mode-tabs button.active { color: var(--color-text-primary); background: var(--color-surface-elevated); box-shadow: var(--shadow-sm); }
 .planner-panel { overflow-y: auto; min-height: 0; padding-bottom: 6px; }
@@ -383,7 +383,7 @@
 .markdown-code-toolbar button { display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent; color: var(--color-text-muted); cursor: pointer; }
 .markdown-code-block pre { margin: 0; padding: 10px; overflow: auto; color: var(--color-text-secondary); font: 11px/1.5 var(--font-mono); }
 .ai-composer-meta { position: absolute; right: 48px; bottom: 4px; color: var(--color-text-muted); font-size: 9px; pointer-events: none; }
-.conversation-history { display: grid; gap: 4px; margin-bottom: 8px; max-height: 150px; overflow: auto; }
+.conversation-history { display: grid; gap: 4px; margin-bottom: 8px; max-height: 150px; overflow: auto; flex-shrink: 0; }
 .conversation-history-search { display: flex; gap: 4px; }
 .conversation-history-search .input { min-width: 0; padding: 5px 7px; font-size: 11px; }
 .conversation-history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto auto; align-items: center; gap: 4px; padding: 4px; border: 1px solid transparent; border-radius: 6px; color: var(--color-text-muted); }

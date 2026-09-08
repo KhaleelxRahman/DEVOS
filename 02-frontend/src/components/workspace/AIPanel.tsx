@@ -145,11 +145,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
     await refreshConversations();
   };
 
-  const send = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const message = input.trim();
-    if (!message || isSending) return;
-    setInput('');
+  const runSend = async (message: string) => {
     lastPromptRef.current = message;
     const createdAt = new Date().toISOString();
     setMessages((prev) => [...prev, { role: 'user', content: message, created_at: createdAt }, { role: 'assistant', content: '', created_at: createdAt }]);
@@ -190,10 +186,19 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
     }
   };
 
+  const send = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const message = input.trim();
+    if (!message || isSending) return;
+    setInput('');
+    await runSend(message);
+  };
+
   const stopGeneration = () => abortRef.current?.abort();
+  // Retry must actually re-issue the AI request, not merely re-fill the composer.
   const regenerateResponse = () => {
     if (!lastPromptRef.current || isSending) return;
-    setInput(lastPromptRef.current);
+    void runSend(lastPromptRef.current);
   };
 
   const runAction = async (action: string) => {
@@ -388,7 +393,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, fontSize: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, fontSize: 12, overflowY: 'auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--color-text-secondary)' }}>
           <Bot size={13} />
@@ -501,7 +506,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
       )}
       {mode === 'assistant' && <div className="ai-approval"><span>Approval queue</span><small>No pending approvals</small></div>}
 
-      {mode === 'assistant' && <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', minHeight: 0, marginBottom: 8 }} aria-live="polite">
+      {mode === 'assistant' && <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', minHeight: 120, marginBottom: 8 }} aria-live="polite">
         {messages.length === 0 && !isSending && (
           <p style={{ color: 'var(--color-text-muted)' }}>
             Ask about your project. The assistant uses your README, file tree, active file, and Git status as

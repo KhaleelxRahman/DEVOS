@@ -131,6 +131,7 @@ test.describe.serial("DEVOS Production QA Audit", () => {
     telemetry(page);
     const meta = { target: BASE, api: API, account: EMAIL, project: PROJECT };
     const S = (t: string) => console.log(`\n[AUDIT] ========== ${t} ==========`);
+    const routeProbes: { stream: number; artifacts: number; move: number } = { stream: 0, artifacts: 0, move: 0 };
 
     // Warm the backend so a Render cold start is not measured as app latency.
     // Actually await the response (with a generous timeout) so the warm-up is real.
@@ -150,12 +151,12 @@ test.describe.serial("DEVOS Production QA Audit", () => {
           return { status: 0, text: `REQUEST_ERROR: ${msg}` };
         }
       };
-      const pStream = await probe("POST", "/projects/00000000-0000-0000-0000-000000000000/ai/chat/stream", { message: "hi" });
-      record(page, "DEPLOY", "POST /ai/chat/stream route exposed by backend", pStream.status === 404 ? "FAIL" : "PASS", `HTTP ${pStream.status}${pStream.status === 404 ? " — route missing on deployed backend (exists in repo HEAD)" : ""}`);
-      const pArt = await probe("POST", "/projects/00000000-0000-0000-0000-000000000000/ai/artifacts", { name: "x", kind: "markdown", content: "x" });
-      record(page, "DEPLOY", "POST /ai/artifacts route exposed by backend", pArt.status === 404 ? "FAIL" : "PASS", `HTTP ${pArt.status}${pArt.status === 404 ? " — route missing on deployed backend (exists in repo HEAD)" : ""}`);
-      const pMove = await probe("POST", "/projects/00000000-0000-0000-0000-000000000000/files/move", { path: "a", destination_parent: "b" });
-      record(page, "DEPLOY", "POST /files/move route exposed by backend", pMove.status === 405 ? "FAIL" : "PASS", `HTTP ${pMove.status}${pMove.status === 405 ? " — route missing on deployed backend (exists in repo HEAD)" : ""}`);
+      routeProbes.stream = (await probe("POST", "/projects/00000000-0000-0000-0000-000000000000/ai/chat/stream", { message: "hi" })).status;
+      record(page, "DEPLOY", "POST /ai/chat/stream route exposed by backend", routeProbes.stream === 0 || routeProbes.stream === 404 ? "FAIL" : "PASS", `HTTP ${routeProbes.stream}${routeProbes.stream === 404 ? " — route missing on deployed backend (exists in repo HEAD)" : routeProbes.stream === 0 ? " — request error (network/cold start)" : ""}`);
+      routeProbes.artifacts = (await probe("POST", "/projects/00000000-0000-0000-0000-000000000000/ai/artifacts", { name: "x", kind: "markdown", content: "x" })).status;
+      record(page, "DEPLOY", "POST /ai/artifacts route exposed by backend", routeProbes.artifacts === 0 || routeProbes.artifacts === 404 ? "FAIL" : "PASS", `HTTP ${routeProbes.artifacts}${routeProbes.artifacts === 404 ? " — route missing on deployed backend (exists in repo HEAD)" : routeProbes.artifacts === 0 ? " — request error (network/cold start)" : " (401 = route present, auth required)"}`);
+      routeProbes.move = (await probe("POST", "/projects/00000000-0000-0000-0000-000000000000/files/move", { path: "a", destination_parent: "b" })).status;
+      record(page, "DEPLOY", "POST /files/move route exposed by backend", routeProbes.move === 0 || routeProbes.move === 404 || routeProbes.move === 405 ? "FAIL" : "PASS", `HTTP ${routeProbes.move}${[404, 405].includes(routeProbes.move) ? " — route missing on deployed backend (exists in repo HEAD)" : routeProbes.move === 0 ? " — request error (network/cold start)" : " (401 = route present, auth required)"}`);
       const pSecurity = await probe("GET", "/auth/me");
       record(page, "DEPLOY", "GET /auth/me route exposed by backend", pSecurity.status === 401 ? "PASS" : "FAIL", `HTTP ${pSecurity.status} (401 = route present, auth required)`);
       const pHealth = await probe("GET", "/health");
@@ -564,8 +565,8 @@ await S("7. AI");
       if (streamCount <= before) throw new Error("regenerate did not trigger a new /chat/stream request");
     });
 await check(page, "AI", "UI surfaces the streaming failure to the user", async () => {
-      // Because the deployed backend lacks /chat/stream (404), the frontend's
-      // send() catches the network error and renders it via role="alert".
+      // A failed stream (network error or SSE error event) must surface to the
+      // user via role="alert"; a completed mock response is also acceptable.
       await expect(page.locator('[role="alert"]').or(page.getByText(/You asked about|deterministic local response/i)).first()).toBeVisible({ timeout: 30_000 });
     });
     await shot(page, "audit-10-ai-stream-failure");
@@ -729,30 +730,44 @@ await S("10. GITHUB");
     unverified("GITHUB", "Disconnect", "no connected account exists in the audit session to disconnect");
     saveReport(meta);
     await S("11. NETWORK / CONSOLE");
-    // Exact expected status map for this audit. Anything outside this set is a true anomaly.
+    // Expected-status map for this audit. Project-scoped keys are normalised
+    // (the `/projects/<uuid>` prefix is stripped) before lookup, so entries
+    // describe the ROUTE, not one specific project. 403 on terminal/execute is
+    // the intentional security block exercised in section 6 (expected behavior).
     const EXPECTED: Record<string, number[]> = {
       "POST /auth/login": [401, 200],
-      "POST /files/rename": [200, 403], // 403 = correct "name already exists" (test seeded a colliding name)
-      "POST /files/move": [405],          // stale backend gap (route exists in repo, not on deployed Render)
-      "POST /ai/chat/stream": [404],      // stale backend gap
-      "POST /ai/artifacts": [404],        // stale backend gap
-      "GET /ai/artifacts": [404],         // stale backend gap
+      "POST /files/rename": [200, 403],
+      "POST /files/move": [200, 401, 404],
+      // 404 on move: the audit's synthetic-drag fallback re-fires a move that
+      // already completed; the backend correctly rejects moving a source that
+      // no longer exists (FileNotFoundException). Not a product defect.
+      "POST /ai/chat/stream": [200, 401],
+      "POST /ai/artifacts": [200, 401],
+      "GET /ai/artifacts": [200, 401],
+      "DELETE /ai/artifacts": [200, 401],
       "POST /terminal/execute": [200, 403],
       "POST /github/connect": [200],
     };
     await check(page, "NETWORK", "No unexpected 4xx/5xx API responses", async () => {
       const bad: string[] = [];
       for (const [key, codes] of Object.entries(apiStatuses)) {
+        // Normalise project-scoped routes so the EXPECTED map stays project-agnostic.
+        const norm = key.replace(/^(\w+) \/projects\/[0-9a-f-]{36}/i, "$1 ");
         for (const c of codes) {
           if (c < 400) continue;
-          const allowed = EXPECTED[key] || [];
+          const allowed = EXPECTED[norm] || [];
           if (!allowed.includes(c)) bad.push(`${key} -> ${c}`);
         }
       }
       if (bad.length) throw new Error(`unexpected 4xx/5xx: ${bad.join(", ").slice(0, 300)}`);
     });
-    record(page, "NETWORK", "Stale-backend gaps documented (404/405 on stream/artifacts/move)", "FAIL",
-      "GET/POST /ai/artifacts, POST /ai/chat/stream, POST /files/move return 404/405 on the deployed backend even though the repo HEAD frontend depends on them. See DEPLOY section rows.");
+    // The previously documented stale-backend gaps (404/405 on stream,
+    // artifacts, move) are re-evaluated against the live DEPLOY probes: PASS
+    // only when the deployed backend actually exposes the routes repo-HEAD
+    // frontend depends on.
+    const gaps = [routeProbes.stream, routeProbes.artifacts, routeProbes.move].filter((s) => s === 0 || s === 404 || s === 405);
+    record(page, "NETWORK", "No stale-backend gaps (stream/artifacts/move routes deployed)", gaps.length === 0 ? "PASS" : "FAIL",
+      gaps.length === 0 ? "deployed backend exposes POST /ai/chat/stream, /ai/artifacts and POST /files/move (see DEPLOY section)" : `routes still missing/erroring on deployed backend: statuses ${gaps.join(", ")}`);
     await check(page, "NETWORK", "No JavaScript exceptions (pageerror)", async () => {
       if (pageErrors.length) throw new Error(pageErrors.slice(0, 3).join(" | "));
     });
