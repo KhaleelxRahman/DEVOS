@@ -155,6 +155,25 @@ async def test_file_folder_create_read_save_rename_delete(client):
         headers=headers,
     )
     assert res.status_code == 200, res.text
+
+    # Regression (final QA audit): renaming a TOP-LEVEL folder must be allowed.
+    # The old guard compared the item's PARENT against the project root, which
+    # 403-blocked every root-level directory rename. Only the project root
+    # itself must stay protected.
+    res = await client.post(
+        f"/api/v1/projects/{pid}/files/rename",
+        json={"path": "lib", "new_name": "librenamed"},
+        headers=headers,
+    )
+    assert res.status_code == 200, res.text
+    assert res.json()["data"]["path"] == "librenamed"
+    res = await client.post(
+        f"/api/v1/projects/{pid}/files/rename",
+        json={"path": "librenamed", "new_name": "lib"},
+        headers=headers,
+    )
+    assert res.status_code == 200, res.text
+
     res = await client.post(
         f"/api/v1/projects/{pid}/files/move",
         json={"path": "src/main.py", "destination_parent": "lib"},

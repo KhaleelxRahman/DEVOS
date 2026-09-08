@@ -235,7 +235,7 @@ class FileService:
         project_root = os.path.abspath(
             ProjectService.get_project_storage_path(project_id)
         )
-        if os.path.abspath(parent_abs) == project_root and os.path.isdir(abs_path):
+        if os.path.abspath(abs_path) == project_root:
             raise FileAccessDeniedException("Cannot rename the project root")
         parent_rel = os.path.relpath(parent_abs, project_root).replace("\\", "/")
         parent_rel = "" if parent_rel == "." else parent_rel
