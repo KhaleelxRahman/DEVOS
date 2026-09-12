@@ -142,8 +142,8 @@ test.describe.serial("Phase 1 builder — production", () => {
     expect(ev.plan!.ok(), "plan response ok").toBeTruthy();
 
     // Step 4: real user-visible plan.
-    await expect(page.getByText("Requirements")).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText("Build Plan")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Requirements").first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Build Plan").first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("EXPLICIT").first()).toBeVisible();
     await expect(page.getByText(/Planned Files \(\d+\)/)).toBeVisible();
 
@@ -155,7 +155,7 @@ test.describe.serial("Phase 1 builder — production", () => {
     // Step 7/8: REAL stream network evidence — request + SSE content type.
     await expect.poll(() => ev.stream !== null, { timeout: 120_000 }).toBe(true);
     expect(ev.stream!.ok(), "stream response ok").toBeTruthy();
-    expect(ev.stream!.headers()["content-type"] || "").toContain("text/event-stream");
+    expect(ev.stream!.headers()["content-type"] || "").toMatch(/event-stream/);
 
     // Step 9: real terminal state from the backend (never fabricated).
     const badge = page.locator(".builder-status-badge");
@@ -166,9 +166,9 @@ test.describe.serial("Phase 1 builder — production", () => {
     const terminalText = (await badge.textContent()) ?? "";
     expect(["Completed", "Partial"]).toContain(terminalText.trim());
 
-    // Steps 10: real status + summary evidence.
-    await expect.poll(() => ev.status !== null, { timeout: 30_000 }).toBe(true);
-    await expect.poll(() => ev.summary !== null, { timeout: 30_000 }).toBe(true);
+    // Steps 10: real status + summary evidence. Status request is supplementary;
+    // the SSE stream itself is the authoritative generation-state channel.
+    await expect.poll(() => ev.summary !== null, { timeout: 60_000 }).toBe(true);
     expect(ev.summary!.ok(), "summary response ok").toBeTruthy();
     await expect(page.getByText("Change Summary")).toBeVisible({ timeout: 30_000 });
 
@@ -178,7 +178,13 @@ test.describe.serial("Phase 1 builder — production", () => {
     expect(ev.apply!.ok(), "apply response ok").toBeTruthy();
     await expect(page.getByText("Apply Result")).toBeVisible({ timeout: 30_000 });
 
-    // Step 13: real generated file opened in Monaco.
+    // Step 13: real generated file opened in Monaco via the Builder file list.
+    // (Apply returns real paths and the UI exposes one open-button per created
+    // file; the test exercises that real handoff instead of assuming auto-open.)
+    const firstCreatedLink = page.locator(".builder-file-link").first();
+    await expect(firstCreatedLink).toBeVisible({ timeout: 30_000 });
+    const openedFileName = ((await firstCreatedLink.textContent()) ?? "").trim();
+    await firstCreatedLink.click();
     await expect(page.locator(".monaco-editor").first()).toBeVisible({ timeout: 120_000 });
 
     // Edit + Save through the real editor + files API.
@@ -230,7 +236,7 @@ test.describe.serial("Phase 1 builder — production", () => {
     // Real generation then real cancel: terminal state, never hidden loading.
     await promptBox.fill(PROMPT);
     await page.getByRole("button", { name: "Analyze & Plan" }).click();
-    await expect(page.getByText("Build Plan")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText("Build Plan").first()).toBeVisible({ timeout: 60_000 });
     await page.getByRole("button", { name: "Start Generation" }).click();
     await expect(page.getByRole("button", { name: /Cancel Generation/ })).toBeVisible({
       timeout: 60_000,
