@@ -103,8 +103,10 @@ test.describe.serial("Phase 1 builder — production", () => {
     page.on("pageerror", (err) => pageErrors.push(String(err.message || err)));
 
     // --- Safe test-data prep through the real API (account + project) ---
+    // Explicit timeout because the Render free-tier backend may cold-start.
     const registered = await request.post(`${API}/auth/register`, {
       data: { name: "QA Phase1 Builder", email: EMAIL, password: PASSWORD },
+      timeout: 120_000,
     });
     expect(registered.ok(), "account provisioning").toBeTruthy();
     const token = (await registered.json()).data?.token as string;
@@ -113,6 +115,7 @@ test.describe.serial("Phase 1 builder — production", () => {
     const created = await request.post(`${API}/projects`, {
       headers: { Authorization: `Bearer ${token}` },
       data: { name: PROJECT_NAME },
+      timeout: 120_000,
     });
     expect(created.ok(), "disposable project provisioning").toBeTruthy();
     expect(((await created.json()).data?.id as string) ?? "").toBeTruthy();
@@ -196,6 +199,7 @@ test.describe.serial("Phase 1 builder — production", () => {
     // Provision + login (fresh account keeps this test isolated).
     const registered = await request.post(`${API}/auth/register`, {
       data: { name: "QA Phase1 Negative", email: EMAIL.replace("builder", "negative"), password: PASSWORD },
+      timeout: 120_000,
     });
     expect(registered.ok()).toBeTruthy();
     const token = (await registered.json()).data?.token as string;
