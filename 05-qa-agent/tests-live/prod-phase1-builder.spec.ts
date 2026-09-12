@@ -231,10 +231,15 @@ test.describe.serial("Phase 1 builder — production", () => {
     await page.getByRole("button", { name: "Analyze & Plan" }).click();
     await expect.poll(() => ev.classify !== null, { timeout: 60_000 }).toBe(true);
     await expect(page.getByText("UNSUPPORTED").first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText(/Unsupported \(blocked, not substituted\)/)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Unsupported \(blocked, not substituted\)/ })).toBeVisible();
 
     // Real generation then real cancel: terminal state, never hidden loading.
-    await promptBox.fill(PROMPT);
+    // Re-query the workspace after the unsupported result — the panel shows the
+    // unsupported state, so re-enter the flow via the project workspace button.
+    await openWorkspaceForProject(page, projectName);
+    const promptBox2 = page.locator("#builder-prompt-input");
+    await expect(promptBox2).toBeVisible({ timeout: 60_000 });
+    await promptBox2.fill(PROMPT);
     await page.getByRole("button", { name: "Analyze & Plan" }).click();
     await expect(page.getByText("Build Plan").first()).toBeVisible({ timeout: 60_000 });
     await page.getByRole("button", { name: "Start Generation" }).click();
@@ -245,6 +250,7 @@ test.describe.serial("Phase 1 builder — production", () => {
 
     const badge = page.locator(".builder-status-badge");
     await expect(badge).toBeVisible({ timeout: 120_000 });
+    await expect(badge).not.toHaveText(/^(Idle|Planning|Generating|Applying|Syncing)$/, { timeout: 120_000 });
     const terminalText = ((await badge.textContent()) ?? "").trim();
     // Whatever the real outcome is, it must be an honest backend state.
     expect(terminalText).toMatch(/^(Completed|Partial|Failed|Cancelled|Blocked)$/);
