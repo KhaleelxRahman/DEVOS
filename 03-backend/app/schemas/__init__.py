@@ -14,6 +14,10 @@ from app.schemas.builder import (
     SummaryResponse,
 )
 from app.schemas.common import ApiResponse, ErrorDetail, HealthResponse
+from app.schemas.execution import (
+    ExecutionCreateRequest,
+    ExecutionResponse,
+)
 from app.schemas.file import FileContentResponse, FileNodeResponse, FileTreeResponse
 from app.schemas.git import GitCommitRequest, GitDiffResponse, GitStatusResponse
 from app.schemas.project import (

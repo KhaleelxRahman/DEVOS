@@ -54,6 +54,15 @@ class Settings(BaseSettings):
     TERMINAL_TIMEOUT_SECONDS: int = 30
     TERMINAL_MAX_OUTPUT_CHARS: int = 20000
 
+    # --- Phase 2A execution foundation (contract only; DEFINED, not ENFORCED) ---
+    # Resource ceilings are documented here for Phase 2B+ enforcement. Phase 2A
+    # persists validation records only — nothing executes, so nothing is capped.
+    EXECUTION_MAX_DURATION_SECONDS: int = 300
+    EXECUTION_MAX_OUTPUT_CHARS: int = 20000
+    EXECUTION_MAX_CONCURRENT: int = 4
+    EXECUTION_MAX_RETRIES: int = 3
+    EXECUTION_MAX_PROCESSES: int = 8
+
     # --- AI providers ("mock" | "gemini" | "openai") ---
     AI_PROVIDER: str = "mock"
     AI_MODEL: str = ""
