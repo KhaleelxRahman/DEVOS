@@ -1,6 +1,18 @@
 from app.schemas.activity import ActivityListResponse, ActivityResponse
 from app.schemas.ai import AIChatRequest, AIChatResponse, ConversationResponse
 from app.schemas.auth import AuthResponseData, UserLogin, UserRegister, UserResponse
+from app.schemas.builder import (
+    ApplyStatusResponse,
+    BuilderStreamEvent,
+    ClassificationResponse,
+    CreateGenerationRequest,
+    FileOperation,
+    GeneratedPlan,
+    NormalizedBuildSpec,
+    RequirementsClassification,
+    StatusResponse,
+    SummaryResponse,
+)
 from app.schemas.common import ApiResponse, ErrorDetail, HealthResponse
 from app.schemas.file import FileContentResponse, FileNodeResponse, FileTreeResponse
 from app.schemas.git import GitCommitRequest, GitDiffResponse, GitStatusResponse
@@ -18,20 +30,30 @@ __all__ = [
     "ActivityListResponse",
     "ActivityResponse",
     "ApiResponse",
+    "ApplyStatusResponse",
     "AuthResponseData",
+    "BuilderStreamEvent",
+    "ClassificationResponse",
     "ConversationResponse",
+    "CreateGenerationRequest",
     "ErrorDetail",
     "FileContentResponse",
     "FileNodeResponse",
+    "FileOperation",
     "FileTreeResponse",
+    "GeneratedPlan",
     "GitCommitRequest",
     "GitDiffResponse",
     "GitStatusResponse",
     "HealthResponse",
+    "NormalizedBuildSpec",
     "ProjectCreate",
     "ProjectListResponse",
     "ProjectResponse",
     "ProjectUpdate",
+    "RequirementsClassification",
+    "StatusResponse",
+    "SummaryResponse",
     "TerminalExecuteRequest",
     "TerminalResultResponse",
     "UserLogin",

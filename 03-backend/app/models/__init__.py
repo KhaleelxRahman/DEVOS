@@ -1,6 +1,7 @@
 from app.models.activity import Activity
 from app.models.artifact import Artifact
 from app.models.conversation import Conversation
+from app.models.generation import Generation
 from app.models.github_connection import GitHubConnection
 from app.models.message import ConversationMessage
 from app.models.project import Project
@@ -13,6 +14,7 @@ __all__ = [
     "ContactMessage",
     "Conversation",
     "ConversationMessage",
+    "Generation",
     "GitHubConnection",
     "Project",
     "User",

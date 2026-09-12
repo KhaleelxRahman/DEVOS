@@ -6,6 +6,13 @@ import { GitStatus, GitDiff } from '../types/git';
 import { AIChatPayload, Conversation } from '../types/ai';
 import { TerminalExecutePayload, TerminalResult } from '../types/terminal';
 import { Activity } from '../types/activity';
+import {
+  ApplyStatusResponse,
+  GeneratedPlan,
+  RequirementsClassification,
+  StatusResponse,
+  SummaryResponse,
+} from '../types/builder';
 
 export interface GithubRepository {
   id: number;
@@ -127,6 +134,56 @@ export const terminalApi = {
 
 export const activityApi = {
   list: () => apiClient.get<{ activities: Activity[] }>('/activity'),
+};
+
+export const builderApi = {
+  classify: (projectId: string, payload: { prompt: string; mode?: string }) =>
+    apiClient.post<RequirementsClassification>(
+      `/projects/${projectId}/builder/classify`,
+      { prompt: payload.prompt, mode: payload.mode || 'build' }
+    ),
+  plan: (projectId: string, payload: { prompt: string; mode?: string }) =>
+    apiClient.post<GeneratedPlan>(
+      `/projects/${projectId}/builder/plan`,
+      { prompt: payload.prompt, mode: payload.mode || 'build' }
+    ),
+  start: (projectId: string, payload: { prompt: string; generation_request_id?: string; project_name?: string; mode?: string }) =>
+    apiClient.post<StatusResponse>(
+      `/projects/${projectId}/builder/start`,
+      {
+        prompt: payload.prompt,
+        generation_request_id: payload.generation_request_id || undefined,
+        project_name: payload.project_name || undefined,
+        mode: payload.mode || 'build',
+      }
+    ),
+  status: (projectId: string, generationRequestId: string) =>
+    apiClient.get<StatusResponse>(
+      `/projects/${projectId}/builder/status/${generationRequestId}`
+    ),
+  stream: (
+    projectId: string,
+    generationRequestId: string,
+    onEvent: (event: string, data: Record<string, unknown>) => void,
+    signal?: AbortSignal,
+  ) =>
+    apiClient.streamGet(
+      `/projects/${projectId}/builder/stream/${generationRequestId}`,
+      onEvent,
+      signal
+    ),
+  summary: (projectId: string, generationRequestId: string) =>
+    apiClient.get<SummaryResponse>(
+      `/projects/${projectId}/builder/summary/${generationRequestId}`
+    ),
+  apply: (projectId: string, generationRequestId: string) =>
+    apiClient.post<ApplyStatusResponse>(
+      `/projects/${projectId}/builder/apply/${generationRequestId}`
+    ),
+  cancel: (projectId: string, generationRequestId: string) =>
+    apiClient.post<StatusResponse>(
+      `/projects/${projectId}/builder/cancel/${generationRequestId}`
+    ),
 };
 
 export const githubApi = {

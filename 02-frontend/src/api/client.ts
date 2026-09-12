@@ -148,6 +148,64 @@ class ApiClient {
       if (done) break;
     }
   }
+
+  /**
+   * GET-based SSE stream (builder generation) that carries the Authorization
+   * header — unlike EventSource, which cannot set custom headers. Frames may
+   * be `event: X\ndata: {...}` or data-only `data: {"event": "X", ...}`.
+   */
+  public async streamGet(
+    endpoint: string,
+    onEvent: (event: string, data: Record<string, unknown>) => void,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.getHeaders({}, false),
+      signal,
+    });
+    if (!response.ok || !response.body) {
+      const data = await response.json().catch(() => null);
+      throw new ApiError(
+        data?.error?.message || response.statusText || 'Streaming request failed',
+        data?.error?.code || `HTTP_${response.status}`,
+        response.status,
+      );
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    const dispatch = (frame: string) => {
+      const dataLine = frame.match(/^data: (.+)$/m)?.[1];
+      if (!dataLine) return;
+      let payload: Record<string, unknown>;
+      try {
+        payload = JSON.parse(dataLine) as Record<string, unknown>;
+      } catch {
+        return;
+      }
+      const eventName =
+        frame.match(/^event: (.+)$/m)?.[1] ||
+        (typeof payload.event === 'string' ? payload.event : 'message');
+      const data =
+        payload.data && typeof payload.data === 'object'
+          ? (payload.data as Record<string, unknown>)
+          : payload;
+      onEvent(eventName, data);
+    };
+    while (true) {
+      const { value, done } = await reader.read();
+      buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+      const frames = buffer.split('\n\n');
+      buffer = frames.pop() || '';
+      frames.forEach(dispatch);
+      if (done) {
+        if (buffer.trim()) dispatch(buffer);
+        break;
+      }
+    }
+  }
 }
 
 export const apiClient = new ApiClient();
