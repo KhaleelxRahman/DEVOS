@@ -180,7 +180,7 @@ export const WorkspacePage: React.FC = () => {
         style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(200px, 240px) 1fr minmax(260px, 340px)',
-          gridTemplateRows: 'minmax(280px, 1fr) minmax(180px, 32%)',
+          gridTemplateRows: '1fr minmax(140px, 18%) minmax(300px, 1fr)',
           gap: 'var(--space-3)',
           flex: 1,
           minHeight: 480,
@@ -209,7 +209,7 @@ export const WorkspacePage: React.FC = () => {
           <TestingPanel projectId={activeProject.id} />
         </Card>
 
-        <Card title="Builder" subtitle="Plan · Generate · Apply" style={{ ...panelStyle, gridColumn: '1 / -1', minHeight: 320 }}>
+        <Card title="Builder" subtitle="Plan · Generate · Apply" style={{ ...panelStyle, gridColumn: '1 / -1', gridRow: '3', minHeight: 320 }}>
           <BuilderPanel
             projectId={activeProject.id}
             onWorkspaceChanged={() => setFileRefreshToken((value) => value + 1)}
