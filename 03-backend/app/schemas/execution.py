@@ -54,6 +54,36 @@ class ExecutionStreamEvent(BaseModel):
     data: dict
 
 
+# ---------------------------------------------------------------------------
+# Phase 2C — quality operations (BUILD / TEST / LINT / TYPECHECK)
+# ---------------------------------------------------------------------------
+QUALITY_OPERATIONS: set[str] = {"BUILD", "TEST", "LINT", "TYPECHECK"}
+
+
+class QualityOperationInfo(BaseModel):
+    """Detection result for one quality operation.
+
+    supported  — the project's real configuration defines this operation.
+    available  — the detected tool binary exists on the execution server.
+    command    — the exact command the Phase 2B engine will run (policy-
+                 approved vocabulary only).
+    source     — the project configuration file the command was detected in.
+    """
+
+    operation: str
+    supported: bool
+    available: bool = False
+    command: str | None = None
+    arguments: list[str] | None = None
+    source: str | None = None
+    reason: str | None = None
+
+
+class QualityOperationsResponse(BaseModel):
+    project_id: str
+    operations: list[QualityOperationInfo]
+
+
 class ExecutionResponse(BaseModel):
     execution_id: str
     request_id: str | None = None

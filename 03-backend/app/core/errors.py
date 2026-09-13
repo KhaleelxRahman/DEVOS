@@ -162,6 +162,30 @@ class ExecutionInvalidRequestException(AppException):
         )
 
 
+class QualityOperationNotSupportedException(AppException):
+    """Phase 2C: the requested quality operation is not configured for
+    this project (no real tooling detected in the workspace)."""
+
+    def __init__(self, message: str = "Quality operation is not supported by this project"):
+        super().__init__(
+            message=message,
+            code="QUALITY_OPERATION_NOT_SUPPORTED",
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        )
+
+
+class QualityToolUnavailableException(AppException):
+    """Phase 2C: the operation is configured, but its tool is not
+    installed on the execution server (honest upfront refusal)."""
+
+    def __init__(self, message: str = "Required tool is not installed on this server"):
+        super().__init__(
+            message=message,
+            code="QUALITY_TOOL_UNAVAILABLE",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status_code,

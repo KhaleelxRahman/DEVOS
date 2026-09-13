@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import ntpath
 import os
+import shutil
 import sys
 import uuid
 from datetime import datetime, timezone
@@ -29,6 +30,8 @@ from app.core.errors import (
     ExecutionInvalidWorkingDirectoryException,
     ProjectAccessDeniedException,
     ProjectNotFoundException,
+    QualityOperationNotSupportedException,
+    QualityToolUnavailableException,
 )
 from app.models.execution import Execution
 from app.models.user import User
@@ -60,6 +63,10 @@ SAFE_COMMANDS = frozenset({
 CONTROLLED_PREFIXES = (
     "npm install", "npm run build", "npm test", "pytest", "npm run lint",
     "python -c", "python3 -c",
+    # Phase 2C quality commands (exact, policy-approved vocabulary only):
+    "npm run type-check", "npm run typecheck", "npm run test",
+    "npx --yes tsc --noemit", "npx tsc --noemit",
+    "python -m pytest", "python3 -m pytest",
 )
 BLOCKED_SUBSTRINGS = (
     "shutdown", "reboot", "halt", "poweroff", "rm -rf /", "rm -rf /*",
@@ -269,6 +276,49 @@ class ExecutionService:
         return execution
 
     @staticmethod
+    async def run_quality_operation(
+        db: AsyncSession, user: User, project_id: str, operation: str,
+    ) -> Execution:
+        """Phase 2C: run a project quality operation through the Phase 2B
+        engine. Detection -> policy/ownership/path validation (via
+        create_execution) -> real process -> authoritative record."""
+        from app.schemas.execution import QUALITY_OPERATIONS
+        if operation not in QUALITY_OPERATIONS:
+            raise ExecutionInvalidTypeException(
+                f"Unsupported quality operation: {operation}")
+        try:
+            await ProjectService.get_for_user(db, project_id, user.id)
+        except ProjectNotFoundException as exc:
+            raise ExecutionInvalidProjectException(
+                "Invalid project for execution") from exc
+        except ProjectAccessDeniedException as exc:
+            raise ExecutionForbiddenException(
+                "Execution is forbidden for this project") from exc
+
+        from app.services.quality_service import QualityService
+        info = QualityService.detect_operation(project_id, operation)
+        if not info.supported:
+            raise QualityOperationNotSupportedException(
+                info.reason or (
+                    f"Quality operation {operation} is not supported by "
+                    "this project"))
+        if not info.available:
+            raise QualityToolUnavailableException(
+                info.reason or "Required tool is not installed on this server")
+
+        payload = ExecutionCreateRequest(
+            execution_type=operation,
+            command=info.command or "",
+            arguments=list(info.arguments or []),
+            working_directory=".",
+            workspace_id=project_id,
+        )
+        execution = await ExecutionService.create_execution(
+            db, user, project_id, payload)
+        return await ExecutionService.run_queued_execution(
+            db, user, project_id, execution.execution_id)
+
+    @staticmethod
     async def get_execution(
         db: AsyncSession, user: User, project_id: str, execution_id: str
     ) -> Execution:
@@ -282,6 +332,18 @@ class ExecutionService:
             raise ExecutionForbiddenException(
                 "Execution is forbidden for this project"
             ) from exc
+        result = await db.execute(
+            select(Execution).where(
+                Execution.execution_id == execution_id,
+                Execution.project_id == project_id,
+                Execution.user_id == user.id,
+            )
+        )
+        execution = result.scalars().first()
+        if execution is None:
+            raise ExecutionForbiddenException(
+                "Execution not found for this context")
+        return execution
 
     @staticmethod
     async def run_queued_execution(
@@ -335,6 +397,14 @@ class ExecutionService:
             ] + all_args
         elif os.name == "nt" and cmd_lower in {"python", "python3"}:
             exec_args = [sys.executable] + all_args
+        elif os.name == "nt" and cmd_lower in {"npm", "npx"}:
+            # npm/npx are .cmd shims on Windows: spawn them through the
+            # shell wrapper with the resolved full path.
+            resolved = shutil.which(cmd_name) or cmd_name
+            exec_args = [
+                os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c",
+                resolved,
+            ] + all_args
 
         proc = None
         stdout_chunks = []
@@ -374,7 +444,7 @@ class ExecutionService:
                 execution.exit_code = -1
                 await db.flush()
                 await db.commit()
-                return
+                return execution
 
             stdout_text = _bounded_decode(
                 stdout_bytes, stdout_chunks, max_out)
@@ -383,7 +453,8 @@ class ExecutionService:
 
             execution.stdout = stdout_text
             execution.stderr = stderr_text
-            execution.exit_code = proc.returncode or 0
+            execution.exit_code = (
+                proc.returncode if proc.returncode is not None else -1)
             execution.completed_at = datetime.now(timezone.utc)
             if execution.exit_code == 0:
                 execution.status = "COMPLETED"

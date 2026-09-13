@@ -15,13 +15,88 @@ from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.common import ApiResponse
-from app.schemas.execution import ExecutionCreateRequest, ExecutionResponse
+from app.schemas.execution import (
+    ExecutionCreateRequest,
+    ExecutionResponse,
+    QualityOperationsResponse,
+)
+from app.services.activity_service import ActivityService
 from app.services.execution_service import (
     ExecutionService,
     to_execution_response,
 )
+from app.services.quality_service import QualityService
 
 router = APIRouter(prefix="/projects/{project_id}/executions", tags=["executions"])
+
+
+@router.get(
+    "/quality/operations",
+    response_model=ApiResponse[QualityOperationsResponse],
+)
+async def list_quality_operations(
+    project_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Phase 2C: detect BUILD/TEST/LINT/TYPECHECK from the project's real
+    configuration. Reports supported/command/availability per operation."""
+    project = await _owned_project(db, project_id, current_user)
+    operations = QualityService.detect(project.id)
+    return ApiResponse(
+        success=True,
+        data=QualityOperationsResponse(
+            project_id=project.id, operations=operations),
+    )
+
+
+@router.post(
+    "/quality/{operation}",
+    response_model=ApiResponse[ExecutionResponse],
+    dependencies=[Depends(rate_limit(30, 60, "executions_quality"))],
+)
+async def run_quality_operation(
+    project_id: str,
+    operation: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Phase 2C: detect the operation's real command, validate it through
+    the Phase 2A policy, and run it as a real Phase 2B process. The returned
+    execution record IS the quality result (stdout/stderr/exit code)."""
+    execution = await ExecutionService.run_quality_operation(
+        db, current_user, project_id, operation.upper())
+    await ActivityService.record(
+        db,
+        user_id=current_user.id,
+        project_id=execution.project_id,
+        activity_type="quality.executed",
+        metadata={
+            "operation": execution.execution_type,
+            "status": execution.status,
+            "exit_code": execution.exit_code,
+            "execution_id": execution.execution_id,
+        },
+    )
+    return ApiResponse(success=True, data=to_execution_response(execution))
+
+
+async def _owned_project(db: AsyncSession, project_id: str, user: User):
+    from app.core.errors import (
+        ExecutionForbiddenException,
+        ExecutionInvalidProjectException,
+        ProjectAccessDeniedException,
+        ProjectNotFoundException,
+    )
+    from app.services.project_service import ProjectService
+    try:
+        return await ProjectService.get_for_user(db, project_id, user.id)
+    except ProjectNotFoundException as exc:
+        raise ExecutionInvalidProjectException(
+            "Invalid project for execution") from exc
+    except ProjectAccessDeniedException as exc:
+        raise ExecutionForbiddenException(
+            "Execution is forbidden for this project") from exc
 
 
 @router.post(

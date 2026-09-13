@@ -174,6 +174,25 @@ export const executionApi = {
     apiClient.get<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}`),
 };
 
+export interface QualityOperation {
+  operation: string;
+  supported: boolean;
+  available: boolean;
+  command: string | null;
+  arguments: string[] | null;
+  source: string | null;
+  reason: string | null;
+}
+
+export const qualityApi = {
+  listOperations: (projectId: string) =>
+    apiClient.get<{ project_id: string; operations: QualityOperation[] }>(
+      `/projects/${projectId}/executions/quality/operations`
+    ),
+  runOperation: (projectId: string, operation: string) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/quality/${operation}`),
+};
+
 export const activityApi = {
   list: () => apiClient.get<{ activities: Activity[] }>('/activity'),
 };

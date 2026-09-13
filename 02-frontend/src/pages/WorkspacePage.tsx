@@ -10,6 +10,7 @@ import { TerminalPanel } from '../components/workspace/TerminalPanel';
 import { GitPanel } from '../components/workspace/GitPanel';
 import { AIPanel } from '../components/workspace/AIPanel';
 import { TestingPanel } from '../components/workspace/TestingPanel';
+import { QualityPanel } from '../components/workspace/QualityPanel';
 import { BuilderPanel } from '../components/workspace/BuilderPanel';
 import { useToast } from '../components/common/Toast';
 import { useSeo } from '../hooks/useSeo';
@@ -207,6 +208,8 @@ export const WorkspacePage: React.FC = () => {
           <GitPanel projectId={activeProject.id} />
           <div style={{ borderTop: '1px solid var(--color-border)', margin: '8px 0' }} />
           <TestingPanel projectId={activeProject.id} />
+          <div style={{ borderTop: '1px solid var(--color-border)', margin: '8px 0' }} />
+          <QualityPanel projectId={activeProject.id} />
         </Card>
 
         <Card title="Builder" subtitle="Plan · Generate · Apply" style={{ ...panelStyle, gridColumn: '1 / -1', gridRow: '3', minHeight: 320 }}>
