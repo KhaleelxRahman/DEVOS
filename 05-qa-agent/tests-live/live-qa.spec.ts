@@ -108,7 +108,10 @@ async function register(page: Page): Promise<void> {
   await snapshot(page, "register-filled");
   await page.getByRole("button", { name: "Create Account" }).click();
   await expect(page).toHaveURL(/\/app\/dashboard$/, { timeout: 90_000 });
-  await expect(page.getByText("Your projects, context, and delivery pipeline")).toBeVisible({ timeout: 30_000 });
+  // Dashboard hero heading rendered by the deployed app (see DashboardPage.tsx).
+  await expect(
+    page.getByRole("heading", { name: /What do you want to build\?/i })
+  ).toBeVisible({ timeout: 30_000 });
 }
 
 async function login(page: Page): Promise<void> {
@@ -223,6 +226,10 @@ test.describe.serial("DEVOS Live Production QA", () => {
     );
     // Refresh the explorer tree so the new row appears.
     await page.getByRole("button", { name: "Refresh tree" }).click();
+    // Folders are collapsed after a tree refresh; expand "facts" so the
+    // nested row renders (same pattern as audit.spec.ts).
+    await page.locator('.tree-row[title="facts"]').first().click();
+    await page.waitForTimeout(600);
     const quotesRow = page.locator('.tree-row[title="facts/quotes.txt"]').last();
     await expect(quotesRow).toBeVisible({ timeout: 30_000 });
 
