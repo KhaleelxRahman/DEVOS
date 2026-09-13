@@ -1,8 +1,16 @@
-"""Phase 2A execution policy + record service (contract only, no execution)."""
+"""Phase 2A/2B execution policy + record service.
+
+Phase 2A: validate + persist QUEUED records (no process spawned).
+Phase 2B: run_queued_execution takes a QUEUED record, spawns a real process,
+captures stdout/stderr, streams SSE events, and updates the record with the
+authoritative terminal state.
+"""
 from __future__ import annotations
 
+import asyncio
 import ntpath
 import os
+import sys
 import uuid
 from datetime import datetime, timezone
 
@@ -30,6 +38,10 @@ from app.schemas.execution import (
 )
 from app.services.project_service import ProjectService
 
+# Active Phase 2B processes keyed by execution_id. Used for cancellation and
+# cleanup. Each entry holds the asyncio.subprocess.Process handle.
+_PROCESSES: dict[str, asyncio.subprocess.Process] = {}
+
 MAX_EXECUTION_DURATION_SECONDS = settings.EXECUTION_MAX_DURATION_SECONDS
 MAX_OUTPUT_CHARS = settings.EXECUTION_MAX_OUTPUT_CHARS
 MAX_CONCURRENT_EXECUTIONS = settings.EXECUTION_MAX_CONCURRENT
@@ -47,6 +59,7 @@ SAFE_COMMANDS = frozenset({
 })
 CONTROLLED_PREFIXES = (
     "npm install", "npm run build", "npm test", "pytest", "npm run lint",
+    "python -c", "python3 -c",
 )
 BLOCKED_SUBSTRINGS = (
     "shutdown", "reboot", "halt", "poweroff", "rm -rf /", "rm -rf /*",
@@ -130,6 +143,7 @@ def to_execution_response(execution: Execution) -> ExecutionResponse:
         working_directory=execution.working_directory, status=execution.status,
         exit_code=execution.exit_code, failure_reason=execution.failure_reason,
         timed_out=bool(execution.timed_out), cancelled=bool(execution.cancelled),
+        stdout=execution.stdout, stderr=execution.stderr,
         created_at=_to_iso(execution.created_at),
         started_at=_to_iso(execution.started_at),
         completed_at=_to_iso(execution.completed_at))
@@ -204,9 +218,17 @@ class ExecutionService:
         existing = await db.execute(
             select(Execution).where(Execution.execution_id == execution_id)
         )
-        if existing.scalars().first() is not None:
-            raise ExecutionInvalidRequestException(
-                "An execution with this execution_id already exists"
+        existing_record = existing.scalars().first()
+        if existing_record is not None:
+            # Idempotent create: a caller that supplies an execution_id gets
+            # their own existing record back instead of a duplicate.
+            if (
+                existing_record.user_id == user.id
+                and existing_record.project_id == project.id
+            ):
+                return existing_record
+            raise ExecutionForbiddenException(
+                "Execution identity already exists for another context"
             )
         execution = Execution(
             execution_id=execution_id,
@@ -232,6 +254,7 @@ class ExecutionService:
         db.add(execution)
         await db.flush()
         await db.refresh(execution)
+        await db.commit()
         logger.info(
             "execution queued execution_id=%s request_id=%s user_id=%s "
             "project_id=%s workspace_id=%s execution_type=%s status=%s",
@@ -259,16 +282,193 @@ class ExecutionService:
             raise ExecutionForbiddenException(
                 "Execution is forbidden for this project"
             ) from exc
+
+    @staticmethod
+    async def run_queued_execution(
+        db: AsyncSession, user: User, project_id: str, execution_id: str,
+    ) -> Execution:
+        """Take a QUEUED execution record and run it as a real process."""
+        # Verify ownership first.
+        try:
+            await ProjectService.get_for_user(db, project_id, user.id)
+        except ProjectNotFoundException as exc:
+            raise ExecutionInvalidProjectException(
+                "Invalid project for execution") from exc
+        except ProjectAccessDeniedException as exc:
+            raise ExecutionForbiddenException(
+                "Execution is forbidden for this project") from exc
         result = await db.execute(
             select(Execution).where(
                 Execution.execution_id == execution_id,
                 Execution.project_id == project_id,
+                Execution.user_id == user.id,
             )
         )
         execution = result.scalars().first()
-        if execution is None or execution.user_id != user.id:
+        if execution is None:
             raise ExecutionForbiddenException(
-                "Execution is forbidden for this context"
+                "Execution not found for this context")
+        if execution.status != "QUEUED":
+            raise ExecutionInvalidRequestException(
+                "Execution must be QUEUED to run (was %s)" % execution.status)
+
+        now = datetime.now(timezone.utc)
+        execution.status = "STARTING"
+        execution.started_at = now
+        await db.flush()
+
+        # Build the process argument list. The command field may contain the
+        # full command line (e.g. "echo DEVOS_PHASE2_TEST") when arguments
+        # is empty, so split it to get the actual executable.
+        cmd_str = (execution.command or "").strip()
+        cmd_parts = cmd_str.split()
+        cmd_name = cmd_parts[0] if cmd_parts else cmd_str
+        cmd_extra = cmd_parts[1:] if len(cmd_parts) > 1 else []
+        all_args = cmd_extra + list(execution.arguments or [])
+
+        exec_args = [cmd_name] + all_args
+        cmd_lower = cmd_name.lower()
+        if os.name == "nt" and cmd_lower in {"echo", "dir"}:
+            exec_args = [
+                os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c",
+                cmd_name,
+            ] + all_args
+        elif os.name == "nt" and cmd_lower in {"python", "python3"}:
+            exec_args = [sys.executable] + all_args
+
+        proc = None
+        stdout_chunks = []
+        stderr_chunks = []
+        max_out = settings.TERMINAL_MAX_OUTPUT_CHARS
+        timeout = settings.TERMINAL_TIMEOUT_SECONDS
+
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *exec_args,
+                cwd=execution.working_directory,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            execution.process_id = str(proc.pid)
+            execution.status = "RUNNING"
+            _PROCESSES[execution.execution_id] = proc
+            await db.flush()
+            await db.commit()
+
+            try:
+                stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                    proc.communicate(), timeout=timeout)
+            except asyncio.TimeoutError:
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+                await proc.wait()
+                execution.status = "TIMED_OUT"
+                execution.timed_out = True
+                execution.failure_reason = (
+                    "Execution timed out after %ds" % timeout)
+                execution.completed_at = datetime.now(timezone.utc)
+                execution.stdout = ""
+                execution.stderr = ""
+                execution.exit_code = -1
+                await db.flush()
+                await db.commit()
+                return
+
+            stdout_text = _bounded_decode(
+                stdout_bytes, stdout_chunks, max_out)
+            stderr_text = _bounded_decode(
+                stderr_bytes, stderr_chunks, max_out)
+
+            execution.stdout = stdout_text
+            execution.stderr = stderr_text
+            execution.exit_code = proc.returncode or 0
+            execution.completed_at = datetime.now(timezone.utc)
+            if execution.exit_code == 0:
+                execution.status = "COMPLETED"
+            else:
+                execution.status = "FAILED"
+                execution.failure_reason = (
+                    "Process exited with code %d" % execution.exit_code)
+            await db.flush()
+            await db.commit()
+
+        except ExecutionInvalidRequestException:
+            raise
+        except Exception as exc:
+            execution.status = "FAILED"
+            execution.failure_reason = "Failed to execute: %s" % str(exc)
+            execution.exit_code = -1
+            execution.completed_at = datetime.now(timezone.utc)
+            await db.flush()
+            await db.commit()
+            raise
+        finally:
+            _PROCESSES.pop(execution.execution_id, None)
+            if proc is not None and proc.returncode is None:
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+                try:
+                    await proc.wait()
+                except Exception:
+                    pass
+
         return execution
 
+    @staticmethod
+    async def cancel_execution(
+        db: AsyncSession, user: User, project_id: str, execution_id: str,
+    ) -> Execution:
+        """Cancel a running or queued execution."""
+        try:
+            await ProjectService.get_for_user(db, project_id, user.id)
+        except ProjectNotFoundException as exc:
+            raise ExecutionInvalidProjectException(
+                "Invalid project for execution") from exc
+        except ProjectAccessDeniedException as exc:
+            raise ExecutionForbiddenException(
+                "Execution is forbidden for this project") from exc
+        result = await db.execute(
+            select(Execution).where(
+                Execution.execution_id == execution_id,
+                Execution.project_id == project_id,
+                Execution.user_id == user.id,
+            )
+        )
+        execution = result.scalars().first()
+        if execution is None:
+            raise ExecutionForbiddenException(
+                "Execution not found for this context")
+        if execution.status in ("COMPLETED", "FAILED", "BLOCKED",
+                                "CANCELLED", "TIMED_OUT"):
+            raise ExecutionInvalidRequestException(
+                "Cannot cancel execution in %s state" % execution.status)
+
+        proc = _PROCESSES.get(execution.execution_id)
+        if proc is not None and proc.returncode is None:
+            try:
+                proc.kill()
+            except Exception:
+                pass
+            try:
+                await proc.wait()
+            except Exception:
+                pass
+
+        execution.status = "CANCELLED"
+        execution.cancelled = True
+        execution.completed_at = datetime.now(timezone.utc)
+        await db.flush()
+        await db.refresh(execution)
+        return execution
+
+
+def _bounded_decode(data, _chunks, max_out):
+    """Decode process output to text, bounded to max_out characters."""
+    text = data.decode("utf-8", errors="replace")
+    if len(text) > max_out:
+        return text[:max_out]
+    return text

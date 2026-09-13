@@ -1,7 +1,10 @@
-"""Phase 2A execution endpoints (foundation only — no process execution).
+"""Phase 2A/2B execution endpoints.
 
 POST /projects/{project_id}/executions — validate + persist a QUEUED record.
+POST /projects/{project_id}/executions/{execution_id}/run — run a QUEUED record.
+POST /projects/{project_id}/executions/{execution_id}/cancel — cancel an execution.
 GET  /projects/{project_id}/executions/{execution_id} — read an owned record.
+GET  /projects/{project_id}/executions/{execution_id}/result — fetch final result.
 """
 
 from fastapi import APIRouter, Depends
@@ -35,6 +38,40 @@ async def create_execution(
     execution = await ExecutionService.create_execution(
         db, current_user, project_id, payload
     )
+    return ApiResponse(success=True, data=to_execution_response(execution))
+
+
+@router.post(
+    "/{execution_id}/run",
+    response_model=ApiResponse[ExecutionResponse],
+    dependencies=[Depends(rate_limit(30, 60, "executions_run"))],
+)
+async def run_execution(
+    project_id: str,
+    execution_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Run a QUEUED execution as a real process. Updates the record with
+    authoritative state (STARTING -> RUNNING -> COMPLETED/FAILED/TIMED_OUT)
+    and captures stdout/stderr."""
+    execution = await ExecutionService.run_queued_execution(
+        db, current_user, project_id, execution_id)
+    return ApiResponse(success=True, data=to_execution_response(execution))
+
+
+@router.post(
+    "/{execution_id}/cancel",
+    response_model=ApiResponse[ExecutionResponse],
+)
+async def cancel_execution(
+    project_id: str,
+    execution_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    execution = await ExecutionService.cancel_execution(
+        db, current_user, project_id, execution_id)
     return ApiResponse(success=True, data=to_execution_response(execution))
 
 

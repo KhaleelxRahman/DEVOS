@@ -51,6 +51,8 @@ class Execution(Base):
     failure_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     timed_out: Mapped[bool] = mapped_column(nullable=False, default=False)
     cancelled: Mapped[bool] = mapped_column(nullable=False, default=False)
+    stdout: Mapped[str | None] = mapped_column(Text, nullable=True)
+    stderr: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         nullable=False,

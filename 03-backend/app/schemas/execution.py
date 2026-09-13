@@ -1,4 +1,4 @@
-"""Phase 2A execution foundation schemas (contract only — nothing executes)."""
+"""Phase 2A/2B execution schemas."""
 
 from typing import Literal
 
@@ -26,12 +26,16 @@ EXECUTION_TYPES: set[str] = {
     "CUSTOM_SAFE_COMMAND",
 }
 
-# Authoritative Phase 2A initial states. Extended states (INSTALLING,
-# BUILDING, RUNNING, COMPLETED, ...) belong to Phase 2B+ and are rejected
-# as input here.
-ExecutionStatus = Literal["QUEUED", "PREPARING", "BLOCKED", "FAILED"]
+# Phase 2B adds real process states on top of the Phase 2A initial states.
+ExecutionStatus = Literal[
+    "QUEUED", "PREPARING", "STARTING", "RUNNING",
+    "COMPLETED", "FAILED", "BLOCKED", "CANCELLED", "TIMED_OUT",
+]
 
-EXECUTION_STATUSES: set[str] = {"QUEUED", "PREPARING", "BLOCKED", "FAILED"}
+EXECUTION_STATUSES: set[str] = {
+    "QUEUED", "PREPARING", "STARTING", "RUNNING",
+    "COMPLETED", "FAILED", "BLOCKED", "CANCELLED", "TIMED_OUT",
+}
 
 
 class ExecutionCreateRequest(BaseModel):
@@ -43,6 +47,11 @@ class ExecutionCreateRequest(BaseModel):
     execution_id: str | None = Field(default=None, max_length=36)
     request_id: str | None = Field(default=None, max_length=64)
     parent_execution_id: str | None = Field(default=None, max_length=36)
+
+
+class ExecutionStreamEvent(BaseModel):
+    event: str
+    data: dict
 
 
 class ExecutionResponse(BaseModel):
@@ -62,6 +71,8 @@ class ExecutionResponse(BaseModel):
     failure_reason: str | None = None
     timed_out: bool = False
     cancelled: bool = False
+    stdout: str | None = None
+    stderr: str | None = None
     created_at: str | None = None
     started_at: str | None = None
     completed_at: str | None = None

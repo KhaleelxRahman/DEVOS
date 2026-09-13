@@ -132,6 +132,48 @@ export const terminalApi = {
   getHistory: (projectId: string) => apiClient.get<{ history: any[] }>(`/projects/${projectId}/terminal/history`),
 };
 
+export interface ExecutionCreateRequest {
+  execution_type: string;
+  command: string;
+  arguments?: string[] | null;
+  working_directory: string;
+  workspace_id: string;
+  execution_id?: string | null;
+}
+
+export interface ExecutionRecord {
+  execution_id: string;
+  request_id: string | null;
+  user_id: string;
+  project_id: string;
+  workspace_id: string;
+  execution_type: string;
+  command: string;
+  arguments: string[] | null;
+  working_directory: string;
+  status: string;
+  exit_code: number | null;
+  failure_reason: string | null;
+  timed_out: boolean;
+  cancelled: boolean;
+  stdout: string | null;
+  stderr: string | null;
+  created_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export const executionApi = {
+  create: (projectId: string, payload: ExecutionCreateRequest) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions`, payload),
+  run: (projectId: string, executionId: string) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}/run`),
+  cancel: (projectId: string, executionId: string) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}/cancel`),
+  get: (projectId: string, executionId: string) =>
+    apiClient.get<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}`),
+};
+
 export const activityApi = {
   list: () => apiClient.get<{ activities: Activity[] }>('/activity'),
 };
