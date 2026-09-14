@@ -33,14 +33,20 @@ router = APIRouter(prefix="/projects/{project_id}", tags=["preview"])
 )
 async def start_preview(
     project_id: str,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Phase 2D: start the project's real dev server and wait until it is
     reachable (READY) with a real connection check. Returns the preview
-    info including the backend proxy URL for the browser iframe."""
+    info including the backend proxy URL for the browser iframe. The public
+    base URL is derived from the incoming request so the proxy URL is
+    correct in every environment (localhost, Render, any host)."""
+    host = request.headers.get("host") or request.url.netloc
+    proto = request.headers.get("x-forwarded-proto") or request.url.scheme
+    public_base_url = f"{proto}://{host}"
     execution = await ExecutionService.start_dev_server(
-        db, current_user, project_id)
+        db, current_user, project_id, public_base_url=public_base_url)
     await ActivityService.record(
         db,
         user_id=current_user.id,

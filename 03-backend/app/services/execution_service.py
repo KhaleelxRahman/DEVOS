@@ -518,6 +518,7 @@ class ExecutionService:
     @staticmethod
     async def start_dev_server(
         db: AsyncSession, user: User, project_id: str,
+        public_base_url: str | None = None,
     ) -> Execution:
         """Phase 2D: start a project dev server as a long-lived process.
 
@@ -669,8 +670,9 @@ class ExecutionService:
                 # backend proxy URL the browser iframe will load.
                 execution.status = "READY"
                 execution.preview_port = expected_port
+                base = (public_base_url or settings.PUBLIC_BACKEND_URL).rstrip("/")
                 execution.preview_url = (
-                    f"{settings.PUBLIC_BACKEND_URL}/api/v1/projects/{project_id}"
+                    f"{base}/api/v1/projects/{project_id}"
                     f"/executions/{execution.execution_id}/preview/")
                 execution.stdout = _bounded_decode(
                     b"".join(stdout_chunks), None, max_out)
