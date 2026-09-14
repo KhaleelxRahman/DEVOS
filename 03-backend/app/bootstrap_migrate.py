@@ -39,8 +39,11 @@ from app.db.session import engine
 _BACKEND_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _ALEMBIC_INI = os.path.join(_BACKEND_ROOT, "alembic.ini")
 
-# Last create-table-only revision. Everything up to here only creates
-# objects that create_all already created on a legacy database.
+# Last safe stamp point for a legacy create_all-provisioned database: the
+# artifacts create-table revision. Stamping here skips only create-table
+# migrations; the column-level conversation-controls migration (9c8d7e6f5a4b)
+# and the idempotent executions migration (3e7e5a9c4f1b) still run on the
+# normal upgrade path.
 LEGACY_STAMP_REVISION = "8b7c6d5e4f3a"
 
 

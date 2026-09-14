@@ -94,7 +94,7 @@ def test_bootstrap_upgrades_fresh_database(tmp_path):
     result = _run_bootstrap(db_path)
     assert result.returncode == 0, result.stderr[-1000:]
     assert "is_pinned" in _conversation_columns(db_path)
-    assert _alembic_head(db_path) == "9c8d7e6f5a4b"
+    assert _alembic_head(db_path) == "3e7e5a9c4f1b"
 
 
 def test_bootstrap_upgrades_legacy_database(tmp_path):
@@ -107,7 +107,7 @@ def test_bootstrap_upgrades_legacy_database(tmp_path):
     result = _run_bootstrap(db_path)
     assert result.returncode == 0, result.stderr[-1000:]
     assert "is_pinned" in _conversation_columns(db_path)
-    assert _alembic_head(db_path) == "9c8d7e6f5a4b"
+    assert _alembic_head(db_path) == "3e7e5a9c4f1b"
 
 
 def test_bootstrap_is_idempotent(tmp_path):
@@ -118,5 +118,5 @@ def test_bootstrap_is_idempotent(tmp_path):
     assert first.returncode == 0, first.stderr[-1000:]
     second = _run_bootstrap(db_path)
     assert second.returncode == 0, second.stderr[-1000:]
-    assert _alembic_head(db_path) == "9c8d7e6f5a4b"
+    assert _alembic_head(db_path) == "3e7e5a9c4f1b"
     assert "is_pinned" in _conversation_columns(db_path)

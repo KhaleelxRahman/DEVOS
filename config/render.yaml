@@ -3,7 +3,7 @@ services:
     name: devos-backend
     runtime: python
     rootDir: 03-backend
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && (git rev-parse HEAD > COMMIT_SHA 2>/dev/null || echo unknown > COMMIT_SHA)
     startCommand: sh -c "python -m app.bootstrap_migrate && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: ENVIRONMENT
