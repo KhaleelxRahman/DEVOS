@@ -8,6 +8,7 @@ from app.api.v1.executions import router as executions_router
 from app.api.v1.files import router as files_router
 from app.api.v1.git import router as git_router
 from app.api.v1.github import router as github_router
+from app.api.v1.preview import router as preview_router
 from app.api.v1.projects import router as projects_router
 from app.api.v1.public_forms import router as public_forms_router
 from app.api.v1.terminal import router as terminal_router
@@ -28,4 +29,5 @@ api_v1_router.include_router(activity_router)
 api_v1_router.include_router(testing_router)
 api_v1_router.include_router(public_forms_router)
 api_v1_router.include_router(builder_router)
+api_v1_router.include_router(preview_router)
 api_v1_router.include_router(executions_router)

@@ -16,6 +16,8 @@ services:
         value: '["https://devos-ebon.vercel.app","https://devos-khaleelxrahmans-projects.vercel.app"]'
       - key: FRONTEND_APP_URL
         value: https://devos-ebon.vercel.app
+      - key: PUBLIC_BACKEND_URL
+        value: https://devos-backend-f3ub.onrender.com
       - key: GITHUB_REDIRECT_URI
         value: https://devos-backend-f3ub.onrender.com/api/v1/github/callback
       - key: GITHUB_CLIENT_ID

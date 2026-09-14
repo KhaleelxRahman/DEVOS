@@ -50,6 +50,15 @@ class Settings(BaseSettings):
     # --- Project workspace storage ---
     PROJECTS_STORAGE_PATH: str = "./data/projects"
 
+    # --- Phase 2D dev-server previews ---
+    # Public origin of THIS backend as reachable from the browser (used to
+    # build the preview proxy URL returned to the iframe). Set per deployment
+    # (Render URL in production), defaults to localhost for local dev.
+    PUBLIC_BACKEND_URL: str = "http://localhost:8000"
+    # How long a started dev server may take to become reachable before the
+    # preview is marked FAILED (real port probe, in seconds).
+    PREVIEW_READY_TIMEOUT_SECONDS: int = 60
+
     # --- Terminal sandbox ---
     TERMINAL_TIMEOUT_SECONDS: int = 30
     TERMINAL_MAX_OUTPUT_CHARS: int = 20000

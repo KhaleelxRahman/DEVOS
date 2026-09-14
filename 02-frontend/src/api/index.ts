@@ -193,6 +193,27 @@ export const qualityApi = {
     apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/quality/${operation}`),
 };
 
+export interface PreviewInfo {
+  execution_id: string;
+  project_id: string;
+  url: string | null;
+  port: number | null;
+  status: string;
+  exit_code: number | null;
+  failure_reason: string | null;
+  stdout: string | null;
+  stderr: string | null;
+}
+
+export const previewApi = {
+  start: (projectId: string) =>
+    apiClient.post<PreviewInfo>(`/projects/${projectId}/preview`),
+  status: (projectId: string) =>
+    apiClient.get<PreviewInfo>(`/projects/${projectId}/preview/status`),
+  stop: (projectId: string) =>
+    apiClient.post<PreviewInfo>(`/projects/${projectId}/preview/stop`),
+};
+
 export const activityApi = {
   list: () => apiClient.get<{ activities: Activity[] }>('/activity'),
 };

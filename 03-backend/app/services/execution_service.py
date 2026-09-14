@@ -4,6 +4,9 @@ Phase 2A: validate + persist QUEUED records (no process spawned).
 Phase 2B: run_queued_execution takes a QUEUED record, spawns a real process,
 captures stdout/stderr, streams SSE events, and updates the record with the
 authoritative terminal state.
+Phase 2D: start_dev_server runs the SAME engine for long-lived dev-server
+previews (non-blocking, registered for cancel/cleanup, READY only after a
+real reachability check).
 """
 from __future__ import annotations
 
@@ -12,6 +15,7 @@ import ntpath
 import os
 import shutil
 import sys
+import time
 import uuid
 from datetime import datetime, timezone
 
@@ -45,6 +49,11 @@ from app.services.project_service import ProjectService
 # cleanup. Each entry holds the asyncio.subprocess.Process handle.
 _PROCESSES: dict[str, asyncio.subprocess.Process] = {}
 
+# Phase 2D preview registry keyed by project_id -> live DEV_SERVER execution
+# row. Mirrors _PROCESSES (one live server max per project); entries are
+# removed on stop/crash/session-end so no orphan survives.
+_PREVIEW_EXECUTIONS: dict[str, "Execution"] = {}
+
 MAX_EXECUTION_DURATION_SECONDS = settings.EXECUTION_MAX_DURATION_SECONDS
 MAX_OUTPUT_CHARS = settings.EXECUTION_MAX_OUTPUT_CHARS
 MAX_CONCURRENT_EXECUTIONS = settings.EXECUTION_MAX_CONCURRENT
@@ -67,6 +76,9 @@ CONTROLLED_PREFIXES = (
     "npm run type-check", "npm run typecheck", "npm run test",
     "npx --yes tsc --noemit", "npx tsc --noemit",
     "python -m pytest", "python3 -m pytest",
+    # Phase 2D dev-server preview commands (exact, policy-approved vocabulary):
+    "npm run dev", "npm run start", "npm start",
+    "python -m http.server", "python3 -m http.server",
 )
 BLOCKED_SUBSTRINGS = (
     "shutdown", "reboot", "halt", "poweroff", "rm -rf /", "rm -rf /*",
@@ -139,6 +151,41 @@ def _to_iso(value: datetime | None) -> str | None:
         value = value.replace(tzinfo=timezone.utc)
     return value.isoformat()
 
+
+def _build_exec_args(command: str, arguments: list[str] | None) -> list[str]:
+    """Build the OS-correct process argument list for a validated command.
+
+    Shared by the blocking runner (Phase 2B) and the long-running preview
+    dev-server runner (Phase 2D) so both use the exact same process-spawn
+    path. The `command` field may carry the full command line when
+    `arguments` is empty (e.g. "echo DEVOS_PHASE2_TEST"), so it is split to
+    find the executable. Windows npm/npx shims are run through the shell
+    wrapper with the resolved full path, identical to the quality runners.
+    """
+    cmd_str = (command or "").strip()
+    cmd_parts = cmd_str.split()
+    cmd_name = cmd_parts[0] if cmd_parts else cmd_str
+    cmd_extra = cmd_parts[1:] if len(cmd_parts) > 1 else []
+    all_args = cmd_extra + list(arguments or [])
+
+    exec_args = [cmd_name] + all_args
+    cmd_lower = cmd_name.lower()
+    if os.name == "nt" and cmd_lower in {"echo", "dir"}:
+        exec_args = [
+            os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c",
+            cmd_name,
+        ] + all_args
+    elif os.name == "nt" and cmd_lower in {"python", "python3"}:
+        exec_args = [sys.executable] + all_args
+    elif os.name == "nt" and cmd_lower in {"npm", "npx"}:
+        resolved = shutil.which(cmd_name) or cmd_name
+        exec_args = [
+            os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c",
+            resolved,
+        ] + all_args
+    return exec_args
+
+
 def to_execution_response(execution: Execution) -> ExecutionResponse:
     return ExecutionResponse(
         execution_id=execution.execution_id, request_id=execution.request_id,
@@ -151,6 +198,8 @@ def to_execution_response(execution: Execution) -> ExecutionResponse:
         exit_code=execution.exit_code, failure_reason=execution.failure_reason,
         timed_out=bool(execution.timed_out), cancelled=bool(execution.cancelled),
         stdout=execution.stdout, stderr=execution.stderr,
+        preview_port=execution.preview_port,
+        preview_url=execution.preview_url,
         created_at=_to_iso(execution.created_at),
         started_at=_to_iso(execution.started_at),
         completed_at=_to_iso(execution.completed_at))
@@ -379,32 +428,9 @@ class ExecutionService:
         execution.started_at = now
         await db.flush()
 
-        # Build the process argument list. The command field may contain the
-        # full command line (e.g. "echo DEVOS_PHASE2_TEST") when arguments
-        # is empty, so split it to get the actual executable.
-        cmd_str = (execution.command or "").strip()
-        cmd_parts = cmd_str.split()
-        cmd_name = cmd_parts[0] if cmd_parts else cmd_str
-        cmd_extra = cmd_parts[1:] if len(cmd_parts) > 1 else []
-        all_args = cmd_extra + list(execution.arguments or [])
-
-        exec_args = [cmd_name] + all_args
-        cmd_lower = cmd_name.lower()
-        if os.name == "nt" and cmd_lower in {"echo", "dir"}:
-            exec_args = [
-                os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c",
-                cmd_name,
-            ] + all_args
-        elif os.name == "nt" and cmd_lower in {"python", "python3"}:
-            exec_args = [sys.executable] + all_args
-        elif os.name == "nt" and cmd_lower in {"npm", "npx"}:
-            # npm/npx are .cmd shims on Windows: spawn them through the
-            # shell wrapper with the resolved full path.
-            resolved = shutil.which(cmd_name) or cmd_name
-            exec_args = [
-                os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c",
-                resolved,
-            ] + all_args
+        # Build the process argument list through the shared builder (the
+        # exact same path the Phase 2D preview runner uses).
+        exec_args = _build_exec_args(execution.command, execution.arguments)
 
         proc = None
         stdout_chunks = []
@@ -490,6 +516,245 @@ class ExecutionService:
         return execution
 
     @staticmethod
+    async def start_dev_server(
+        db: AsyncSession, user: User, project_id: str,
+    ) -> Execution:
+        """Phase 2D: start a project dev server as a long-lived process.
+
+        Reuses the canonical engine: ownership (get_for_user), policy
+        (create_execution -> BLOCKED/contained working directory), and the
+        shared process-spawn builder. Unlike the blocking quality runner the
+        process is NOT awaited to exit — it is registered in ``_PROCESSES``
+        so stop/cancel/session-end can kill it, then polled with a real
+        connection check until the port is reachable (READY).
+
+        Lifecycle: QUEUED -> STARTING -> RUNNING -> READY (reachable),
+        or FAILED / TIMED_OUT when the server exits early or never binds.
+        """
+        # 1. Cancel any existing preview execution for this project first so a
+        #    project never owns two live server processes.
+        existing = await ExecutionService.get_active_preview(db, user, project_id)
+        if existing is not None and _PROCESSES.get(existing.execution_id) is not None:
+            await ExecutionService.cancel_execution(
+                db, user, project_id, existing.execution_id)
+
+        from app.services.preview_service import PreviewService
+        info = PreviewService.detect_start(project_id)
+        if not info.supported:
+            from app.core.errors import PreviewNotSupportedException
+            raise PreviewNotSupportedException(info.reason)
+        if not info.available:
+            from app.core.errors import QualityToolUnavailableException
+            raise QualityToolUnavailableException(
+                info.reason or "Required tool is not installed on this server")
+
+        payload = ExecutionCreateRequest(
+            execution_type="DEV_SERVER",
+            command=info.command or "",
+            arguments=list(info.arguments or []),
+            working_directory=".",
+            workspace_id=project_id,
+        )
+        execution = await ExecutionService.create_execution(
+            db, user, project_id, payload)
+        if execution.status == "BLOCKED":
+            return execution
+
+        # 2. Resolve the real bound port: prefer the detected/configured
+        #    port, otherwise allocate a free one from the preview range.
+        expected_port = info.port
+        if expected_port is None:
+            expected_port = PreviewService.allocate_port()
+        # Port injection is command-specific: npm scripts take the `--port`
+        # flag; Python's http.server takes the port positionally. Passing
+        # the wrong shape makes the dev server exit before it can bind.
+        if info.command and info.command.strip().lower().startswith("npm"):
+            execution.arguments = list(execution.arguments or []) + [
+                "--port", str(expected_port),
+            ]
+        else:
+            execution.arguments = list(execution.arguments or []) + [
+                str(expected_port),
+            ]
+
+        from app.core.errors import PreviewLaunchFailedException
+        proc = None
+        stdout_chunks: list[bytes] = []
+        stderr_chunks: list[bytes] = []
+        max_out = settings.TERMINAL_MAX_OUTPUT_CHARS
+        drain_tasks: list[asyncio.Task] = []
+
+        async def _drain(stream) -> None:
+            try:
+                while True:
+                    chunk = await stream.read(1024)
+                    if not chunk:
+                        break
+                    stdout_chunks.append(chunk)
+                    if len(stdout_chunks) > 1024:
+                        stdout_chunks.pop(0)
+            except Exception:
+                pass
+
+        try:
+            execution.status = "STARTING"
+            execution.started_at = datetime.now(timezone.utc)
+            await db.flush()
+
+            proc = await asyncio.create_subprocess_exec(
+                *_build_exec_args(execution.command, execution.arguments),
+                cwd=execution.working_directory,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            execution.process_id = str(proc.pid)
+            execution.status = "RUNNING"
+            _PROCESSES[execution.execution_id] = proc
+            _PREVIEW_EXECUTIONS[project_id] = execution
+            await db.flush()
+            await db.commit()
+
+            # Drain stdout/stderr continuously so the pipe never fills.
+            drain_tasks = [
+                asyncio.create_task(_drain(proc.stdout)),
+                asyncio.create_task(_drain(proc.stderr)),
+            ]
+        except Exception as exc:
+            execution.status = "FAILED"
+            execution.failure_reason = "Failed to start dev server: %s" % str(exc)
+            execution.exit_code = -1
+            execution.completed_at = datetime.now(timezone.utc)
+            await db.flush()
+            await db.commit()
+            raise PreviewLaunchFailedException(execution.failure_reason)
+
+        # 3. Real reachability check: poll until the port accepts a TCP
+        #    connection, the process exits, or the grace period elapses.
+        deadline = time.monotonic() + settings.PREVIEW_READY_TIMEOUT_SECONDS
+        last_error: str = ""
+        while time.monotonic() < deadline:
+            if proc.returncode is not None:
+                await asyncio.gather(*drain_tasks)
+                stdout_text = _bounded_decode(
+                    b"".join(stdout_chunks), None, max_out)
+                stderr_text = _bounded_decode(
+                    b"".join(stderr_chunks), None, max_out)
+                last_error = (
+                    "dev server exited (code %s) before becoming reachable"
+                    % proc.returncode)
+                execution.status = "FAILED"
+                execution.failure_reason = last_error
+                execution.exit_code = proc.returncode
+                execution.completed_at = datetime.now(timezone.utc)
+                execution.stdout = stdout_text
+                execution.stderr = stderr_text
+                await db.flush()
+                await db.commit()
+                raise PreviewLaunchFailedException(
+                    f"{last_error} | stdout={stdout_text!r} stderr={stderr_text!r}")
+            try:
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection("127.0.0.1", expected_port),
+                    timeout=2.0)
+                writer.close()
+                try:
+                    await writer.wait_closed()
+                except Exception:
+                    pass
+                # Small settle so the dev server's connection handler fully
+                # resets after the probe's immediate close before we declare
+                # READY (otherwise the very next request can be dropped).
+                await asyncio.sleep(0.3)
+                # Reachable: mark READY with the real bound port and the
+                # backend proxy URL the browser iframe will load.
+                execution.status = "READY"
+                execution.preview_port = expected_port
+                execution.preview_url = (
+                    f"{settings.PUBLIC_BACKEND_URL}/api/v1/projects/{project_id}"
+                    f"/executions/{execution.execution_id}/preview/")
+                execution.stdout = _bounded_decode(
+                    b"".join(stdout_chunks), None, max_out)
+                execution.stderr = _bounded_decode(
+                    b"".join(stderr_chunks), None, max_out)
+                await db.flush()
+                await db.commit()
+                return execution
+            except Exception as exc:
+                last_error = str(exc)
+            await asyncio.sleep(0.5)
+
+        # 4. Never became reachable: kill, mark failed, no orphan.
+        if proc is not None:
+            try:
+                proc.kill()
+            except Exception:
+                pass
+            try:
+                await proc.wait()
+            except Exception:
+                pass
+        await asyncio.gather(*drain_tasks) if drain_tasks else None
+        _PROCESSES.pop(execution.execution_id, None)
+        _PREVIEW_EXECUTIONS.pop(project_id, None)
+        execution.status = "FAILED"
+        execution.failure_reason = (
+            "Dev server did not become reachable on port %d within %ds (%s)"
+            % (expected_port, settings.PREVIEW_READY_TIMEOUT_SECONDS, last_error))
+        execution.exit_code = -1
+        execution.completed_at = datetime.now(timezone.utc)
+        execution.stdout = _bounded_decode(b"".join(stdout_chunks), None, max_out)
+        execution.stderr = _bounded_decode(b"".join(stderr_chunks), None, max_out)
+        await db.flush()
+        await db.commit()
+        raise PreviewLaunchFailedException(execution.failure_reason)
+
+    @staticmethod
+    async def get_active_preview(
+        db: AsyncSession, user: User, project_id: str,
+    ) -> Execution | None:
+        """Return the most recent STARTING/RUNNING/READY DEV_SERVER execution
+        for a project, or None. Ownership is enforced by the project lookup."""
+        from app.core.errors import (
+            ProjectAccessDeniedException,
+            ProjectNotFoundException,
+        )
+        try:
+            await ProjectService.get_for_user(db, project_id, user.id)
+        except (ProjectNotFoundException, ProjectAccessDeniedException):
+            return None
+        result = await db.execute(
+            select(Execution)
+            .where(
+                Execution.project_id == project_id,
+                Execution.user_id == user.id,
+                Execution.execution_type == "DEV_SERVER",
+                Execution.status.in_(["STARTING", "RUNNING", "READY"]),
+            )
+            .order_by(Execution.created_at.desc())
+            .limit(1)
+        )
+        return result.scalars().first()
+
+    @staticmethod
+    async def cleanup_active_previews() -> int:
+        """Session-end safety net: kill every live preview process so no
+        dev server survives the backend process (no orphans)."""
+        killed = 0
+        for _exec_id, proc in list(_PROCESSES.items()):
+            if proc is None:
+                continue
+            try:
+                if proc.returncode is None:
+                    proc.kill()
+                    killed += 1
+                await asyncio.wait_for(proc.wait(), timeout=3.0)
+            except Exception:
+                pass
+        _PROCESSES.clear()
+        _PREVIEW_EXECUTIONS.clear()
+        return killed
+
+    @staticmethod
     async def cancel_execution(
         db: AsyncSession, user: User, project_id: str, execution_id: str,
     ) -> Execution:
@@ -528,11 +793,14 @@ class ExecutionService:
                 await proc.wait()
             except Exception:
                 pass
+        _PROCESSES.pop(execution.execution_id, None)
+        _PREVIEW_EXECUTIONS.pop(project_id, None)
 
         execution.status = "CANCELLED"
         execution.cancelled = True
         execution.completed_at = datetime.now(timezone.utc)
         await db.flush()
+        await db.commit()
         await db.refresh(execution)
         return execution
 

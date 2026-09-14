@@ -53,6 +53,11 @@ class Execution(Base):
     cancelled: Mapped[bool] = mapped_column(nullable=False, default=False)
     stdout: Mapped[str | None] = mapped_column(Text, nullable=True)
     stderr: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Phase 2D dev-server preview fields: populated when a DEV_SERVER
+    # execution is marked READY (real reachability check passed) and cleared
+    # on stop. One preview per execution row — no second/parallel store.
+    preview_port: Mapped[int | None] = mapped_column(nullable=True)
+    preview_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         nullable=False,

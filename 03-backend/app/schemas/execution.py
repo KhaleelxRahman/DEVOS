@@ -37,6 +37,15 @@ EXECUTION_STATUSES: set[str] = {
     "COMPLETED", "FAILED", "BLOCKED", "CANCELLED", "TIMED_OUT",
 }
 
+# Phase 2D dev-server preview states. A preview execution starts RUNNING,
+# becomes READY only after a real reachability check, and ends STOPPED /
+# CANCELLED / FAILED / TIMED_OUT. CANCELLED is the stop path's canonical
+# terminal state (stop reuses the Phase 2B cancel/kill machinery).
+PREVIEW_STATUSES: set[str] = {
+    "STARTING", "RUNNING", "READY", "STOPPED",
+    "FAILED", "CANCELLED", "TIMED_OUT",
+}
+
 
 class ExecutionCreateRequest(BaseModel):
     execution_type: str = Field(min_length=1, max_length=32)
@@ -103,8 +112,38 @@ class ExecutionResponse(BaseModel):
     cancelled: bool = False
     stdout: str | None = None
     stderr: str | None = None
+    # Phase 2D dev-server preview fields (populated when status == READY).
+    preview_port: int | None = None
+    preview_url: str | None = None
     created_at: str | None = None
     started_at: str | None = None
     completed_at: str | None = None
 
     model_config = {"from_attributes": True}
+
+
+class PreviewInfo(BaseModel):
+    """Phase 2D preview status payload.
+
+    execution_id  — the DEV_SERVER execution row backing this preview.
+    url           — backend proxy URL the browser iframe will load.
+    port          — real TCP port the dev server bound to, once reachable.
+    status        — STARTING / RUNNING / READY / STOPPED / FAILED / CANCELLED.
+    exit_code     — process exit code when the preview ended.
+    stdout        — live dev-server output captured so far.
+    stderr        — live dev-server error output captured so far.
+    """
+
+    execution_id: str
+    project_id: str
+    url: str | None = None
+    port: int | None = None
+    status: str
+    exit_code: int | None = None
+    failure_reason: str | None = None
+    stdout: str | None = None
+    stderr: str | None = None
+
+
+class StartPreviewResponse(BaseModel):
+    preview: PreviewInfo

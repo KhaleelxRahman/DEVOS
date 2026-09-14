@@ -186,6 +186,41 @@ class QualityToolUnavailableException(AppException):
         )
 
 
+class PreviewNotSupportedException(AppException):
+    """Phase 2D: the project has no configured start/dev command
+    (no real dev-tooling detected in the workspace)."""
+
+    def __init__(self, message: str = "No dev server start command detected in this project"):
+        super().__init__(
+            message=message,
+            code="PREVIEW_NOT_SUPPORTED",
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        )
+
+
+class PreviewLaunchFailedException(AppException):
+    """Phase 2D: the dev server process could not be started or never
+    became reachable (real port probe failed)."""
+
+    def __init__(self, message: str = "Dev server failed to start"):
+        super().__init__(
+            message=message,
+            code="PREVIEW_LAUNCH_FAILED",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+class PreviewNotFoundException(AppException):
+    """Phase 2D: no running/ready preview exists for this execution."""
+
+    def __init__(self, message: str = "Preview not found"):
+        super().__init__(
+            message=message,
+            code="PREVIEW_NOT_FOUND",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status_code,

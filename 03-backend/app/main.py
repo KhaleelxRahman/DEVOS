@@ -59,6 +59,15 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
     logger.info("DEVOS v1.0.0 database schema verified/created")
     yield
+    # Phase 2D: kill any live dev-server preview processes so no orphan
+    # survives the backend process (session-end safety net).
+    try:
+        from app.services.execution_service import ExecutionService
+        killed = await ExecutionService.cleanup_active_previews()
+        if killed:
+            logger.info("preview cleanup: killed %d live dev-server process(es)", killed)
+    except Exception:
+        logger.exception("preview cleanup failed")
     await engine.dispose()
 
 
