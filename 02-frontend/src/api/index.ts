@@ -144,6 +144,9 @@ export interface ExecutionCreateRequest {
 export interface ExecutionRecord {
   execution_id: string;
   request_id: string | null;
+  parent_execution_id?: string | null;
+  retry_count?: number;
+  process_id?: string | null;
   user_id: string;
   project_id: string;
   workspace_id: string;
@@ -170,6 +173,11 @@ export const executionApi = {
     apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}/run`),
   cancel: (projectId: string, executionId: string) =>
     apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}/cancel`),
+  retry: (projectId: string, executionId: string) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}/retry`),
+  // Phase 2F: execution history for the project, newest first.
+  list: (projectId: string, limit = 50) =>
+    apiClient.get<ExecutionRecord[]>(`/projects/${projectId}/executions?limit=${limit}`),
   get: (projectId: string, executionId: string) =>
     apiClient.get<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}`),
 };

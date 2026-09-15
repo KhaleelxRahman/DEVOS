@@ -376,6 +376,38 @@ class ExecutionService:
             db, user, project_id, execution.execution_id)
 
     @staticmethod
+    async def list_executions(
+        db: AsyncSession, user: User, project_id: str, limit: int = 50,
+    ) -> list[Execution]:
+        """Phase 2F: execution history for an owned project, newest first.
+
+        Reads the same Execution rows the Phase 2A-2E engine records — this
+        is the single source of truth; no separate history store exists.
+        Ownership is enforced twice: the project must belong to the caller,
+        AND every returned row must match both user_id and project_id.
+        """
+        try:
+            await ProjectService.get_for_user(db, project_id, user.id)
+        except ProjectNotFoundException as exc:
+            raise ExecutionInvalidProjectException(
+                "Invalid project for execution"
+            ) from exc
+        except ProjectAccessDeniedException as exc:
+            raise ExecutionForbiddenException(
+                "Execution is forbidden for this project"
+            ) from exc
+        result = await db.execute(
+            select(Execution)
+            .where(
+                Execution.project_id == project_id,
+                Execution.user_id == user.id,
+            )
+            .order_by(Execution.created_at.desc())
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
+    @staticmethod
     async def get_execution(
         db: AsyncSession, user: User, project_id: str, execution_id: str
     ) -> Execution:

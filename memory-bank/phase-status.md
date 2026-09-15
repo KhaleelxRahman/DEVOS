@@ -72,6 +72,27 @@ Verified deployed revision: `074dac0` (`074dac05266a689940637d99cf96a8ac905d2c39
 - **Residual UX gap (unchanged, honest):** the deployed Workspace terminal UI still exposes **no** Stop/Cancel and **no** Retry control (`02-frontend/src/components/workspace/TerminalPanel.tsx` has only New terminal / Copy / Run command / Clear). Phase 2E cancellation + retry are therefore **API-verified in production (real HTTP 200/422/403 + real state transitions), not browser-UI-verified** — there is no supported production UI control to click. This is a UX/UI gap to be closed by the later UX phase, not a backend defect.
 - **No orphan policy:** stop / cancel / session-end / timeout all kill the real process and clear the in-memory registries; a subsequent start obtains a fresh port, proving the previous bind was released.
 
+## Phase 2F — History / Observability / UX (2026-09-15)
+
+**Goal:** surface real execution history to the user, reading ONLY the Execution rows 2A–2E already record (no second store).
+
+| Capability | Implementation | Status | Evidence |
+| --- | --- | --- | --- |
+| **history (list)** | New `GET /api/v1/projects/{id}/executions?limit=1..100` (default 50), newest first. `ExecutionService.list_executions()` selects the real `executions` rows filtered by `project_id` AND `user_id` — the same records the 2A–2E engine writes. No new table, no parallel store. | PASS | `test_history_lists_real_executions_newest_first`: 2 real created records returned newest-first with full contract (type/command/args/status/exit/created_at/retry_count/project_id) |
+| **details (drill-in)** | Reuses the existing `GET /executions/{execution_id}` owned-record read; the new `HistoryPanel` fetches it on expand. | PASS | `test_history_entry_reflects_real_run_with_logs` (detail returns the run's record) |
+| **logs (full stdout/stderr)** | `ExecutionResponse` already carries the real captured `stdout`/`stderr`; HistoryPanel renders both verbatim in `<pre>` blocks. | PASS | pytest asserts real `DEVOS_PHASE2F_OK` in detail stdout and real `BOOM` stderr non-empty for the failing run |
+| **failure surfaced** | Colored status (FAILED/TIMED_OUT = error color), `failure_reason` shown inline in the list row and in the drill-in with timed_out/cancelled attribution. | PASS | pytest asserts FAILED + exit 42 + failure_reason present on the history row |
+| **duration** | Computed client-side from the real recorded `started_at` → `completed_at` timestamps (no fabricated timing). | PASS | pytest parses the recorded ISO timestamps and asserts a valid non-negative duration |
+| **status** | Live status per entry, color-coded; RUNNING entries expose a Cancel control, terminal FAILED/CANCELLED/TIMED_OUT entries expose Retry (closes the Phase 2E residual UX gap). | PASS | pytest attempt-tracking test proves retry children + original increments appear in history; controls call the production-verified `/cancel` and `/retry` endpoints |
+| **attempt tracking** | `retry_count` + `parent_execution_id` rendered per entry (attempt number, parent link). | PASS | `test_history_surfaces_attempt_tracking`: child `retry_count=1`, `parent_execution_id=orig`, original preserved FAILED with `retry_count=1` |
+| **ownership** | Enforced twice in `list_executions`: project must belong to caller (`ProjectService.get_for_user`) AND every row filtered by `user_id == caller`. Detail reuse keeps the existing ownership filter. | PASS | `test_history_ownership_enforced`: cross-user list 403/404, cross-user detail 403/404, other user's own list is empty (no leakage) |
+| **bounded output** | `limit` Query param ge=1 le=100 (422 outside range); newest entries win. | PASS | `test_history_limit_and_pagination`: limit=2 returns newest 2 of 3; limit=0/101 → 422 |
+
+**Local gate (all real exit codes):** Phase 2F focused 5/5 · regression 2a+2b+2c+2d+2e = 60/60 · **full pytest 134/134** (346.84s) · type-check exit 0 · build exit 0 ("✓ built in 16.51s") · ruff "All checks passed!" · `git diff --check` exit 0.
+
+**Files:** `03-backend/app/services/execution_service.py` (list_executions), `03-backend/app/api/v1/executions.py` (GET "" endpoint), `02-frontend/src/api/index.ts` (list/retry + attempt fields), `02-frontend/src/components/workspace/HistoryPanel.tsx` (new), `02-frontend/src/pages/WorkspacePage.tsx` (wired into Git & Tests card), `04-tests/api/test_history_2f.py` (new).
+
+## Residual caveats carried forward
 ## Residual caveats carried forward
 
 - **Phase 2B cancellation**: backend `/cancel` exists and is locally tested; production UI did not expose Stop/Cancel at the time of the prior closure. **Updated in Phase 2E (2026-09-15):** backend cancellation is now *production-verified* — live `POST .../cancel` on a genuinely RUNNING execution returned HTTP 200 with `status=CANCELLED`, `cancelled=True`, a real `process_id`, a real `completed_at`, and the state persisted on re-read; the deployed terminal UI *still* has no Stop/Cancel control, so the UX gap remains open. Treat as an open UX gap, not a security defect or a backend defect.

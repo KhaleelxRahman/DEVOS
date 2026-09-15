@@ -3,11 +3,13 @@
 POST /projects/{project_id}/executions — validate + persist a QUEUED record.
 POST /projects/{project_id}/executions/{execution_id}/run — run a QUEUED record.
 POST /projects/{project_id}/executions/{execution_id}/cancel — cancel an execution.
+POST /projects/{project_id}/executions/{execution_id}/retry — retry a terminal execution.
+GET  /projects/{project_id}/executions — Phase 2F history list (newest first).
 GET  /projects/{project_id}/executions/{execution_id} — read an owned record.
 GET  /projects/{project_id}/executions/{execution_id}/result — fetch final result.
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
@@ -167,6 +169,33 @@ async def retry_execution(
     execution = await ExecutionService.retry_execution(
         db, current_user, project_id, execution_id)
     return ApiResponse(success=True, data=to_execution_response(execution))
+@router.get(
+    "",
+    response_model=ApiResponse[list[ExecutionResponse]],
+)
+async def list_executions(
+    project_id: str,
+    limit: int = Query(default=50, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Phase 2F: execution history for an owned project, newest first.
+
+    Reads the real Execution records written by the 2A-2E engine (no separate
+    history store). Each entry carries the operation type, command, status,
+    exit code, timestamps, captured stdout/stderr, and the retry attempt
+    count. Full logs for one entry: GET /executions/{execution_id}.
+    """
+    executions = await ExecutionService.list_executions(
+        db, current_user, project_id, limit=limit)
+    return ApiResponse(success=True, data=[
+        to_execution_response(execution) for execution in executions])
+
+
+@router.get(
+    "/{execution_id}",
+    response_model=ApiResponse[ExecutionResponse],
+)
 
 
 @router.get(
