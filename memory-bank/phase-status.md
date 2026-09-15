@@ -90,6 +90,8 @@ Verified deployed revision: `074dac0` (`074dac05266a689940637d99cf96a8ac905d2c39
 
 **Local gate (all real exit codes):** Phase 2F focused 5/5 · regression 2a+2b+2c+2d+2e = 60/60 · **full pytest 134/134** (346.84s) · type-check exit 0 · build exit 0 ("✓ built in 16.51s") · ruff "All checks passed!" · `git diff --check` exit 0.
 
+**Live production verification (commit `14de6fc`, confirmed via `GET /version` → `14de6fc07f572a6c309b3e53da42cfbac7cd2423` after a bounded deploy wait; first probes saw the still-serving `074dac0` and were reported as pending, not assumed):** dedicated history probe = **`PASS=14 FAIL=0 TOTAL=14`** — register A/B (200) · project (200) · real run success (`COMPLETED exit=0`) · real run failure (`FAILED exit=7`) · history list newest-first (2 rows, correct order) · failure surfaced on the row (`exit=7`, `reason='Process exited with code 7'`) · real duration timestamps (`started=…T12:36:30.718970` → `completed=…T12:36:31.954420`) · detail drill-in real stdout (`HIST_LIVE_OK`) · detail real stderr (`BOOM`) · **cross-user list 403 FORBIDDEN · cross-user detail 403 FORBIDDEN** · retry from the history flow (child `attempt=1`, `parent_execution_id=orig`) · history reflects attempt tracking (3 rows, child attempt=1, original preserved FAILED with `retry_count=1`). Probe script deleted after evidence collection.
+
 **Files:** `03-backend/app/services/execution_service.py` (list_executions), `03-backend/app/api/v1/executions.py` (GET "" endpoint), `02-frontend/src/api/index.ts` (list/retry + attempt fields), `02-frontend/src/components/workspace/HistoryPanel.tsx` (new), `02-frontend/src/pages/WorkspacePage.tsx` (wired into Git & Tests card), `04-tests/api/test_history_2f.py` (new).
 
 ## Residual caveats carried forward
