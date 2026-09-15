@@ -132,6 +132,96 @@ export const terminalApi = {
   getHistory: (projectId: string) => apiClient.get<{ history: any[] }>(`/projects/${projectId}/terminal/history`),
 };
 
+export interface ExecutionCreateRequest {
+  execution_type: string;
+  command: string;
+  arguments?: string[] | null;
+  working_directory: string;
+  workspace_id: string;
+  execution_id?: string | null;
+}
+
+export interface ExecutionRecord {
+  execution_id: string;
+  request_id: string | null;
+  parent_execution_id?: string | null;
+  retry_count?: number;
+  process_id?: string | null;
+  user_id: string;
+  project_id: string;
+  workspace_id: string;
+  execution_type: string;
+  command: string;
+  arguments: string[] | null;
+  working_directory: string;
+  status: string;
+  exit_code: number | null;
+  failure_reason: string | null;
+  timed_out: boolean;
+  cancelled: boolean;
+  stdout: string | null;
+  stderr: string | null;
+  created_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export const executionApi = {
+  create: (projectId: string, payload: ExecutionCreateRequest) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions`, payload),
+  run: (projectId: string, executionId: string) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}/run`),
+  cancel: (projectId: string, executionId: string) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}/cancel`),
+  retry: (projectId: string, executionId: string) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}/retry`),
+  // Phase 2F: execution history for the project, newest first.
+  list: (projectId: string, limit = 50) =>
+    apiClient.get<ExecutionRecord[]>(`/projects/${projectId}/executions?limit=${limit}`),
+  get: (projectId: string, executionId: string) =>
+    apiClient.get<ExecutionRecord>(`/projects/${projectId}/executions/${executionId}`),
+};
+
+export interface QualityOperation {
+  operation: string;
+  supported: boolean;
+  available: boolean;
+  command: string | null;
+  arguments: string[] | null;
+  source: string | null;
+  reason: string | null;
+}
+
+export const qualityApi = {
+  listOperations: (projectId: string) =>
+    apiClient.get<{ project_id: string; operations: QualityOperation[] }>(
+      `/projects/${projectId}/executions/quality/operations`
+    ),
+  runOperation: (projectId: string, operation: string) =>
+    apiClient.post<ExecutionRecord>(`/projects/${projectId}/executions/quality/${operation}`),
+};
+
+export interface PreviewInfo {
+  execution_id: string;
+  project_id: string;
+  url: string | null;
+  port: number | null;
+  status: string;
+  exit_code: number | null;
+  failure_reason: string | null;
+  stdout: string | null;
+  stderr: string | null;
+}
+
+export const previewApi = {
+  start: (projectId: string) =>
+    apiClient.post<PreviewInfo>(`/projects/${projectId}/preview`),
+  status: (projectId: string) =>
+    apiClient.get<PreviewInfo>(`/projects/${projectId}/preview/status`),
+  stop: (projectId: string) =>
+    apiClient.post<PreviewInfo>(`/projects/${projectId}/preview/stop`),
+};
+
 export const activityApi = {
   list: () => apiClient.get<{ activities: Activity[] }>('/activity'),
 };

@@ -20,3 +20,8 @@ class HealthResponse(BaseModel):
     status: str
     service: str
     environment: str
+
+
+class VersionResponse(BaseModel):
+    commit_sha: str
+    source: str

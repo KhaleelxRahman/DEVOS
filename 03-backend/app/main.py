@@ -23,8 +23,13 @@ from app.core.errors import (
 )
 from app.db.base import Base
 from app.db.session import engine
-from app.schemas.common import ApiResponse, HealthResponse
+from app.schemas.common import ApiResponse, HealthResponse, VersionResponse
 from app import bootstrap_migrate
+
+# The deployed commit SHA is baked in at build/deploy time into a
+# `COMMIT_SHA` file (see config/render.yaml buildCommand, plus
+# `RENDER_GIT_COMMIT` at runtime when available). This endpoint is a
+# standing deployment-identity tool — never a temporary debug shim.
 
 # Starlette's `add_exception_handler` expects a handler whose second parameter
 # is the base `Exception` type. slowapi's and our custom handlers declare
@@ -54,6 +59,15 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
     logger.info("DEVOS v1.0.0 database schema verified/created")
     yield
+    # Phase 2D: kill any live dev-server preview processes so no orphan
+    # survives the backend process (session-end safety net).
+    try:
+        from app.services.execution_service import ExecutionService
+        killed = await ExecutionService.cleanup_active_previews()
+        if killed:
+            logger.info("preview cleanup: killed %d live dev-server process(es)", killed)
+    except Exception:
+        logger.exception("preview cleanup failed")
     await engine.dispose()
 
 
@@ -129,6 +143,40 @@ async def health_check():
 @app.get("/api/v1/health", response_model=ApiResponse[HealthResponse], tags=["health"])
 async def health_check_v1():
     return await health_check()
+
+
+def _resolve_commit_sha() -> tuple[str, str]:
+    """Return (commit_sha, source) for the running deployment."""
+    import os
+
+    for key in ("RENDER_GIT_COMMIT", "GIT_COMMIT_SHA", "DEPLOY_GIT_COMMIT"):
+        value = os.environ.get(key, "").strip()
+        if value:
+            return value, key
+    here = os.path.dirname(os.path.abspath(__file__))
+    for candidate in (
+        os.path.join(os.path.dirname(here), "COMMIT_SHA"),
+        os.path.join(os.getcwd(), "COMMIT_SHA"),
+    ):
+        try:
+            with open(candidate, encoding="utf-8") as f:
+                value = f.read().strip()
+            if value:
+                return value, "COMMIT_SHA file"
+        except OSError:
+            continue
+    return "unknown", "unavailable"
+
+
+@app.get(
+    "/version", response_model=ApiResponse[VersionResponse], tags=["health"]
+)
+@app.get(
+    "/api/v1/version", response_model=ApiResponse[VersionResponse], tags=["health"]
+)
+async def version_check():
+    sha, source = _resolve_commit_sha()
+    return ApiResponse(success=True, data=VersionResponse(commit_sha=sha, source=source))
 
 
 # Mount API v1

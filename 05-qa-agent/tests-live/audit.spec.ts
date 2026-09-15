@@ -212,7 +212,9 @@ test.describe.serial("DEVOS Production QA Audit", () => {
     await check(page, "AUTH", "Session persists across refresh", async () => {
       await page.reload({ waitUntil: "domcontentloaded" });
       await expect(page).toHaveURL(/\/app\/dashboard$/, { timeout: 30_000 });
-      await expect(page.getByText(/delivery pipeline|Active project/i).first()).toBeVisible({ timeout: 30_000 });
+      await expect(
+        page.getByRole("heading", { name: /What do you want to build\?/i })
+      ).toBeVisible({ timeout: 30_000 });
     });
     await check(page, "AUTH", "Session persists navigating away and back", async () => {
       await page.goto(`${BASE}/app/projects`, { waitUntil: "domcontentloaded" });

@@ -1,4 +1,4 @@
-"""Regression tests for the production database migration bootstrap.
+﻿"""Regression tests for the production database migration bootstrap.
 
 The production database was originally provisioned by ``create_all`` (which
 never alters existing tables). Repo-HEAD models later added columns (e.g.
@@ -12,8 +12,6 @@ import os
 import sqlite3
 import subprocess
 import sys
-
-import pytest
 
 # Locate the backend root the same way the sibling API tests do.
 BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "03-backend"))
@@ -94,7 +92,7 @@ def test_bootstrap_upgrades_fresh_database(tmp_path):
     result = _run_bootstrap(db_path)
     assert result.returncode == 0, result.stderr[-1000:]
     assert "is_pinned" in _conversation_columns(db_path)
-    assert _alembic_head(db_path) == "9c8d7e6f5a4b"
+    assert _alembic_head(db_path) == "c520db81c7c6"
 
 
 def test_bootstrap_upgrades_legacy_database(tmp_path):
@@ -107,7 +105,7 @@ def test_bootstrap_upgrades_legacy_database(tmp_path):
     result = _run_bootstrap(db_path)
     assert result.returncode == 0, result.stderr[-1000:]
     assert "is_pinned" in _conversation_columns(db_path)
-    assert _alembic_head(db_path) == "9c8d7e6f5a4b"
+    assert _alembic_head(db_path) == "c520db81c7c6"
 
 
 def test_bootstrap_is_idempotent(tmp_path):
@@ -118,5 +116,6 @@ def test_bootstrap_is_idempotent(tmp_path):
     assert first.returncode == 0, first.stderr[-1000:]
     second = _run_bootstrap(db_path)
     assert second.returncode == 0, second.stderr[-1000:]
-    assert _alembic_head(db_path) == "9c8d7e6f5a4b"
+    assert _alembic_head(db_path) == "c520db81c7c6"
     assert "is_pinned" in _conversation_columns(db_path)
+
