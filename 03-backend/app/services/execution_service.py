@@ -630,7 +630,8 @@ class ExecutionService:
         info = PreviewService.detect_start(project_id)
         if not info.supported:
             from app.core.errors import PreviewNotSupportedException
-            raise PreviewNotSupportedException(info.reason)
+            raise PreviewNotSupportedException(
+                info.reason or "Preview is not supported for this project")
         if not info.available:
             from app.core.errors import QualityToolUnavailableException
             raise QualityToolUnavailableException(
@@ -708,13 +709,14 @@ class ExecutionService:
                 asyncio.create_task(_drain(proc.stderr)),
             ]
         except Exception as exc:
+            failure_reason = "Failed to start dev server: %s" % str(exc)
             execution.status = "FAILED"
-            execution.failure_reason = "Failed to start dev server: %s" % str(exc)
+            execution.failure_reason = failure_reason
             execution.exit_code = -1
             execution.completed_at = datetime.now(timezone.utc)
             await db.flush()
             await db.commit()
-            raise PreviewLaunchFailedException(execution.failure_reason)
+            raise PreviewLaunchFailedException(failure_reason)
 
         # 3. Real reachability check: poll until the port accepts a TCP
         #    connection, the process exits, or the grace period elapses.
@@ -786,16 +788,17 @@ class ExecutionService:
         _PROCESSES.pop(execution.execution_id, None)
         _PREVIEW_EXECUTIONS.pop(project_id, None)
         execution.status = "FAILED"
-        execution.failure_reason = (
+        failure_reason = (
             "Dev server did not become reachable on port %d within %ds (%s)"
             % (expected_port, settings.PREVIEW_READY_TIMEOUT_SECONDS, last_error))
+        execution.failure_reason = failure_reason
         execution.exit_code = -1
         execution.completed_at = datetime.now(timezone.utc)
         execution.stdout = _bounded_decode(b"".join(stdout_chunks), None, max_out)
         execution.stderr = _bounded_decode(b"".join(stderr_chunks), None, max_out)
         await db.flush()
         await db.commit()
-        raise PreviewLaunchFailedException(execution.failure_reason)
+        raise PreviewLaunchFailedException(failure_reason)
 
     @staticmethod
     async def get_active_preview(
