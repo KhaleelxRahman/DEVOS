@@ -221,6 +221,18 @@ class PreviewNotFoundException(AppException):
         )
 
 
+class ExecutionRetryExhaustedException(AppException):
+    """Phase 2E: the execution has already been retried the maximum number of
+    times; no further retry is permitted."""
+
+    def __init__(self, message: str = "Retry limit exhausted"):
+        super().__init__(
+            message=message,
+            code="RETRY_EXHAUSTED",
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        )
+
+
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status_code,

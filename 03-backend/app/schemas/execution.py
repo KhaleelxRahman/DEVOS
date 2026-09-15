@@ -97,6 +97,9 @@ class ExecutionResponse(BaseModel):
     execution_id: str
     request_id: str | None = None
     parent_execution_id: str | None = None
+    # Phase 2E retry field: how many times this execution (or its parent,
+    # when this row is a retry child) has been re-run.
+    retry_count: int = 0
     process_id: str | None = None
     user_id: str
     project_id: str

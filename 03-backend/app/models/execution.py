@@ -30,6 +30,9 @@ class Execution(Base):
     parent_execution_id: Mapped[str | None] = mapped_column(
         String(36), nullable=True, index=True
     )
+    retry_count: Mapped[int] = mapped_column(
+        nullable=False, default=0, server_default="0"
+    )
     process_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     user_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("users.id", ondelete="CASCADE"),
@@ -53,11 +56,8 @@ class Execution(Base):
     cancelled: Mapped[bool] = mapped_column(nullable=False, default=False)
     stdout: Mapped[str | None] = mapped_column(Text, nullable=True)
     stderr: Mapped[str | None] = mapped_column(Text, nullable=True)
-    # Phase 2D dev-server preview fields: populated when a DEV_SERVER
-    # execution is marked READY (real reachability check passed) and cleared
-    # on stop. One preview per execution row — no second/parallel store.
-    preview_port: Mapped[int | None] = mapped_column(nullable=True)
-    preview_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    # Timestamps: when the record was created, when the process started, when
+    # it reached a terminal state. All UTC, timezone-aware.
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         nullable=False,
@@ -68,3 +68,6 @@ class Execution(Base):
     completed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    # Phase 2D dev-server preview fields
+    preview_port: Mapped[int | None] = mapped_column(nullable=True)
+    preview_url: Mapped[str | None] = mapped_column(String(512), nullable=True)

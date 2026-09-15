@@ -150,6 +150,25 @@ async def cancel_execution(
     return ApiResponse(success=True, data=to_execution_response(execution))
 
 
+@router.post(
+    "/{execution_id}/retry",
+    response_model=ApiResponse[ExecutionResponse],
+)
+async def retry_execution(
+    project_id: str,
+    execution_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Phase 2E: retry a terminal execution (FAILED / CANCELLED / TIMED_OUT /
+    COMPLETED) by spawning a new process with a fresh PID. The retry creates a
+    new execution row linked via parent_execution_id. Attempt tracking and the
+    max-retry cap (EXECUTION_MAX_RETRIES) are enforced server-side."""
+    execution = await ExecutionService.retry_execution(
+        db, current_user, project_id, execution_id)
+    return ApiResponse(success=True, data=to_execution_response(execution))
+
+
 @router.get(
     "/{execution_id}",
     response_model=ApiResponse[ExecutionResponse],

@@ -32,6 +32,7 @@ from app.core.errors import (
     ExecutionInvalidTypeException,
     ExecutionInvalidWorkspaceException,
     ExecutionInvalidWorkingDirectoryException,
+    ExecutionRetryExhaustedException,
     ProjectAccessDeniedException,
     ProjectNotFoundException,
     QualityOperationNotSupportedException,
@@ -48,6 +49,12 @@ from app.services.project_service import ProjectService
 # Active Phase 2B processes keyed by execution_id. Used for cancellation and
 # cleanup. Each entry holds the asyncio.subprocess.Process handle.
 _PROCESSES: dict[str, asyncio.subprocess.Process] = {}
+
+# Phase 2E: execution_ids cancelled via cancel_execution while a /run task may
+# still hold a live handle. run_queued_execution checks this set before
+# finalizing so a concurrent cancel wins deterministically (no FAILED
+# overwrite of a committed CANCELLED).
+_CANCELLED_IDS: set[str] = set()
 
 # Phase 2D preview registry keyed by project_id -> live DEV_SERVER execution
 # row. Mirrors _PROCESSES (one live server max per project); entries are
@@ -197,6 +204,7 @@ def to_execution_response(execution: Execution) -> ExecutionResponse:
         working_directory=execution.working_directory, status=execution.status,
         exit_code=execution.exit_code, failure_reason=execution.failure_reason,
         timed_out=bool(execution.timed_out), cancelled=bool(execution.cancelled),
+        retry_count=int(execution.retry_count),
         stdout=execution.stdout, stderr=execution.stderr,
         preview_port=execution.preview_port,
         preview_url=execution.preview_url,
@@ -456,6 +464,18 @@ class ExecutionService:
                     proc.communicate(), timeout=timeout)
             except asyncio.TimeoutError:
                 try:
+                    await db.refresh(execution)
+                except Exception:
+                    pass
+                if (execution.execution_id in _CANCELLED_IDS
+                        or execution.status == "CANCELLED"):
+                    _CANCELLED_IDS.discard(execution.execution_id)
+                    try:
+                        await db.refresh(execution)
+                    except Exception:
+                        pass
+                    return execution
+                try:
                     proc.kill()
                 except Exception:
                     pass
@@ -477,6 +497,18 @@ class ExecutionService:
             stderr_text = _bounded_decode(
                 stderr_bytes, stderr_chunks, max_out)
 
+            try:
+                await db.refresh(execution)
+            except Exception:
+                pass
+            if (execution.execution_id in _CANCELLED_IDS
+                    or execution.status == "CANCELLED"):
+                _CANCELLED_IDS.discard(execution.execution_id)
+                try:
+                    await db.refresh(execution)
+                except Exception:
+                    pass
+                return execution
             execution.stdout = stdout_text
             execution.stderr = stderr_text
             execution.exit_code = (
@@ -494,6 +526,18 @@ class ExecutionService:
         except ExecutionInvalidRequestException:
             raise
         except Exception as exc:
+            try:
+                await db.refresh(execution)
+            except Exception:
+                pass
+            if (execution.execution_id in _CANCELLED_IDS
+                    or execution.status == "CANCELLED"):
+                _CANCELLED_IDS.discard(execution.execution_id)
+                try:
+                    await db.refresh(execution)
+                except Exception:
+                    pass
+                return execution
             execution.status = "FAILED"
             execution.failure_reason = "Failed to execute: %s" % str(exc)
             execution.exit_code = -1
@@ -738,6 +782,125 @@ class ExecutionService:
         return result.scalars().first()
 
     @staticmethod
+    async def retry_execution(
+        db: AsyncSession, user: User, project_id: str, execution_id: str,
+    ) -> Execution:
+        """Retry a terminal execution (FAILED / CANCELLED / TIMED_OUT / COMPLETED).
+
+        Creates a NEW execution row with:
+        - parent_execution_id set to the original execution_id
+        - retry_count starting at 1 for the first retry of this parent
+        - a fresh process (new PID) via run_queued_execution
+        - copied command/arguments/working_directory from the parent
+
+        The original row is untouched; its retry_count = total retries it has
+        spawned (for observability). Each retry child records its own attempt
+        count via retry_count.
+
+        Raises ExecutionRetryExhaustedException when the parent has already
+        been retried MAX_RETRY_COUNT times.
+        """
+        try:
+            await ProjectService.get_for_user(db, project_id, user.id)
+        except (ProjectNotFoundException, ProjectAccessDeniedException):
+            raise ExecutionForbiddenException(
+                "Execution is forbidden for this project"
+            )
+
+        result = await db.execute(
+            select(Execution).where(
+                Execution.execution_id == execution_id,
+                Execution.project_id == project_id,
+                Execution.user_id == user.id,
+            )
+        )
+        parent = result.scalars().first()
+        if parent is None:
+            raise ExecutionForbiddenException(
+                "Execution not found for this context"
+            )
+
+        # Only terminal states may be retried.
+        if parent.status not in (
+            "FAILED", "CANCELLED", "TIMED_OUT", "COMPLETED",
+        ):
+            raise ExecutionInvalidRequestException(
+                "Cannot retry execution in %s state" % parent.status
+            )
+
+        # Count existing retry children to enforce the cap.
+        child_rows = await db.execute(
+            select(Execution).where(
+                Execution.parent_execution_id == execution_id,
+            )
+        )
+        existing_children = child_rows.scalars().all()
+        if len(existing_children) >= MAX_RETRY_COUNT:
+            raise ExecutionRetryExhaustedException(
+                "Retry limit exhausted (%d retries already performed)"
+                % MAX_RETRY_COUNT
+            )
+
+        # Compute the new retry_count: 1..MAX_RETRY_COUNT.
+        new_retry_count = len(existing_children) + 1
+
+        # Build a new queued execution that mirrors the parent's command.
+        retry_execution_id = str(uuid.uuid4())
+        child = Execution(
+            execution_id=retry_execution_id,
+            request_id=parent.request_id,
+            parent_execution_id=execution_id,
+            retry_count=new_retry_count,
+            user_id=user.id,
+            project_id=project_id,
+            workspace_id=parent.workspace_id,
+            execution_type=parent.execution_type,
+            command=parent.command,
+            arguments=parent.arguments,
+            working_directory=parent.working_directory,
+            status="QUEUED",
+            exit_code=None,
+            failure_reason=None,
+            timed_out=False,
+            cancelled=False,
+            stdout=None,
+            stderr=None,
+            preview_port=None,
+            preview_url=None,
+            created_at=datetime.now(timezone.utc),
+        )
+        db.add(child)
+        await db.flush()
+        await db.refresh(child)
+
+        # Increment the parent's retry_count to reflect total retries spawned.
+        parent.retry_count = len(existing_children) + 1
+        await db.flush()
+
+        # Now run the queued retry child via the canonical Phase 2B engine.
+        # This spawns a fresh process (new PID) and updates the child to a
+        # terminal state.
+        try:
+            return await ExecutionService.run_queued_execution(
+                db=db,
+                user=user,
+                project_id=project_id,
+                execution_id=retry_execution_id,
+            )
+        except Exception:
+            # If the run itself fails for any reason, mark the child as FAILED
+            # so we don't leave it stuck QUEUED.
+            child.status = "FAILED"
+            child.failure_reason = "Retry run failed: %s" % (
+                child.failure_reason or "unknown"
+            )
+            child.completed_at = datetime.now(timezone.utc)
+            await db.flush()
+            await db.commit()
+            await db.refresh(child)
+            raise
+
+    @staticmethod
     async def cleanup_active_previews() -> int:
         """Session-end safety net: kill every live preview process so no
         dev server survives the backend process (no orphans)."""
@@ -797,6 +960,7 @@ class ExecutionService:
                 pass
         _PROCESSES.pop(execution.execution_id, None)
         _PREVIEW_EXECUTIONS.pop(project_id, None)
+        _CANCELLED_IDS.add(execution.execution_id)
 
         execution.status = "CANCELLED"
         execution.cancelled = True
