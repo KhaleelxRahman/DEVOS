@@ -36,7 +36,8 @@ async def _create_project(client, headers, name="exec2e-project"):
     return res.json()["data"]["id"]
 
 
-_exec_base = lambda project_id: f"/api/v1/projects/{project_id}/executions"
+def _exec_base(project_id):
+    return f"/api/v1/projects/{project_id}/executions"
 
 
 async def _create_queued(client, headers, project_id,

@@ -503,6 +503,17 @@ class ExecutionService:
                 pass
             if (execution.execution_id in _CANCELLED_IDS
                     or execution.status == "CANCELLED"):
+                # A cancel that landed between spawn and process registration
+                # has not killed anything yet -- never leave it running.
+                if proc.returncode is None:
+                    try:
+                        proc.kill()
+                    except Exception:
+                        pass
+                    try:
+                        await proc.wait()
+                    except Exception:
+                        pass
                 _CANCELLED_IDS.discard(execution.execution_id)
                 try:
                     await db.refresh(execution)
@@ -948,6 +959,14 @@ class ExecutionService:
             raise ExecutionInvalidRequestException(
                 "Cannot cancel execution in %s state" % execution.status)
 
+        # Phase 2E: register the cancellation BEFORE the process is touched.
+        # A concurrent /run task only re-checks this marker after the child
+        # process is dead (i.e. strictly after the kill below), so registering
+        # first guarantees the run task observes the cancellation and cannot
+        # commit FAILED over an already-committed CANCELLED.
+        inflight_run = execution.status in ("STARTING", "RUNNING")
+        _CANCELLED_IDS.add(execution.execution_id)
+
         proc = _PROCESSES.get(execution.execution_id)
         if proc is not None and proc.returncode is None:
             try:
@@ -960,7 +979,6 @@ class ExecutionService:
                 pass
         _PROCESSES.pop(execution.execution_id, None)
         _PREVIEW_EXECUTIONS.pop(project_id, None)
-        _CANCELLED_IDS.add(execution.execution_id)
 
         execution.status = "CANCELLED"
         execution.cancelled = True
@@ -968,6 +986,10 @@ class ExecutionService:
         await db.flush()
         await db.commit()
         await db.refresh(execution)
+        # No /run task is in flight (QUEUED without a spawn), so nobody will
+        # consume the marker -- drop it to keep the set bounded.
+        if not inflight_run:
+            _CANCELLED_IDS.discard(execution.execution_id)
         return execution
 
 
