@@ -4,6 +4,7 @@
 **Audit:** Phase 17 accessibility review
 **Status:** Repository-based review with automated evidence
 **Date:** 2026-09-04
+
 ## Verified practices
 
 - Routes use semantic headings and links.
