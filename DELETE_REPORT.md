@@ -5,6 +5,7 @@
 **Prerequisite read:** `FULL_FILE_INVENTORY.md` — Group 1: Root Files (38 files, before deletions)
 
 Rules applied:
+
 - Delete only files that are (a) genuinely empty/stub/placeholder with 0 real logic, OR (b) have content but are referenced nowhere in the entire repo and serve no purpose in the current DEVOS roadmap.
 - If unsure about any file → do NOT delete → list under "Needs Manual Review".
 - All reference checks performed repo-wide (grep across every tracked/untracked file, excluding `.git/` and `node_modules/`).
@@ -21,7 +22,7 @@ After deletions (and before writing this report): **23** original non-hidden roo
 ### Deleted (7 files)
 
 | File | Size (bytes) | Reason | Action |
-|------|--------------|--------|--------|
+| ------ | -------------- | -------- | -------- |
 | `frontend-err.log` | 0 | **Empty file (0 bytes).** Zero content, no diagnostic value. No path has `frontend-err.log` referenced anywhere else in the repo (repo-wide grep = 0 hits). | **DELETED** |
 | `frontend-local-final.err.log` | 0 | **Empty file (0 bytes).** Same as above — zero content, no references. | **DELETED** |
 | `build-check2.log` | 1,458 | **Duplicate of `build-check.log`.** Byte-identical (same size, content), and `build-check.log` is the canonical copy kept. No references to `build-check2.log` anywhere. | **DELETED** |
@@ -35,7 +36,7 @@ After deletions (and before writing this report): **23** original non-hidden roo
 These files are NOT deleted in this pass. They have content or are runtime env files. Flagged for your manual decision.
 
 | File | Size (bytes) | Reason kept / Notes |
-|------|--------------|---------------------|
+| ------ | -------------- | --------------------- |
 | `backend-err.log` | 199 | Dev session stderr log; content present; no references. Keep until you confirm. |
 | `backend.err.log` | 199 | Same size as `backend-err.log` — possibly identical duplicate. **Needs your confirmation** before deleting either. |
 | `backend.log` | 21,263 | Dev session backend log; content present; no references. Keep until you confirm. |

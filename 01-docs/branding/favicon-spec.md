@@ -2,6 +2,7 @@
 
 **Product:** DEVOS v1.0.0
 **Version:** 1.0
+
 ## Purpose
 
 This document defines browser favicon, PWA, and app-icon exports derived from the

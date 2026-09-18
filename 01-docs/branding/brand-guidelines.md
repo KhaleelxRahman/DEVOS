@@ -4,6 +4,7 @@
 **Full name:** Developer Operating System
 **Status:** Brand identity foundation
 **Version:** 1.0
+
 ## Purpose
 
 This document defines the identity, logo usage, composition, and accessibility rules

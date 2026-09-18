@@ -2,6 +2,7 @@
 
 **Product:** DEVOS v1.0.0
 **Version:** 1.0
+
 ## Purpose
 
 This specification defines the readable, technical type hierarchy used by DEVOS

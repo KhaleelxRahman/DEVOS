@@ -4,6 +4,7 @@
 **Audit:** Phase 17 production QA
 **Status:** Evidence-based audit
 **Date:** 2026-09-04
+
 ## Executive summary
 
 The local application validation gate is green. The Vercel production alias
