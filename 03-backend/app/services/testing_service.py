@@ -11,6 +11,7 @@ import time
 from typing import Any
 
 from app.core.errors import AppException
+from app.core.security import build_child_env
 from app.services.project_service import ProjectService
 
 ALLOWED_TEST_JOBS: dict[str, dict[str, Any]] = {
@@ -69,6 +70,7 @@ class TestingService:
         proc = await asyncio.create_subprocess_exec(
             *spec["argv"],
             cwd=project_dir,
+            env=build_child_env(),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )

@@ -142,15 +142,10 @@ async def preview_proxy(
     http://127.0.0.1:<stored port> — never client-supplied."""
     from app.api.deps import AuthRequiredException as _ARE
     from app.core.errors import (
-        ExecutionForbiddenException,
         ExecutionInvalidTypeException,
-        ProjectAccessDeniedException,
-        ProjectNotFoundException,
-        ExecutionInvalidProjectException,
     )
     from app.core.security import decode_access_token
     from app.services.auth_service import AuthService
-    from app.services.project_service import ProjectService
 
     token = None
     if authorization and authorization.startswith("Bearer "):

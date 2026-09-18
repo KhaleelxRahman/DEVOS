@@ -94,10 +94,8 @@ async def test_failure_execution_records_exit_code(client):
 async def test_timeout_enforced_real_kill(client):
     """A process that exceeds TERMINAL_TIMEOUT_SECONDS is killed and marked
     TIMED_OUT. We patch the timeout down to 1 s so the test runs fast."""
-    import app.services.execution_service as svc_mod
-
     original = settings.TERMINAL_TIMEOUT_SECONDS
-    svc_mod.TERMINAL_TIMEOUT_SECONDS = 1
+    settings.TERMINAL_TIMEOUT_SECONDS = 1
     try:
         headers = await _register(client)
         project_id = await _create_project(client, headers)
@@ -117,7 +115,6 @@ async def test_timeout_enforced_real_kill(client):
         assert data["completed_at"] is not None
     finally:
         settings.TERMINAL_TIMEOUT_SECONDS = original
-        svc_mod.TERMINAL_TIMEOUT_SECONDS = original
 
 
 @pytest.mark.asyncio
@@ -376,7 +373,7 @@ async def test_no_orphan_after_timeout(client):
     """After TIMED_OUT, _PROCESSES must be empty."""
     import app.services.execution_service as svc_mod
     original = settings.TERMINAL_TIMEOUT_SECONDS
-    svc_mod.TERMINAL_TIMEOUT_SECONDS = 1
+    settings.TERMINAL_TIMEOUT_SECONDS = 1
     try:
         headers = await _register(client)
         project_id = await _create_project(client, headers)
@@ -388,7 +385,6 @@ async def test_no_orphan_after_timeout(client):
         assert svc_mod._PROCESSES == {}, svc_mod._PROCESSES
     finally:
         settings.TERMINAL_TIMEOUT_SECONDS = original
-        svc_mod.TERMINAL_TIMEOUT_SECONDS = original
 
 
 @pytest.mark.asyncio

@@ -24,6 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.app_logging import logger
 from app.core.config import settings
+from app.core.security import build_child_env
 from app.core.errors import (
     ExecutionBlockedCommandException,
     ExecutionForbiddenException,
@@ -268,6 +269,7 @@ class ExecutionService:
             db.add(execution)
             await db.flush()
             await db.refresh(execution)
+            await db.commit()
             raise ExecutionBlockedCommandException(
                 "Command is blocked by the execution policy"
             )
@@ -482,6 +484,7 @@ class ExecutionService:
             proc = await asyncio.create_subprocess_exec(
                 *exec_args,
                 cwd=execution.working_directory,
+                env=build_child_env(),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
@@ -693,12 +696,14 @@ class ExecutionService:
             proc = await asyncio.create_subprocess_exec(
                 *_build_exec_args(execution.command, execution.arguments),
                 cwd=execution.working_directory,
+                env=build_child_env(),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             execution.process_id = str(proc.pid)
             execution.status = "RUNNING"
             _PROCESSES[execution.execution_id] = proc
+            proc._devos_preview_port = expected_port
             _PREVIEW_EXECUTIONS[project_id] = execution
             await db.flush()
             await db.commit()

@@ -6,24 +6,13 @@ Generation transaction model. Requirements classified EXPLICIT / INFERRED /
 OPTIONAL / UNSUPPORTED with no silent substitution.
 """
 
-import re
-import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import (
-    FileAccessDeniedException,
-    ProjectAccessDeniedException,
-)
-from app.models.generation import Generation
 from app.schemas.builder import (
     ClassifiedRequirement,
-    FileOperation,
     NormalizedBuildSpec,
 )
-from app.services.file_service import FileService
 
 TERMINAL_STATUSES = {"COMPLETED", "PARTIAL", "FAILED", "CANCELLED", "BLOCKED"}
 

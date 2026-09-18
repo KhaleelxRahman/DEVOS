@@ -5,6 +5,7 @@ for authentication routes, GitHub OAuth state, and the API dependency layer.
 """
 
 from datetime import datetime, timedelta, timezone
+import os
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -65,3 +66,32 @@ def decode_access_token(token: str) -> str | None:
     if not sub:
         return None
     return str(sub)
+
+
+# Substrings that mark an environment variable as sensitive. Any variable
+# whose upper-cased name contains one of these markers must NOT reach a
+# spawned process (Phase 2G adversarial hardening).
+_CHILD_ENV_SECRET_MARKERS = (
+    "SECRET", "TOKEN", "PASSWORD", "PASSWD", "PRIVATE_KEY", "API_KEY",
+    "_KEY", "CREDENTIAL", "DATABASE_URL", "DSN", "OAUTH", "SESSION",
+)
+
+
+def build_child_env() -> dict[str, str]:
+    """Environment for spawned processes: the server environment MINUS
+    sensitive variables.
+
+    Without this, a CONTROLLED command such as ``python -c
+    "import os; print(os.environ)"`` inherits the backend's full environment
+    (AUTH_SECRET, DATABASE_URL, ...) and exfiltrates it into stdout — which
+    is persisted in the execution record and served back through the
+    history/detail API. PATH and OS essentials are preserved so approved
+    toolchains (python, npm, git) keep working.
+    """
+    env: dict[str, str] = {}
+    for key, value in os.environ.items():
+        upper = key.upper()
+        if any(marker in upper for marker in _CHILD_ENV_SECRET_MARKERS):
+            continue
+        env[key] = value
+    return env

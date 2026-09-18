@@ -7,6 +7,7 @@ import ntpath
 
 from app.core.config import settings
 from app.core.errors import AppException
+from app.core.security import build_child_env
 from app.schemas.terminal import TerminalResultResponse
 from app.services.project_service import ProjectService
 
@@ -197,6 +198,7 @@ class TerminalService:
             proc = await asyncio.create_subprocess_exec(
                 *exec_args,
                 cwd=project_dir,
+                env=build_child_env(),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )

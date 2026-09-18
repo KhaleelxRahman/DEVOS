@@ -15,6 +15,7 @@ __all__ = [
     "ContactMessage",
     "Conversation",
     "ConversationMessage",
+    "Execution",
     "Generation",
     "GitHubConnection",
     "Project",

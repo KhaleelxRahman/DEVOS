@@ -41,6 +41,8 @@ __all__ = [
     "ConversationResponse",
     "CreateGenerationRequest",
     "ErrorDetail",
+    "ExecutionCreateRequest",
+    "ExecutionResponse",
     "FileContentResponse",
     "FileNodeResponse",
     "FileOperation",
