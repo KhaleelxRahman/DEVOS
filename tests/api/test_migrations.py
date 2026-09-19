@@ -14,7 +14,7 @@ import subprocess
 import sys
 
 # Locate the backend root the same way the sibling API tests do.
-BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "03-backend"))
+BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backend"))
 
 LEGACY_CREATE_ALL = (
     "import asyncio\n"
