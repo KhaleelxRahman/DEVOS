@@ -146,13 +146,11 @@ class PreviewService:
         """Return the first free TCP port in the preview range. Ports held by
         live preview processes on this instance are skipped. The scan binds a
         temporary socket so a port in use by ANY local process is skipped."""
-        from app.services.execution_service import _PROCESSES
+        from app.services.execution_service import _PROCESSES, _PREVIEW_PORTS
         used = set()
-        for proc in _PROCESSES.values():
-            if proc is not None:
-                p = getattr(proc, "_devos_preview_port", None)
-                if p is not None:
-                    used.add(int(p))
+        for exec_id in _PROCESSES:
+            if exec_id in _PREVIEW_PORTS:
+                used.add(_PREVIEW_PORTS[exec_id])
         for port in range(PreviewService.PORT_RANGE_START,
                            PreviewService.PORT_RANGE_END + 1):
             if port in used:

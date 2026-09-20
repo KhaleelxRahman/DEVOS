@@ -1,0 +1,85 @@
+{
+  "timestamp": "2026-09-20T02:44:55.098Z",
+  "url": "https://devos-ebon.vercel.app",
+  "tests": [
+    {
+      "name": "1. Page Load",
+      "status": "PASS"
+    },
+    {
+      "name": "2. Initial Load Screenshot",
+      "status": "PASS"
+    },
+    {
+      "name": "3. Sidebar Visible",
+      "status": "FAIL",
+      "error": "Sidebar not found"
+    },
+    {
+      "name": "4. Navigation Items Present",
+      "status": "PASS"
+    },
+    {
+      "name": "5. Builder Section Visible",
+      "status": "FAIL",
+      "error": "Builder not in page"
+    },
+    {
+      "name": "6. Build Plan Visible",
+      "status": "PASS"
+    },
+    {
+      "name": "7. AI Section Visible",
+      "status": "PASS"
+    },
+    {
+      "name": "8. Click AI Menu",
+      "status": "PASS"
+    },
+    {
+      "name": "9. GitHub Section Visible",
+      "status": "PASS"
+    },
+    {
+      "name": "10. Deploy Section Visible",
+      "status": "FAIL",
+      "error": "Deploy not found"
+    },
+    {
+      "name": "11. Repository Dashboard",
+      "status": "PASS"
+    },
+    {
+      "name": "12. Console Error Check",
+      "status": "PASS"
+    },
+    {
+      "name": "13. Mobile Responsive (375px)",
+      "status": "PASS"
+    },
+    {
+      "name": "14. Page Load Performance",
+      "status": "PASS"
+    },
+    {
+      "name": "15. API Connectivity",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    {
+      "feature": "3. Sidebar Visible",
+      "error": "Sidebar not found"
+    },
+    {
+      "feature": "5. Builder Section Visible",
+      "error": "Builder not in page"
+    },
+    {
+      "feature": "10. Deploy Section Visible",
+      "error": "Deploy not found"
+    }
+  ],
+  "passed": 12,
+  "failed": 3
+}

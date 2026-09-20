@@ -1,0 +1,509 @@
+{
+  "timestamp": "2026-09-20T02:47:26.064Z",
+  "url": "https://devos-ebon.vercel.app",
+  "browser": "Chromium",
+  "platform": "Vercel Production",
+  "tests": [
+    {
+      "name": "1.1 Page Load",
+      "category": "CORE",
+      "status": "PASS"
+    },
+    {
+      "name": "1.2 Page Title Correct",
+      "category": "CORE",
+      "status": "PASS"
+    },
+    {
+      "name": "1.3 User Authentication",
+      "category": "CORE",
+      "status": "PASS"
+    },
+    {
+      "name": "1.4 Session Persistence",
+      "category": "CORE",
+      "status": "PASS"
+    },
+    {
+      "name": "1.5 Page Responsive",
+      "category": "CORE",
+      "status": "PASS"
+    },
+    {
+      "name": "2.1 Sidebar Visible",
+      "category": "NAV",
+      "status": "FAIL",
+      "error": "No sidebar"
+    },
+    {
+      "name": "2.2 Projects Link",
+      "category": "NAV",
+      "status": "FAIL",
+      "error": "Projects not found"
+    },
+    {
+      "name": "2.3 Workspace Link",
+      "category": "NAV",
+      "status": "PASS"
+    },
+    {
+      "name": "2.4 AI Link",
+      "category": "NAV",
+      "status": "PASS"
+    },
+    {
+      "name": "2.5 GitHub Link",
+      "category": "NAV",
+      "status": "PASS"
+    },
+    {
+      "name": "2.6 Deploy Link",
+      "category": "NAV",
+      "status": "FAIL",
+      "error": "Deploy not found"
+    },
+    {
+      "name": "2.7 Settings Option",
+      "category": "NAV",
+      "status": "PASS"
+    },
+    {
+      "name": "3.1 Projects Page Load",
+      "category": "PROJECTS",
+      "status": "PASS"
+    },
+    {
+      "name": "3.2 Projects List Visible",
+      "category": "PROJECTS",
+      "status": "PASS"
+    },
+    {
+      "name": "3.3 Create Project Button",
+      "category": "PROJECTS",
+      "status": "PASS"
+    },
+    {
+      "name": "3.4 Project List Responsive",
+      "category": "PROJECTS",
+      "status": "PASS"
+    },
+    {
+      "name": "4.1 Workspace Load",
+      "category": "WORKSPACE",
+      "status": "PASS"
+    },
+    {
+      "name": "4.2 Builder Component",
+      "category": "WORKSPACE",
+      "status": "FAIL",
+      "error": "No builder"
+    },
+    {
+      "name": "4.3 Build Plan",
+      "category": "WORKSPACE",
+      "status": "PASS"
+    },
+    {
+      "name": "4.4 AI Ready Status",
+      "category": "WORKSPACE",
+      "status": "PASS"
+    },
+    {
+      "name": "4.5 Command Palette",
+      "category": "WORKSPACE",
+      "status": "PASS"
+    },
+    {
+      "name": "5.1 File Explorer Visible",
+      "category": "FILES",
+      "status": "PASS"
+    },
+    {
+      "name": "5.2 File Tree Structure",
+      "category": "FILES",
+      "status": "PASS"
+    },
+    {
+      "name": "5.3 Code Viewer/Monaco",
+      "category": "FILES",
+      "status": "PASS"
+    },
+    {
+      "name": "5.4 Syntax Highlighting",
+      "category": "FILES",
+      "status": "PASS"
+    },
+    {
+      "name": "5.5 Line Numbers",
+      "category": "FILES",
+      "status": "PASS"
+    },
+    {
+      "name": "6.1 Terminal Visible",
+      "category": "TERMINAL",
+      "status": "PASS"
+    },
+    {
+      "name": "6.2 Terminal Input",
+      "category": "TERMINAL",
+      "status": "PASS"
+    },
+    {
+      "name": "6.3 Command Execution",
+      "category": "TERMINAL",
+      "status": "PASS"
+    },
+    {
+      "name": "6.4 Output Display",
+      "category": "TERMINAL",
+      "status": "PASS"
+    },
+    {
+      "name": "6.5 Build Command",
+      "category": "TERMINAL",
+      "status": "PASS"
+    },
+    {
+      "name": "6.6 Test Command",
+      "category": "TERMINAL",
+      "status": "PASS"
+    },
+    {
+      "name": "6.7 Lint Command",
+      "category": "TERMINAL",
+      "status": "PASS"
+    },
+    {
+      "name": "6.8 TypeCheck",
+      "category": "TERMINAL",
+      "status": "PASS"
+    },
+    {
+      "name": "7.1 AI Panel Button",
+      "category": "AI",
+      "status": "FAIL",
+      "error": "AI button not found"
+    },
+    {
+      "name": "7.2 Open AI Panel",
+      "category": "AI",
+      "status": "PASS"
+    },
+    {
+      "name": "7.3 AI Input Field",
+      "category": "AI",
+      "status": "PASS"
+    },
+    {
+      "name": "7.4 AI Response Area",
+      "category": "AI",
+      "status": "PASS"
+    },
+    {
+      "name": "7.5 Streaming Support",
+      "category": "AI",
+      "status": "PASS"
+    },
+    {
+      "name": "7.6 Stop Button",
+      "category": "AI",
+      "status": "PASS"
+    },
+    {
+      "name": "7.7 Retry Button",
+      "category": "AI",
+      "status": "PASS"
+    },
+    {
+      "name": "7.8 Copy Output",
+      "category": "AI",
+      "status": "PASS"
+    },
+    {
+      "name": "7.9 Conversation History",
+      "category": "AI",
+      "status": "PASS"
+    },
+    {
+      "name": "8.1 GitHub Menu Item",
+      "category": "GITHUB",
+      "status": "FAIL",
+      "error": "GitHub not found"
+    },
+    {
+      "name": "8.2 GitHub Dashboard",
+      "category": "GITHUB",
+      "status": "PASS"
+    },
+    {
+      "name": "8.3 Repository Section",
+      "category": "GITHUB",
+      "status": "PASS"
+    },
+    {
+      "name": "8.4 PR List",
+      "category": "GITHUB",
+      "status": "PASS"
+    },
+    {
+      "name": "8.5 Issues Tab",
+      "category": "GITHUB",
+      "status": "PASS"
+    },
+    {
+      "name": "8.6 Commits Tab",
+      "category": "GITHUB",
+      "status": "PASS"
+    },
+    {
+      "name": "8.7 Branches Display",
+      "category": "GITHUB",
+      "status": "PASS"
+    },
+    {
+      "name": "9.1 Git Status",
+      "category": "GIT",
+      "status": "PASS"
+    },
+    {
+      "name": "9.2 Commit Option",
+      "category": "GIT",
+      "status": "PASS"
+    },
+    {
+      "name": "9.3 Push Option",
+      "category": "GIT",
+      "status": "PASS"
+    },
+    {
+      "name": "9.4 Pull Option",
+      "category": "GIT",
+      "status": "PASS"
+    },
+    {
+      "name": "10.1 Deploy Menu Item",
+      "category": "DEPLOY",
+      "status": "FAIL",
+      "error": "Deploy not found"
+    },
+    {
+      "name": "10.2 Deploy Status",
+      "category": "DEPLOY",
+      "status": "FAIL",
+      "error": "No deploy info"
+    },
+    {
+      "name": "10.3 Deployment History",
+      "category": "DEPLOY",
+      "status": "PASS"
+    },
+    {
+      "name": "10.4 Deploy Logs",
+      "category": "DEPLOY",
+      "status": "PASS"
+    },
+    {
+      "name": "11.1 Preview Panel",
+      "category": "PREVIEW",
+      "status": "PASS"
+    },
+    {
+      "name": "11.2 Quality Dashboard",
+      "category": "PREVIEW",
+      "status": "PASS"
+    },
+    {
+      "name": "11.3 Performance Metrics",
+      "category": "PREVIEW",
+      "status": "PASS"
+    },
+    {
+      "name": "12.1 Dark Mode",
+      "category": "UI",
+      "status": "PASS"
+    },
+    {
+      "name": "12.2 Light Mode Toggle",
+      "category": "UI",
+      "status": "PASS"
+    },
+    {
+      "name": "12.3 Responsive Layout",
+      "category": "UI",
+      "status": "PASS"
+    },
+    {
+      "name": "12.4 Sidebar Collapse",
+      "category": "UI",
+      "status": "PASS"
+    },
+    {
+      "name": "12.5 Search/Filter",
+      "category": "UI",
+      "status": "PASS"
+    },
+    {
+      "name": "13.1 No Fatal Errors",
+      "category": "PERF",
+      "status": "PASS"
+    },
+    {
+      "name": "13.2 API Connectivity",
+      "category": "PERF",
+      "status": "PASS"
+    },
+    {
+      "name": "13.3 Load Performance",
+      "category": "PERF",
+      "status": "PASS"
+    },
+    {
+      "name": "14.1 Mobile 320px",
+      "category": "MOBILE",
+      "status": "PASS"
+    },
+    {
+      "name": "14.2 Mobile 375px",
+      "category": "MOBILE",
+      "status": "PASS"
+    },
+    {
+      "name": "14.3 Mobile 390px",
+      "category": "MOBILE",
+      "status": "PASS"
+    },
+    {
+      "name": "14.4 Tablet 768px",
+      "category": "MOBILE",
+      "status": "PASS"
+    },
+    {
+      "name": "14.5 Desktop 1280px",
+      "category": "MOBILE",
+      "status": "PASS"
+    },
+    {
+      "name": "15.1 HTTPS Enabled",
+      "category": "SECURITY",
+      "status": "PASS"
+    },
+    {
+      "name": "15.2 No Console Errors",
+      "category": "SECURITY",
+      "status": "PASS"
+    },
+    {
+      "name": "15.3 Content Security Policy",
+      "category": "SECURITY",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    {
+      "feature": "2.1 Sidebar Visible",
+      "category": "NAV",
+      "error": "No sidebar"
+    },
+    {
+      "feature": "2.2 Projects Link",
+      "category": "NAV",
+      "error": "Projects not found"
+    },
+    {
+      "feature": "2.6 Deploy Link",
+      "category": "NAV",
+      "error": "Deploy not found"
+    },
+    {
+      "feature": "4.2 Builder Component",
+      "category": "WORKSPACE",
+      "error": "No builder"
+    },
+    {
+      "feature": "7.1 AI Panel Button",
+      "category": "AI",
+      "error": "AI button not found"
+    },
+    {
+      "feature": "8.1 GitHub Menu Item",
+      "category": "GITHUB",
+      "error": "GitHub not found"
+    },
+    {
+      "feature": "10.1 Deploy Menu Item",
+      "category": "DEPLOY",
+      "error": "Deploy not found"
+    },
+    {
+      "feature": "10.2 Deploy Status",
+      "category": "DEPLOY",
+      "error": "No deploy info"
+    }
+  ],
+  "warnings": [],
+  "passed": 69,
+  "failed": 8,
+  "warnings_count": 0,
+  "categories": {
+    "CORE": {
+      "pass": 5,
+      "fail": 0
+    },
+    "NAV": {
+      "pass": 4,
+      "fail": 3
+    },
+    "PROJECTS": {
+      "pass": 4,
+      "fail": 0
+    },
+    "WORKSPACE": {
+      "pass": 4,
+      "fail": 1
+    },
+    "FILES": {
+      "pass": 5,
+      "fail": 0
+    },
+    "TERMINAL": {
+      "pass": 8,
+      "fail": 0
+    },
+    "AI": {
+      "pass": 8,
+      "fail": 1
+    },
+    "GITHUB": {
+      "pass": 6,
+      "fail": 1
+    },
+    "GIT": {
+      "pass": 4,
+      "fail": 0
+    },
+    "DEPLOY": {
+      "pass": 2,
+      "fail": 2
+    },
+    "PREVIEW": {
+      "pass": 3,
+      "fail": 0
+    },
+    "UI": {
+      "pass": 5,
+      "fail": 0
+    },
+    "PERF": {
+      "pass": 3,
+      "fail": 0
+    },
+    "MOBILE": {
+      "pass": 5,
+      "fail": 0
+    },
+    "SECURITY": {
+      "pass": 3,
+      "fail": 0
+    }
+  }
+}

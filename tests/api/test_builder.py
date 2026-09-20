@@ -9,11 +9,20 @@ operation is always asserted through its real error code or terminal state,
 never through HTTP 200 alone.
 """
 import asyncio
+import os
+import sys
 import uuid
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+
+# Ensure an isolated SQLite database is configured BEFORE importing the app.
+_BACKEND_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "backend")
+)
+if _BACKEND_PATH not in sys.path:
+    sys.path.insert(0, _BACKEND_PATH)
 
 from app.main import app
 from app.db.base import Base

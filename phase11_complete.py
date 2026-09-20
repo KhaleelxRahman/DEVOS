@@ -29,10 +29,11 @@ os.chdir(ROOT)
 def log(msg):
     print(msg)
 
-def run(cmd, check=True):
+def run(cmd, check=True, timeout=None):
     """Run a shell command and return (returncode, stdout, stderr)."""
     log(f"  CMD: {cmd}")
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                            timeout=timeout)
     if result.stdout:
         for line in result.stdout.strip().split('\n'):
             if line.strip():

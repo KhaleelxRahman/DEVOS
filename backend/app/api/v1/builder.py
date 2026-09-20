@@ -345,6 +345,7 @@ async def summary(
     for f in files:
         op = f.get("operation") if isinstance(f, dict) else None
         path = f.get("path") if isinstance(f, dict) else str(f)
+        path = path or ""
         if op == "create" or op == "write":
             by_status["created"].append(path)
         elif op == "modify":

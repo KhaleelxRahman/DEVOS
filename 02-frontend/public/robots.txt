@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /dashboard
+Disallow: /projects
+Disallow: /workspace
+Disallow: /settings
+Disallow: /api
+
+Sitemap: https://devos-ebon.vercel.app/sitemap.xml

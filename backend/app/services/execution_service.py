@@ -57,6 +57,12 @@ _PROCESSES: dict[str, asyncio.subprocess.Process] = {}
 # overwrite of a committed CANCELLED).
 _CANCELLED_IDS: set[str] = set()
 
+# Phase 2D: preview port registry keyed by execution_id -> bound port.
+# Mirrors _PROCESSES so stop/cancel/session-end can discover which port a
+# preview server was bound to without touching the asyncio.subprocess.Process
+# object (which Pylance reports as an unknown attribute on that type).
+_PREVIEW_PORTS: dict[str, int] = {}
+
 # Phase 2D preview registry keyed by project_id -> live DEV_SERVER execution
 # row. Mirrors _PROCESSES (one live server max per project); entries are
 # removed on stop/crash/session-end so no orphan survives.
@@ -703,7 +709,7 @@ class ExecutionService:
             execution.process_id = str(proc.pid)
             execution.status = "RUNNING"
             _PROCESSES[execution.execution_id] = proc
-            proc._devos_preview_port = expected_port
+            _PREVIEW_PORTS[execution.execution_id] = expected_port
             _PREVIEW_EXECUTIONS[project_id] = execution
             await db.flush()
             await db.commit()

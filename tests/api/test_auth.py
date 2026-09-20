@@ -8,7 +8,7 @@ from httpx import ASGITransport, AsyncClient
 
 # Ensure an isolated SQLite database is configured BEFORE importing the app.
 _BACKEND_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "03-backend")
+    os.path.join(os.path.dirname(__file__), "..", "backend")
 )
 if _BACKEND_PATH not in sys.path:
     sys.path.insert(0, _BACKEND_PATH)
