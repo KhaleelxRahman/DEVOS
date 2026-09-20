@@ -67,6 +67,43 @@
   background-color: #dc2626;
 }
 
+/* Bare .btn without a variant keeps the glass treatment so no UA-default
+   button face can surface (terminal Copy/clear, preview Stop/Open). */
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-ghost):not(.btn-danger) {
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+}
+
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-ghost):not(.btn-danger):hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-ghost):not(.btn-danger):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Icon-only utility buttons rendered as plain buttons (terminal copy). */
+.terminal-copy {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.terminal-copy:hover:not(:disabled), .terminal-copy:focus-visible {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.terminal-copy:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+
 /* Inputs & Form Controls */
 .form-group {
   display: flex;
@@ -94,6 +131,44 @@
   font-size: var(--font-size-sm);
   outline: none;
   transition: border-color var(--transition-fast);
+}
+
+/* Legacy/global text-field controls shared by workspace panels (terminal
+   command input, explorer search, AI composer, planner/builder fields).
+   Matches the form-input dark treatment so no raw UA-default white box can
+   surface on the dark theme. */
+.input {
+  padding: 6px 10px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.input:focus {
+  border-color: var(--color-border-focus);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 1px;
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+textarea.input {
+  resize: vertical;
 }
 
 .form-input:focus {
