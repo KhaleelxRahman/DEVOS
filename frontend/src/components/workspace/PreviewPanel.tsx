@@ -59,7 +59,10 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ projectId }) => {
   };
 
   const ready = preview?.status === 'READY' && !!preview.url;
-  const frameSrc = authedFrameSrc(preview?.url ?? null);
+  const frameSrc = authedFrameSrc(
+    preview?.url ?? null,
+    preview?.preview_token ?? null,
+  );
 
   return (
     <div style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>

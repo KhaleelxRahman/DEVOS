@@ -7,12 +7,15 @@ interface PreviewPanelProps {
   projectId: string;
 }
 
-const authedFrameSrc = (url: string | null): string | null => {
+const authedFrameSrc = (
+  url: string | null,
+  token: string | null,
+): string | null => {
   if (!url) return null;
-  // The iframe cannot set an Authorization header, so the session JWT rides
-  // in the URL (short-lived, validated server-side against the execution's
-  // owner). This mirrors the backend's preview_token contract.
-  const token = localStorage.getItem('devos_token');
+  // The iframe cannot set an Authorization header, so the backend mints a
+  // short-lived, execution-scoped preview token and the client appends it to
+  // the proxy URL. The session JWT is never placed in a URL (Phase 2G
+  // hardening) — the preview token authorizes only this execution's proxy.
   return token ? `${url}?preview_token=${encodeURIComponent(token)}` : url;
 };
 
@@ -59,7 +62,10 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ projectId }) => {
   };
 
   const ready = preview?.status === 'READY' && !!preview.url;
-  const frameSrc = authedFrameSrc(preview?.url ?? null);
+  const frameSrc = authedFrameSrc(
+    preview?.url ?? null,
+    preview?.preview_token ?? null,
+  );
 
   return (
     <div style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>

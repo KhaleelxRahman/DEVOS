@@ -6,14 +6,9 @@ observed result is asserted (blocked = non-200 with the right error shape).
 No attack is reasoned about without being executed.
 """
 
-import json
 import pytest
 import pytest_asyncio
-import re
-import uuid
 from httpx import ASGITransport, AsyncClient
-from app.models.user import User
-from app.models.execution import Execution
 
 from app.db.base import Base
 from app.db.session import engine
@@ -414,4 +409,102 @@ async def test_preview_isolated_across_users_and_projects(client):
         res = await client.post(
             f"/api/v1/projects/{project}/preview/stop", headers=headers)
         assert res.status_code == 200, res.text
+    assert _PROCESSES == {}
+
+
+# ---------------------------------------------------------------------------
+# 8. Preview proxy URL-token hardening (Phase 2G fix)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_preview_proxy_rejects_session_jwt_in_url(client):
+    """Attack: put the SESSION JWT in the iframe URL (?preview_token=<jwt>).
+
+    Before this Phase 2G fix that authenticated the proxy, so a long-lived
+    credential rode in a URL (browser history, access logs, Referer). After
+    the fix the URL token must be a dedicated execution-scoped preview token:
+    a session JWT in the URL is rejected, while the very same JWT still works
+    in the Authorization header (API contract preserved).
+    """
+    from app.services.file_service import FileService
+
+    headers_a, token_a = await _register(client, "secg-pt@example.com", "PT")
+    project_a = await _create_project(client, headers_a, "pt-project")
+    FileService.create_file(project_a, "", "index.html", "<h1>PT_OK</h1>")
+
+    start = await client.post(
+        f"/api/v1/projects/{project_a}/preview", headers=headers_a)
+    assert start.status_code == 200, start.text
+    info = start.json()["data"]
+    assert info["status"] == "READY", info
+
+    # 1. The session JWT in the URL is refused (the old, leaky contract).
+    res = await client.get(f"{info['url']}?preview_token={token_a}")
+    assert res.status_code in (401, 403), (res.status_code, res.text)
+
+    # 2. The same session JWT still authenticates the proxy via the header.
+    res = await client.get(info["url"], headers=headers_a)
+    assert res.status_code == 200, res.text
+    assert "PT_OK" in res.text
+
+    # 3. A scoped preview token IS issued, differs from the session JWT, and
+    #    works from the URL alone (that is what the iframe uses now).
+    scoped = info.get("preview_token")
+    assert scoped, "backend must issue an execution-scoped preview token"
+    assert scoped != token_a
+    res = await client.get(f"{info['url']}?preview_token={scoped}")
+    assert res.status_code == 200, res.text
+    assert "PT_OK" in res.text
+
+    # 4. That URL token is NOT a session credential: it cannot authenticate
+    #    any API route, in the header or the query string.
+    res = await client.get(
+        "/api/v1/projects", headers={"Authorization": f"Bearer {scoped}"})
+    assert res.status_code in (401, 403), res.text
+    res = await client.get("/api/v1/projects", params={"preview_token": scoped})
+    assert res.status_code in (401, 403), res.text
+
+    stop = await client.post(
+        f"/api/v1/projects/{project_a}/preview/stop", headers=headers_a)
+    assert stop.status_code == 200, stop.text
+    assert _PROCESSES == {}
+
+
+@pytest.mark.asyncio
+async def test_preview_token_scoped_to_execution_and_project(client):
+    """A preview token minted for one execution must not unlock another
+    execution or another project of the same user (scope binding)."""
+    from app.services.file_service import FileService
+
+    headers_a, _ = await _register(client, "secg-scope@example.com", "S")
+    project_1 = await _create_project(client, headers_a, "scope-1")
+    project_2 = await _create_project(client, headers_a, "scope-2")
+    FileService.create_file(project_1, "", "index.html", "<h1>SCOPE_1</h1>")
+    FileService.create_file(project_2, "", "index.html", "<h1>SCOPE_2</h1>")
+
+    info_1 = (await client.post(
+        f"/api/v1/projects/{project_1}/preview", headers=headers_a)).json()["data"]
+    info_2 = (await client.post(
+        f"/api/v1/projects/{project_2}/preview", headers=headers_a)).json()["data"]
+    assert info_1["status"] == "READY" and info_2["status"] == "READY"
+    token_1 = info_1["preview_token"]
+    assert token_1
+
+    # token_1 on project_2's proxy path -> rejected (different execution id).
+    res = await client.get(f"{info_2['url']}?preview_token={token_1}")
+    assert res.status_code in (401, 403), (res.status_code, res.text)
+
+    # token_1 on its own execution -> accepted.
+    res = await client.get(f"{info_1['url']}?preview_token={token_1}")
+    assert res.status_code == 200
+    assert "SCOPE_1" in res.text
+
+    # Tampered token -> rejected.
+    res = await client.get(f"{info_1['url']}?preview_token={token_1[:-3]}abc")
+    assert res.status_code in (401, 403), res.text
+
+    for headers, project in ((headers_a, project_1), (headers_a, project_2)):
+        await client.post(
+            f"/api/v1/projects/{project}/preview/stop", headers=headers)
     assert _PROCESSES == {}

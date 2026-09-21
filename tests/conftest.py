@@ -1,4 +1,3 @@
-import pytest
 import sys
 import os
 import tempfile
@@ -28,7 +27,7 @@ os.environ.setdefault(
 
 # Rate limiting is process-local; reset between tests so per-IP limits in
 # auth/waitlist/contact/AI/terminal do not leak across test cases.
-import pytest as _pytest
+import pytest as _pytest  # noqa: E402  (kept after env setup by intent)
 
 
 @_pytest.fixture(autouse=True)

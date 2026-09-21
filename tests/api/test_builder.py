@@ -24,10 +24,10 @@ _BACKEND_PATH = os.path.abspath(
 if _BACKEND_PATH not in sys.path:
     sys.path.insert(0, _BACKEND_PATH)
 
-from app.main import app
-from app.db.base import Base
-from app.db.session import engine
-from app.services.builder_service import BACKGROUND_STORE
+from app.main import app  # noqa: E402
+from app.db.base import Base  # noqa: E402
+from app.db.session import engine  # noqa: E402
+from app.services.builder_service import BACKGROUND_STORE  # noqa: E402
 
 
 @pytest_asyncio.fixture

@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.api.v1.executions import _owned_project
 from app.core.rate_limit import rate_limit
+from app.core.security import create_preview_token, decode_preview_token
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.common import ApiResponse
@@ -24,6 +25,24 @@ from app.services.execution_service import ExecutionService
 from app.services.preview_service import PreviewService
 
 router = APIRouter(prefix="/projects/{project_id}", tags=["preview"])
+
+
+def _preview_token_for(execution, user) -> str | None:
+    """Phase 2G: mint the short-lived, execution-scoped iframe token.
+
+    Only a READY preview gets one. The token authorizes ONLY this execution's
+    preview proxy and can never be used as a session/API credential (distinct
+    signing key, ``typ="preview"``, short TTL).
+    """
+    if execution is None or not execution.execution_id:
+        return None
+    if execution.status != "READY" or not execution.preview_port:
+        return None
+    return create_preview_token(
+        execution_id=execution.execution_id,
+        user_id=user.id,
+        project_id=execution.project_id,
+    )
 
 
 @router.post(
@@ -58,7 +77,8 @@ async def start_preview(
             "port": execution.preview_port,
         },
     )
-    info = PreviewService.build_preview_info(execution, project_id)
+    info = PreviewService.build_preview_info(
+        execution, project_id, _preview_token_for(execution, current_user))
     return ApiResponse(success=True, data=info)
 
 
@@ -82,7 +102,8 @@ async def preview_status(
             data=PreviewInfo(
                 execution_id="", project_id=project_id, status="STOPPED"),
         )
-    info = PreviewService.build_preview_info(execution, project_id)
+    info = PreviewService.build_preview_info(
+        execution, project_id, _preview_token_for(execution, current_user))
     return ApiResponse(success=True, data=info)
 
 
@@ -116,7 +137,9 @@ async def stop_preview(
         activity_type="preview.stopped",
         metadata={"execution_id": stopped.execution_id},
     )
-    info = PreviewService.build_preview_info(stopped, project_id)
+    # A stopped preview is never READY, so no iframe token is issued.
+    info = PreviewService.build_preview_info(
+        stopped, project_id, _preview_token_for(stopped, current_user))
     return ApiResponse(success=True, data=info)
 
 
@@ -135,11 +158,15 @@ async def preview_proxy(
 ):
     """Phase 2D: relay the running dev server's HTTP response through the
     authorized backend so the browser iframe can load the preview without
-    exposing the dev-server port publicly. The caller is authenticated via
-    the Bearer header OR a `preview_token` query param (the same session
-    JWT — an iframe cannot set headers, so the token rides in the URL).
-    Ownership is enforced; the target is always
-    http://127.0.0.1:<stored port> — never client-supplied."""
+    exposing the dev-server port publicly. Ownership is enforced; the target
+    is always http://127.0.0.1:<stored port> — never client-supplied.
+
+    Authentication is EITHER a Bearer session JWT (API clients) OR, for the
+    iframe which cannot set headers, a short-lived `preview_token` query param.
+    Phase 2G: that URL token must be a dedicated execution-scoped preview
+    token — a session JWT is explicitly NOT accepted in the URL, because a
+    credential in a URL leaks through browser history, access logs and
+    Referer headers."""
     from app.api.deps import AuthRequiredException as _ARE
     from app.core.errors import (
         ExecutionInvalidTypeException,
@@ -147,16 +174,19 @@ async def preview_proxy(
     from app.core.security import decode_access_token
     from app.services.auth_service import AuthService
 
-    token = None
     if authorization and authorization.startswith("Bearer "):
-        token = authorization.split(" ", 1)[1]
+        user_id = decode_access_token(authorization.split(" ", 1)[1])
+        if not user_id:
+            raise _ARE("Invalid or expired session token")
     elif preview_token:
-        token = preview_token
-    if not token:
+        scope = decode_preview_token(preview_token)
+        if (not scope
+                or scope["execution_id"] != execution_id
+                or scope["project_id"] != project_id):
+            raise _ARE("Invalid or expired preview token")
+        user_id = scope["user_id"]
+    else:
         raise _ARE()
-    user_id = decode_access_token(token)
-    if not user_id:
-        raise _ARE("Invalid or expired session token")
     user = await AuthService.get_by_id(db, user_id)
     if not user:
         raise _ARE("User associated with token no longer exists")

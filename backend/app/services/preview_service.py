@@ -164,8 +164,14 @@ class PreviewService:
         raise RuntimeError("No free port available in the preview range")
 
     @staticmethod
-    def build_preview_info(execution, project_id: str) -> PreviewInfo:
-        """Build a PreviewInfo payload from a DEV_SERVER execution record."""
+    def build_preview_info(
+        execution, project_id: str, preview_token: str | None = None,
+    ) -> PreviewInfo:
+        """Build a PreviewInfo payload from a DEV_SERVER execution record.
+
+        ``preview_token`` is the Phase 2G execution-scoped iframe token; it is
+        optional and additive so existing callers/contracts are unchanged.
+        """
         return PreviewInfo(
             execution_id=execution.execution_id,
             project_id=project_id,
@@ -176,4 +182,5 @@ class PreviewService:
             failure_reason=execution.failure_reason,
             stdout=execution.stdout,
             stderr=execution.stderr,
+            preview_token=preview_token,
         )

@@ -135,6 +135,10 @@ class PreviewInfo(BaseModel):
     exit_code     — process exit code when the preview ended.
     stdout        — live dev-server output captured so far.
     stderr        — live dev-server error output captured so far.
+    preview_token — Phase 2G: short-lived, execution-scoped token the browser
+                    iframe appends to `url` (?preview_token=...). It replaces
+                    the session JWT that used to ride in the URL and authorizes
+                    ONLY this execution's preview proxy.
     """
 
     execution_id: str
@@ -146,6 +150,7 @@ class PreviewInfo(BaseModel):
     failure_reason: str | None = None
     stdout: str | None = None
     stderr: str | None = None
+    preview_token: str | None = None
 
 
 class StartPreviewResponse(BaseModel):

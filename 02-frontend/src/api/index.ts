@@ -211,6 +211,9 @@ export interface PreviewInfo {
   failure_reason: string | null;
   stdout: string | null;
   stderr: string | null;
+  // Phase 2G: short-lived, execution-scoped iframe token (replaces the
+  // session JWT that used to ride in the preview URL).
+  preview_token: string | null;
 }
 
 export const previewApi = {
