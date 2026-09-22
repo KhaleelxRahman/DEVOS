@@ -667,8 +667,15 @@ class ExecutionService:
         # flag; Python's http.server takes the port positionally. Passing
         # the wrong shape makes the dev server exit before it can bind.
         if info.command and info.command.strip().lower().startswith("npm"):
+            # npm's own CLI consumes `--port` unless it is separated by `--`.
+            # Without the separator npm warns "Unknown cli config \"--port\""
+            # and hands the bare port to the script as a positional argument,
+            # so the dev server binds its default port instead of the one the
+            # readiness probe checks. Verified against this workspace:
+            #   npm run dev --port 5198     -> 5198 closed (vite ignores it)
+            #   npm run dev -- --port 5199  -> 5199 bound  (preview READY)
             execution.arguments = list(execution.arguments or []) + [
-                "--port", str(expected_port),
+                "--", "--port", str(expected_port),
             ]
         else:
             execution.arguments = list(execution.arguments or []) + [
@@ -735,7 +742,15 @@ class ExecutionService:
         last_error: str = ""
         while time.monotonic() < deadline:
             if proc.returncode is not None:
-                await asyncio.gather(*drain_tasks)
+                # Bounded drain: the process that exited may be the cmd.exe
+                # wrapper while the grandchild dev server still holds the
+                # stdio pipes open, so the drain task can never see EOF.
+                # Never let that stall the request.
+                try:
+                    await asyncio.wait_for(asyncio.gather(*drain_tasks), 5)
+                except Exception:
+                    for task in drain_tasks:
+                        task.cancel()
                 stdout_text = _bounded_decode(
                     b"".join(stdout_chunks), None, max_out)
                 stderr_text = _bounded_decode(
@@ -795,7 +810,15 @@ class ExecutionService:
                 await proc.wait()
             except Exception:
                 pass
-        await asyncio.gather(*drain_tasks) if drain_tasks else None
+        if drain_tasks:
+            # Bounded drain (see above): a surviving grandchild dev server can
+            # hold the pipes open forever. Record the terminal state even if
+            # the streams never reach EOF.
+            try:
+                await asyncio.wait_for(asyncio.gather(*drain_tasks), 5)
+            except Exception:
+                for task in drain_tasks:
+                    task.cancel()
         _PROCESSES.pop(execution.execution_id, None)
         _PREVIEW_EXECUTIONS.pop(project_id, None)
         execution.status = "FAILED"

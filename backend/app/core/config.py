@@ -11,6 +11,7 @@ production deployment is missing the minimum security requirements
 """
 
 import json
+import os
 from typing import Any
 
 from dotenv import load_dotenv
@@ -61,6 +62,15 @@ class Settings(BaseSettings):
 
     # --- Terminal sandbox ---
     TERMINAL_TIMEOUT_SECONDS: int = 30
+    # --- Auth / password hashing ---
+    # bcrypt work factor. Default 12 (~0.08–0.2s on modern hardware); very high
+    # values (e.g. 16384 = 2^14) make login unusably slow (~1.2s per call).
+    # Capped at 14 as a safety valve — any higher value is silently reduced.
+    BCRYPT_ROUNDS: int = int(os.getenv("BCRYPT_ROUNDS", "12"))
+    if BCRYPT_ROUNDS > 14:
+        BCRYPT_ROUNDS = 14
+
+    # --- Terminal sandbox ---
     TERMINAL_MAX_OUTPUT_CHARS: int = 20000
 
     # --- Phase 2A execution foundation (contract only; DEFINED, not ENFORCED) ---

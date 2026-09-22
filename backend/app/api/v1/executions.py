@@ -196,18 +196,32 @@ async def list_executions(
     "/{execution_id}",
     response_model=ApiResponse[ExecutionResponse],
 )
-
-
-@router.get(
-    "/{execution_id}",
-    response_model=ApiResponse[ExecutionResponse],
-)
 async def get_execution(
     project_id: str,
     execution_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    execution = await ExecutionService.get_execution(
+        db, current_user, project_id, execution_id
+    )
+    return ApiResponse(success=True, data=to_execution_response(execution))
+
+
+@router.get(
+    "/{execution_id}/logs",
+    response_model=ApiResponse[ExecutionResponse],
+)
+async def get_execution_logs(
+    project_id: str,
+    execution_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Phase 2F: retrieve execution logs (stdout/stderr/exit code).
+
+    Returns the full execution record including captured output, status,
+    and timestamps for a completed execution."""
     execution = await ExecutionService.get_execution(
         db, current_user, project_id, execution_id
     )
