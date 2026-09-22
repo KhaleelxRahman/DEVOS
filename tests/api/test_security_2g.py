@@ -508,3 +508,54 @@ async def test_preview_token_scoped_to_execution_and_project(client):
         await client.post(
             f"/api/v1/projects/{project}/preview/stop", headers=headers)
     assert _PROCESSES == {}
+
+
+# ---------------------------------------------------------------------------
+# 9. Security headers: framing policy (Phase 2H cert finding)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_preview_proxy_frameable_app_only_other_routes_denied(client):
+    """The preview proxy response must be frameable from the configured app
+    origins (the workspace iframe loads it), while every other route keeps
+    X-Frame-Options: DENY + CSP frame-ancestors 'none'."""
+    from app.services.file_service import FileService
+
+    headers_a, _ = await _register(client, "secg-frame@example.com", "FR")
+    project_a = await _create_project(client, headers_a, "frame-project")
+    FileService.create_file(project_a, "", "index.html", "<h1>FRAME_OK</h1>")
+
+    start = await client.post(
+        f"/api/v1/projects/{project_a}/preview", headers=headers_a)
+    assert start.status_code == 200, start.text
+    info = start.json()["data"]
+    assert info["status"] == "READY", info
+
+    from app import main as app_main
+    origins = " ".join(app_main.settings.BACKEND_CORS_ORIGINS)
+
+    # 1. Proxy response: no X-Frame-Options DENY; CSP allows app origins.
+    proxy = await client.get(
+        f"{info['url']}?preview_token={info['preview_token']}")
+    assert proxy.status_code == 200, proxy.text
+    assert proxy.headers.get("x-frame-options") is None
+    csp = proxy.headers.get("content-security-policy", "")
+    assert "frame-ancestors" in csp
+    for origin in app_main.settings.BACKEND_CORS_ORIGINS:
+        assert origin in csp, (origin, csp)
+    assert "'none'" not in csp.split("frame-ancestors", 1)[1].split(";")[0]
+    assert "FRAME_OK" in proxy.text
+
+    # 2. Any other API route keeps the strict no-framing default.
+    strict = await client.get("/api/v1/projects", headers=headers_a)
+    assert strict.status_code == 200
+    assert strict.headers.get("x-frame-options") == "DENY"
+    strict_csp = strict.headers.get("content-security-policy", "")
+    assert "frame-ancestors 'none'" in strict_csp
+    assert origins not in strict_csp
+
+    stop = await client.post(
+        f"/api/v1/projects/{project_a}/preview/stop", headers=headers_a)
+    assert stop.status_code == 200, stop.text
+    assert _PROCESSES == {}

@@ -101,14 +101,26 @@ app.add_exception_handler(
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
-    response.headers.setdefault("X-Frame-Options", "DENY")
+    # The preview proxy response is rendered inside the workspace iframe. It
+    # must be frameable from the configured app origins only; every other
+    # route keeps the strict no-framing default (Phase 2H cert finding).
+    if "/executions/" in request.url.path and "/preview/" in request.url.path:
+        ancestors = " ".join(settings.BACKEND_CORS_ORIGINS)
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            f"default-src 'self'; frame-ancestors {ancestors}; "
+            "base-uri 'self'; object-src 'none'",
+        )
+    else:
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; frame-ancestors 'none'; "
+            "base-uri 'self'; object-src 'none'",
+        )
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
-    response.headers.setdefault(
-        "Content-Security-Policy",
-        "default-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
-    )
     if settings.ENVIRONMENT == "production":
         response.headers.setdefault(
             "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
