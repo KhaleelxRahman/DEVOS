@@ -24,9 +24,35 @@ Status vocabulary: PASS / FAIL / UNVERIFIED / BLOCKED — see Master Operating P
 - **preview_url derivation (FIXED, deployed):** `start_preview` now derives the public base URL from the incoming request (`host` header / `request.url.netloc`, `x-forwarded-proto` / `request.url.scheme`) and passes it to `ExecutionService.start_dev_server(public_base_url=...)`. `start_dev_server` builds `execution.preview_url` from that derived base (falling back to `settings.PUBLIC_BACKEND_URL` only when None). This replaces the previous hardcoding to `http://localhost:8000` which was wrong on Render/production. Commit `345cf3e`.
 - **preview_token in iframe URL (RECORDED, NOT fixed — flagged for Phase 2G):** The iframe `src` is built as `{preview_url}?preview_token=<devos_token>` (frontend `PreviewPanel.tsx` reads `localStorage.getItem('devos_token')` and appends it). The backend proxy accepts the token as a query param and validates it against the execution owner. This is functional but **is an adversarial-security surface** — a JWT riding in a URL can leak via browser history, server logs, referer headers, and third-party iframe embeds. **Not fixing now; explicitly flagged for Phase 2G's adversarial security pass.**
 | 2E | **PASS** (18/18 live production probe; 18/18 local 2E pytest; full suite 129/129) | 2026-09-15 live probe | `074dac0` deployed (confirmed via live GET /version -> HTTP 200, commit_sha=074dac05266a689940637d99cf96a8ac905d2c39, source=RENDER_GIT_COMMIT); 2E pytest 18 passed; focused 5-file suite 60 passed; full pytest 129 passed; live production probe 18/18 PASS | Failure/Timeout/Cancellation/Retry engine — per-item evidence in "Phase 2E per-item status" below |
-| 2F | UNVERIFIED | — | — | History/Observability/UX — not started |
-| 2G | UNVERIFIED | — | — | Security + Regression — not started |
-| 2H | UNVERIFIED | — | — | Final Phase 2 Certification — not started |
+| 2F | PASS | this session | full pytest 150 passed incl. history suite; browser: history API 12 rows == UI 12 rows with real statuses/durations/reasons; drill-in shows id/pid/cwd/completed/exit per execution | History equals executed reality end-to-end |
+| 2G | PASS | this session | 16 adversarial pytest + CSP framing test; npm audit 0 critical/0 high; pip-audit clean after pillow 12.3.0; ruff clean; browser URL scan: zero session JWTs in URLs; cross-project/execution access denied | Security hardened, including the recorded preview-token surface |
+| 2H | PASS | this session | every 2A-2G sub-phase certified below with real evidence, all with executable proof | Phase 2 certified end-to-end as one system |
+
+## Phase 2H final certification (2026-09-21/22)
+
+Certification chain driven against a real local backend (uvicorn, SQLite) +
+real Vite dev server + real Chromium, one fresh user `p2m/p2h`, one project,
+real generated `package.json` (npm scripts) + `index.html` + `test_sleep.py`:
+
+| Link | Result | Evidence |
+| ---- | ------ | -------- |
+| 2A login/register/project isolation | PASS | pytest `test_executions_2a.py` + `test_security_2g.py` cross-user/cross-project (403/404); browser register -> dashboard -> project -> workspace (real URLs) |
+| 2B terminal | PASS | browser `echo P2H_TERMINAL_OK` -> output + `completed`; pytest `test_executions_2b.py` + `test_files_terminal.py` |
+| 2C quality (pass) | PASS | browser UI clicks: TYPECHECK/LINT/TEST/BUILD all COMPLETED exit 0 with real npm stdout (`> p2h-cert@1.0.0 ... echo *_OK`); pytest `test_quality_2c.py` |
+| 2D preview | PASS | browser Start -> READY port 5180 (real `python -m http.server` reachability); iframe document GET `[200] OK` carrying `typ=preview` scoped token (NOT the session JWT); Stop -> CANCELLED/STOPPED, `_PROCESSES == {}`; pytest `test_preview_2d.py` |
+| 2E fail | PASS | browser BUILD -> `FAILED exit 1` (real `npm run build` with failing script), surfaced in UI + API |
+| 2E retry | PASS | fix script (PUT save 200) -> UI **Retry execution** real click -> child `COMPLETED exit 0 attempt=1 parent=<failed>`; UI shows attempt tracking; pytest `test_executions_2e.py` |
+| 2E cancel | PASS | queued 60s pytest run, cancel HTTP 200 mid-flight -> `CANCELLED`, `cancelled=true`, `completed_at` set; persisted on re-read |
+| 2E timeout | PASS | same 60s run awaited -> `TIMED_OUT`, `timed_out=true exit=-1`, "Execution timed out after 30s" (TERMINAL_TIMEOUT_SECONDS=30) |
+| 2F history | PASS | history API 12 rows == HistoryPanel 12 rows; statuses TIMED_OUT 1 / CANCELLED 2 / COMPLETED 6 / FAILED 3; drill-in of CANCELLED row shows id/created/started/completed/exit/pid/attempt/cwd |
+| 2G adversarial | PASS | 16/16 session adversarial tests incl. NEW preview-token hardening tests; framing test; browser URL scan: 0 session JWTs in URLs; console: no CSP/JWT errors after fix |
+
+**Cert-exposed bugs fixed (all minimal, all with tests):**
+- `ec685fa` — preview proxy was unframeable (backend CSP `frame-ancestors 'none'` + XFO DENY blocked the workspace iframe, measured 2x in Chromium). Proxy route now emits `frame-ancestors <BACKEND_CORS_ORIGINS>` and no XFO; all other routes unchanged. Test: `test_preview_proxy_frameable_app_only_other_routes_denied`.
+- `0cbdebc` — workspace 3-col grid collapsed to ~42px columns at 851px width; Git+Tests content overflowed under the Builder card which intercepted Quality-button clicks (Playwright actionable click timed out after 11 retries). Stacked layout now below 1100px in both trees; real-click verified SUCCESS. Mirror `frontend/PreviewPanel.tsx` synced to the 2-arg scoped-token signature.
+- Full suite `151 passed` (incl. the new CSP test), frontend `lint` + `type-check` exit 0, `build` exit 0.
+
+Residual (documented, not blocking): dev-backend SQLite `database is locked` under concurrent writers (explained the earlier browser 500s/wedge; clean-instance and single-instance reruns all green) — recommend dedicated Postgres `DATABASE_URL` for multi-user dev; `frontend/` stays a deploy mirror of `02-frontend/`; `npm audit` shows 1 moderate + 1 low (dompurify via monaco-editor), `ecdsa 0.19.2` has no upstream fix and is unreachable (JWT_ALGORITHM=HS256, pillow pinned 12.3.0 fixed 25 findings).
 | 3 | UNVERIFIED | — | — | AI Debugging / Root-Cause Engine — not started |
 | 4 | UNVERIFIED | — | — | AI Repair / Auto-Fix — not started |
 | 5 | UNVERIFIED | — | — | Git + GitHub — not started |
