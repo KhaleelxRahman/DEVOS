@@ -79,6 +79,127 @@ REDACTED_ENV_KEYS = frozenset({
     "AUTH_SECRET", "DATABASE_URL", "JWT", "TOKEN", "SECRET",
     "PASSWORD", "API_KEY", "PRIVATE_KEY", "OAUTH", "SESSION",
 })
+
+
+def _kill_process_tree(proc: asyncio.subprocess.Process) -> None:
+    """Best-effort kill of a spawned process AND its child tree.
+
+    Dev servers are launched through a shell wrapper (COMSPEC ``/d /c`` for
+    npm on Windows, ``/bin/sh -c`` on POSIX). Killing only ``proc`` leaves
+    the grandchild dev server alive: it keeps the preview socket bound (a
+    later readiness probe then reports a false READY) and it keeps the
+    stdio pipes open (the stdout/stderr drain tasks never see EOF, which
+    used to stall the request path forever). Hence every engine kill site
+    routes through here.
+
+    Windows: ``taskkill /F /T <pid>`` kills the whole tree. Fallback to
+    ``proc.kill()`` when taskkill is unavailable or fails.
+    POSIX: kill each descendant discovered via ``/proc`` (stdlib only, no
+    psutil), then ``proc.kill()``. Descendants are found by scanning
+    ``/proc/<pid>/stat`` PPID fields; grandchildren whose parent already
+    exited are re-parented to PID 1 and are compared by start time
+    (field 22) so only processes started after ``proc`` are killed.
+    """
+    pid = getattr(proc, "pid", None)
+    if pid is None:
+        try:
+            proc.kill()
+        except Exception:
+            pass
+        return
+    if os.name == "nt":
+        import subprocess as _sp
+
+        try:
+            _sp.run(["taskkill", "/F", "/T", "/PID", str(pid)],
+                    capture_output=True, timeout=10, check=False,
+                    creationflags=0x08000000)
+        except Exception:
+            pass
+        try:
+            if proc.returncode is None:
+                proc.kill()
+        except Exception:
+            pass
+        return
+    _kill_process_tree_posix(proc, pid)
+
+
+def _kill_process_tree_posix(proc: asyncio.subprocess.Process, pid: int) -> None:
+    """POSIX fallback for :func:`_kill_process_tree` (stdlib only, /proc scan).
+
+    Finds the descendants of ``pid`` by walking ``/proc`` PPID links, kills
+    the whole tree youngest-first (SIGKILL), then kills ``proc`` itself.
+    Processes whose ancestors already exited are re-parented to PID 1 and no
+    longer appear under ``pid``; those are still matched, but ONLY when their
+    working directory is the dev server's own working directory. Matching
+    every PID-1-reparented process by start time instead is unsafe on a
+    container host: it SIGKILLs unrelated processes (including platform
+    supervisors) that merely started after the dev server. Anything
+    unreadable (zombies, permission errors, a non-/proc platform) is skipped.
+    Every step is best-effort under the same "never raise" contract as the
+    Windows branch.
+    """
+    import signal as _signal
+
+    def _stat(target: int) -> tuple[int, int] | None:
+        try:
+            with open("/proc/%d/stat" % target, encoding="utf-8",
+                      errors="replace") as fh:
+                fields = fh.read().rsplit(")", 1)[-1].split()
+            # Post-comm layout: state, ppid, ..., starttime is field 22.
+            return int(fields[1]), int(fields[19])
+        except Exception:
+            return None
+
+    def _same_cwd(one: int, other: int) -> bool:
+        """True when both PIDs run in the same directory (re-parent check)."""
+        try:
+            return os.path.realpath("/proc/%d/cwd" % one) == os.path.realpath(
+                "/proc/%d/cwd" % other)
+        except Exception:
+            return False
+
+    try:
+        candidates = [int(name) for name in os.listdir("/proc")
+                      if name.isdigit() and int(name) != pid]
+    except Exception:
+        candidates = []
+    children: dict[int, list[int]] = {}
+    for other in candidates:
+        info = _stat(other)
+        if info is None:
+            continue
+        ppid, _start = info
+        if ppid == pid:
+            children.setdefault(ppid, []).append(other)
+    ordered: list[int] = []
+    stack = list(children.get(pid, []))
+    while stack:
+        current = stack.pop()
+        ordered.append(current)
+        stack.extend(children.get(current, []))
+    # Re-parented grandchildren only: a process whose PPID is now 1 qualifies
+    # solely when it shares the dev server's working directory, so unrelated
+    # host processes are never killed.
+    for other in candidates:
+        if other in ordered:
+            continue
+        info = _stat(other)
+        if info is None or info[0] != 1:
+            continue
+        if _same_cwd(pid, other):
+            ordered.append(other)
+    for target in ordered:
+        try:
+            os.kill(target, _signal.SIGKILL)
+        except Exception:
+            pass
+    try:
+        if proc.returncode is None:
+            proc.kill()
+    except Exception:
+        pass
 SAFE_COMMANDS = frozenset({
     "echo DEVOS_PHASE2_TEST", "node --version", "npm --version",
     "python --version", "git --version",
@@ -517,10 +638,15 @@ class ExecutionService:
                         pass
                     return execution
                 try:
-                    proc.kill()
+                    _kill_process_tree(proc)
                 except Exception:
                     pass
-                await proc.wait()
+                # Bounded: a wrapper that survives the tree kill must never
+                # stall the request -- the terminal state is recorded anyway.
+                try:
+                    await asyncio.wait_for(proc.wait(), 10)
+                except Exception:
+                    pass
                 execution.status = "TIMED_OUT"
                 execution.timed_out = True
                 execution.failure_reason = (
@@ -548,11 +674,11 @@ class ExecutionService:
                 # has not killed anything yet -- never leave it running.
                 if proc.returncode is None:
                     try:
-                        proc.kill()
+                        _kill_process_tree(proc)
                     except Exception:
                         pass
                     try:
-                        await proc.wait()
+                        await asyncio.wait_for(proc.wait(), 10)
                     except Exception:
                         pass
                 _CANCELLED_IDS.discard(execution.execution_id)
@@ -601,11 +727,11 @@ class ExecutionService:
             _PROCESSES.pop(execution.execution_id, None)
             if proc is not None and proc.returncode is None:
                 try:
-                    proc.kill()
+                    _kill_process_tree(proc)
                 except Exception:
                     pass
                 try:
-                    await proc.wait()
+                    await asyncio.wait_for(proc.wait(), 10)
                 except Exception:
                     pass
 
@@ -660,8 +786,14 @@ class ExecutionService:
 
         # 2. Resolve the real bound port: prefer the detected/configured
         #    port, otherwise allocate a free one from the preview range.
+        #    A configured port that is ALREADY occupied is not usable: the dev
+        #    server would silently bind a different port (vite auto-increments
+        #    without strictPort) while the readiness probe below keeps polling
+        #    the occupied one, so an unrelated local listener would be reported
+        #    as READY and the proxy would serve that foreign server. Fall back
+        #    to the preview range whenever the pinned port is not free.
         expected_port = info.port
-        if expected_port is None:
+        if expected_port is None or not PreviewService.is_port_free(expected_port):
             expected_port = PreviewService.allocate_port()
         # Port injection is command-specific: npm scripts take the `--port`
         # flag; Python's http.server takes the port positionally. Passing
@@ -803,11 +935,11 @@ class ExecutionService:
         # 4. Never became reachable: kill, mark failed, no orphan.
         if proc is not None:
             try:
-                proc.kill()
+                _kill_process_tree(proc)
             except Exception:
                 pass
             try:
-                await proc.wait()
+                await asyncio.wait_for(proc.wait(), 10)
             except Exception:
                 pass
         if drain_tasks:
@@ -990,7 +1122,7 @@ class ExecutionService:
                 continue
             try:
                 if proc.returncode is None:
-                    proc.kill()
+                    _kill_process_tree(proc)
                     killed += 1
                 await asyncio.wait_for(proc.wait(), timeout=3.0)
             except Exception:
@@ -1039,11 +1171,11 @@ class ExecutionService:
         proc = _PROCESSES.get(execution.execution_id)
         if proc is not None and proc.returncode is None:
             try:
-                proc.kill()
+                _kill_process_tree(proc)
             except Exception:
                 pass
             try:
-                await proc.wait()
+                await asyncio.wait_for(proc.wait(), 10)
             except Exception:
                 pass
         _PROCESSES.pop(execution.execution_id, None)

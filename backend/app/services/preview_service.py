@@ -164,6 +164,27 @@ class PreviewService:
         raise RuntimeError("No free port available in the preview range")
 
     @staticmethod
+    def is_port_free(port: int | None) -> bool:
+        """True when `port` can still be bound on 127.0.0.1 right now.
+
+        A project's real config may pin its own dev-server port
+        (``server.port`` in vite.config.ts). That pin is only usable when the
+        port is actually free: the readiness probe polls exactly this port, so
+        probing a port this engine did not reserve would report a FOREIGN
+        listener as READY — the preview proxy would then serve another
+        process's server. Callers must fall back to `allocate_port()` when
+        this returns False.
+        """
+        if not port:
+            return False
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            try:
+                sock.bind(("127.0.0.1", port))
+                return True
+            except OSError:
+                return False
+
+    @staticmethod
     def build_preview_info(
         execution, project_id: str, preview_token: str | None = None,
     ) -> PreviewInfo:

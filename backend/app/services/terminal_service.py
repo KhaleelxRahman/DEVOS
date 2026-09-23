@@ -187,7 +187,19 @@ class TerminalService:
                 execution_time_ms=round((time.time() - start_time) * 1000, 2),
             )
         exec_args = [command] + (args or [])
-        if os.name == "nt" and command.lower() in {"echo", "dir"}:
+        # POSIX commands on the allowlist have no cmd.exe equivalent, so an
+        # unmapped call dies with "[WinError 2] The system cannot find the file
+        # specified" and surfaced as a 500 TERMINAL_ERROR instead of a result.
+        # `cd` with no argument prints the working directory, `dir`/`type` are
+        # the `ls`/`cat` equivalents. The allowlist, cwd confinement and
+        # argument validation above still gate every one of these.
+        windows_aliases = {"pwd": "cd", "ls": "dir", "cat": "type"}
+        if os.name == "nt" and command.lower() in windows_aliases:
+            exec_args = [
+                os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c",
+                windows_aliases[command.lower()],
+            ] + (args or [])
+        elif os.name == "nt" and command.lower() in {"echo", "dir"}:
             exec_args = [os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", command] + (
                 args or []
             )
