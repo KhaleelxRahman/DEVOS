@@ -2,6 +2,7 @@
 
 **Product:** DEVOS v1.0.0
 **Version:** 1.0
+
 ## Purpose
 
 This palette standardizes brand, interface, status, and accessible text colors across

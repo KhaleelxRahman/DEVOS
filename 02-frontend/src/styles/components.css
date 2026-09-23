@@ -67,6 +67,43 @@
   background-color: #dc2626;
 }
 
+/* Bare .btn without a variant keeps the glass treatment so no UA-default
+   button face can surface (terminal Copy/clear, preview Stop/Open). */
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-ghost):not(.btn-danger) {
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+}
+
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-ghost):not(.btn-danger):hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-ghost):not(.btn-danger):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Icon-only utility buttons rendered as plain buttons (terminal copy). */
+.terminal-copy {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.terminal-copy:hover:not(:disabled), .terminal-copy:focus-visible {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.terminal-copy:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+
 /* Inputs & Form Controls */
 .form-group {
   display: flex;
@@ -96,6 +133,44 @@
   transition: border-color var(--transition-fast);
 }
 
+/* Legacy/global text-field controls shared by workspace panels (terminal
+   command input, explorer search, AI composer, planner/builder fields).
+   Matches the form-input dark treatment so no raw UA-default white box can
+   surface on the dark theme. */
+.input {
+  padding: 6px 10px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.input:focus {
+  border-color: var(--color-border-focus);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 1px;
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+textarea.input {
+  resize: vertical;
+}
+
 .form-input:focus {
   border-color: var(--color-border-focus);
 }
@@ -119,6 +194,21 @@
   box-shadow: var(--shadow-glass);
   backdrop-filter: blur(16px) saturate(125%);
   transition: border-color var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-normal);
+  pointer-events: auto;
+}
+
+.card[id] { pointer-events: auto; }
+
+.card>:not(.card-actions):not(.card-header):not([role="button"]):not(.btn):not(.form-input):not(.form-select):not(.monaco-editor):not(.ai-composer):not(.file-explorer):not(.code-viewer):not(.terminal-panel):not(.git-panel):not(.testing-panel):not(.quality-panel):not(.preview-panel):not(.history-panel):not(.builder-panel):not(.artifact-panel):not(.repository-dashboard) {
+  pointer-events: auto;
+}
+
+.card>*:where(.btn, .form-input, .form-select, [role="button"], .monaco-editor, .ai-composer, .file-explorer, .code-viewer, .terminal-panel, .git-panel, .testing-panel, .quality-panel, .preview-panel, .history-panel, .builder-panel, .artifact-panel, .repository-dashboard) {
+  pointer-events: auto;
+}
+
+.card>*:where(:not(.btn):not(.form-input):not(.form-select):not([role="button"]):not(.monaco-editor):not(.ai-composer):not(.file-explorer):not(.code-viewer):not(.terminal-panel):not(.git-panel):not(.testing-panel):not(.quality-panel):not(.preview-panel):not(.history-panel):not(.builder-panel):not(.artifact-panel):not(.repository-dashboard)) {
+  pointer-events: none;
 }
 
 .card:hover {
@@ -437,5 +527,28 @@
 .builder-diff { max-height: 220px; overflow: auto; margin: 8px 0 0; padding: 8px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-background); font-family: var(--font-mono, ui-monospace, monospace); font-size: 10px; line-height: 1.7; color: var(--color-text-secondary); white-space: pre-wrap; }
 .builder-error { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border: 1px solid color-mix(in srgb, var(--color-error) 45%, transparent); border-radius: 8px; color: var(--color-error); font-size: 11px; line-height: 1.5; }
 .builder-error svg { flex-shrink: 0; margin-top: 1px; }
-.builder-empty { margin: 0; color: var(--color-text-muted); font-size: 11px; display: inline-flex; align-items: center; gap: 5px; }
-@media (max-width: 640px) { .builder-actions .btn { flex: 1 1 auto; justify-content: center; } .builder-log { max-height: 140px; } .builder-diff { max-height: 160px; } }
+.builder-empty { margin: 0; color: var(--color-text-muted); font-size: 11px; display: inline-flex; align-items: center; gap: 5px; pointer-events: auto; }
+.builder-panel, .ai-command-center, .file-explorer, .code-viewer, .terminal-panel, .git-panel, .testing-panel, .quality-panel, .preview-panel, .history-panel, .artifact-panel, .repository-dashboard {
+  pointer-events: auto;
+}
+
+.builder-panel * { pointer-events: auto; }
+.ai-command-center * { pointer-events: auto; }
+.file-explorer * { pointer-events: auto; }
+.code-viewer * { pointer-events: auto; }
+.terminal-panel * { pointer-events: auto; }
+.git-panel * { pointer-events: auto; }
+.testing-panel * { pointer-events: auto; }
+.quality-panel * { pointer-events: auto; }
+.preview-panel * { pointer-events: auto; }
+.history-panel * { pointer-events: auto; }
+.artifact-panel * { pointer-events: auto; }
+.repository-dashboard * { pointer-events: auto; }
+
+.builder-actions { pointer-events: auto; }
+
+@media (max-width: 640px) {
+  .builder-actions .btn { flex: 1 1 auto; justify-content: center; }
+  .builder-log { max-height: 140px; }
+  .builder-diff { max-height: 160px; }
+}

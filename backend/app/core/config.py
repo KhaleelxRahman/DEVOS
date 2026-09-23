@@ -1,0 +1,138 @@
+"""DEVOS v1.0.0 application settings.
+
+Settings are loaded from environment variables and an optional local `.env`
+file via pydantic-settings. Everything the app needs is read off the `settings`
+object; `DATABASE_URL` is kept as a module-level alias for backward
+compatibility (used by `app.db.session`).
+
+Production safety: `_validate_production_safety` raises on import when a
+production deployment is missing the minimum security requirements
+(strong AUTH_SECRET, explicitly allow-listed CORS origins, non-SQLite DB).
+"""
+
+import json
+import os
+from typing import Any
+
+from dotenv import load_dotenv
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+load_dotenv()
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
+    # --- Core ---
+    PROJECT_NAME: str = "DEVOS v1.0.0"
+    API_V1_STR: str = "/api/v1"
+    ENVIRONMENT: str = "development"
+    AUTH_SECRET: str = "CHANGE_ME_IN_ENV"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    FRONTEND_APP_URL: str = "http://localhost:5173"
+
+    # --- Database ---
+    # Async drivers only: `sqlite+aiosqlite` locally, `postgresql+asyncpg`
+    # in production (test suite and Alembic rely on async engines).
+    DATABASE_URL: str = "sqlite+aiosqlite:///./data/devos.db"
+
+    # --- CORS ---
+    # Accepts a JSON array ("[\"https://a.com\", \"https://b.com\"]") or a
+    # comma-separated string from a hosting-provider dashboard.
+    BACKEND_CORS_ORIGINS: list[str] = []
+
+    # --- Project workspace storage ---
+    PROJECTS_STORAGE_PATH: str = "./data/projects"
+
+    # --- Phase 2D dev-server previews ---
+    # Public origin of THIS backend as reachable from the browser (used to
+    # build the preview proxy URL returned to the iframe). Set per deployment
+    # (Render URL in production), defaults to localhost for local dev.
+    PUBLIC_BACKEND_URL: str = "http://localhost:8000"
+    # How long a started dev server may take to become reachable before the
+    # preview is marked FAILED (real port probe, in seconds).
+    PREVIEW_READY_TIMEOUT_SECONDS: int = 60
+
+    # --- Terminal sandbox ---
+    TERMINAL_TIMEOUT_SECONDS: int = 30
+    # --- Auth / password hashing ---
+    # bcrypt work factor. Default 12 (~0.08–0.2s on modern hardware); very high
+    # values (e.g. 16384 = 2^14) make login unusably slow (~1.2s per call).
+    # Capped at 14 as a safety valve — any higher value is silently reduced.
+    BCRYPT_ROUNDS: int = int(os.getenv("BCRYPT_ROUNDS", "12"))
+    if BCRYPT_ROUNDS > 14:
+        BCRYPT_ROUNDS = 14
+
+    # --- Terminal sandbox ---
+    TERMINAL_MAX_OUTPUT_CHARS: int = 20000
+
+    # --- Phase 2A execution foundation (contract only; DEFINED, not ENFORCED) ---
+    # Resource ceilings are documented here for Phase 2B+ enforcement. Phase 2A
+    # persists validation records only — nothing executes, so nothing is capped.
+    EXECUTION_MAX_DURATION_SECONDS: int = 300
+    EXECUTION_MAX_OUTPUT_CHARS: int = 20000
+    EXECUTION_MAX_CONCURRENT: int = 4
+    EXECUTION_MAX_RETRIES: int = 3
+    EXECUTION_MAX_PROCESSES: int = 8
+
+    # --- AI providers ("mock" | "gemini" | "openai") ---
+    AI_PROVIDER: str = "mock"
+    AI_MODEL: str = ""
+    AI_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
+    OPENAI_API_KEY: str = ""
+
+    # --- GitHub OAuth ---
+    GITHUB_CLIENT_ID: str = ""
+    GITHUB_CLIENT_SECRET: str = ""
+    GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/github/callback"
+    GITHUB_TOKEN: str = ""
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def _parse_cors_origins(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
+            if v.startswith("["):
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    return []
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v or []
+
+
+def _validate_production_safety(s: Settings) -> Settings:
+    """Fail fast when a production deployment is missing required settings."""
+    if s.AUTH_SECRET in {"", "CHANGE_ME_IN_ENV"} or s.AUTH_SECRET.startswith("PASTE_"):
+        if s.ENVIRONMENT == "production":
+            raise ValueError("Insecure production configuration: AUTH_SECRET must be set")
+        return s
+    if s.ENVIRONMENT != "production":
+        return s
+    problems: list[str] = []
+    if not s.AUTH_SECRET or len(s.AUTH_SECRET) < 32:
+        problems.append("AUTH_SECRET must be at least 32 characters in production")
+    if not s.BACKEND_CORS_ORIGINS:
+        problems.append("BACKEND_CORS_ORIGINS must list the allowed frontend origins")
+    if s.DATABASE_URL.startswith("sqlite"):
+        problems.append("DATABASE_URL must not use SQLite in production")
+    if problems:
+        raise ValueError("Insecure production configuration: " + "; ".join(problems))
+    return s
+
+
+settings = Settings()
+_validate_production_safety(settings)
+
+# Backward-compatible module-level alias used by app.db.session.
+DATABASE_URL = settings.DATABASE_URL

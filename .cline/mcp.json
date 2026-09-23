@@ -1,0 +1,33 @@
+{
+  "mcpServers": {
+    "filesystem-devos": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@2026.8.31",
+        "\"C:\\Users\\DELL\\DEVOS v1.0.0\""
+      ],
+      "disabled": false,
+      "autoApprove": []
+    },
+    "git-devos": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@cyanheads/git-mcp-server@2.15.3"
+      ],
+      "env": {
+        "MCP_TRANSPORT_TYPE": "stdio",
+        "GIT_BASE_DIR": "C:\\Users\\DELL\\DEVOS v1.0.0"
+      },
+      "disabled": false,
+      "autoApprove": []
+    },
+    "semgrep-devos": {
+      "command": "C:\\Users\\DELL\\DEVOS v1.0.0\\.venv\\Scripts\\semgrep.exe",
+      "args": ["mcp", "-t", "stdio"],
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
