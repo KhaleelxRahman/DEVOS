@@ -111,13 +111,36 @@ class Settings(BaseSettings):
         return v or []
 
 
+def is_production_environment(value: Any) -> bool:
+    """True when a configured ENVIRONMENT value means production.
+
+    Environment names are case-insensitive on load (``case_sensitive=False``),
+    so the comparison is normalized here and used by every production
+    safety check. ``Production`` and ``PRODUCTION`` must behave exactly like
+    ``production``; the raw stored value is left untouched.
+    """
+    return str(value or "").strip().lower() == "production"
+
+
+def normalize_environment(value: Any) -> Any:
+    """Normalize an ENVIRONMENT value for storage on the settings object.
+
+    Keeps the human-entered spelling for display (``/health`` reports the raw
+    value) while all production decisions go through
+    :func:`is_production_environment`.
+    """
+    if isinstance(value, str):
+        return value.strip()
+    return value
+
+
 def _validate_production_safety(s: Settings) -> Settings:
     """Fail fast when a production deployment is missing required settings."""
     if s.AUTH_SECRET in {"", "CHANGE_ME_IN_ENV"} or s.AUTH_SECRET.startswith("PASTE_"):
-        if s.ENVIRONMENT == "production":
+        if is_production_environment(s.ENVIRONMENT):
             raise ValueError("Insecure production configuration: AUTH_SECRET must be set")
         return s
-    if s.ENVIRONMENT != "production":
+    if not is_production_environment(s.ENVIRONMENT):
         return s
     problems: list[str] = []
     if not s.AUTH_SECRET or len(s.AUTH_SECRET) < 32:
