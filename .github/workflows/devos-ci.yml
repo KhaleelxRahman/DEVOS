@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: 02-frontend
+        working-directory: frontend
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: 03-backend
+        working-directory: backend
 
     steps:
       - uses: actions/checkout@v4

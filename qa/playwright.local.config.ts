@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 // Local regression config (Phase 0). Requires the local dev stack:
 //   cd 03-backend && python -m uvicorn app.main:app --port 8000
-//   npm --prefix 02-frontend run dev
+//   npm --prefix frontend run dev
 // Run: npm exec -- playwright test --config="playwright.local.config.ts"
 export default defineConfig({
   testDir: "./tests-live",

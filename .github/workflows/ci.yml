@@ -16,7 +16,7 @@ jobs:
           python-version: "3.13"
 
       - run: |
-          cd 03-backend
+          cd backend
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-asyncio httpx
 
@@ -33,6 +33,6 @@ jobs:
           node-version: "22"
 
       - run: |
-          cd 02-frontend
+          cd frontend
           npm install
           npm run build

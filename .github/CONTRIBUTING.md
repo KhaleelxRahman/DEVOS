@@ -6,7 +6,7 @@
 
 3. Run `python -m ruff check 03-backend`, `python -m pytest -q`, and
 
-   `cd 02-frontend && npm run build` before opening a pull request.
+   `cd frontend && npm run build` before opening a pull request.
 
 4. Never commit `.env` files, credentials, tokens, or runtime data.
 

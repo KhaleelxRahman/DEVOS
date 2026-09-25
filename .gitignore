@@ -1,5 +1,5 @@
 node_modules/
-02-frontend/node_modules/
+frontend/node_modules/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
@@ -8,8 +8,8 @@ __pycache__/
 .coverage
 *.pyc
 
-02-frontend/dist/
-02-frontend/.vercel/
+frontend/dist/
+frontend/.vercel/
 03-backend/logs/
 03-backend/__pycache__/
 03-backend/.ruff_cache/
@@ -39,4 +39,48 @@ playwright/.cache/
 *.sqlite3
 DEVOS/
 
+# Phase-2H certification/temp launchers and evidence (untracked, do not commit)
+cert_*.py
+cert_*.json
+cert_*.out.log
+cert_*.out2.log
+cert_*.log
+*cert*.log
+*_out.log
+*_out2.log
+stage_*.log
+stage_*.json
+run_cert_*.py
+run_links_*.py
+run_10_18.py
+cert2.py
+cert_p1.py
+phase2h_certify.py
+start_backend_2h*.py
+start_frontend_2h*.py
+stash0_diff.txt
+tmp*.txt
+backend/data/2h_cert_projects/
+frontend/.npm-cache/
+frontend/cert-mobile.mjs
+frontend/cert_shots/
+frontend/playwright-report/
+.devenv/
+
 .env*
+
+# Local credential/test artifacts
+mob_email.txt
+mob_pw.txt
+mob_token.txt
+
+# Local production test state
+prod_mobile_state.json
+mob_pid.txt
+
+# Local credential/test artifacts
+mob_email.txt
+mob_pw.txt
+mob_token.txt
+mob_pid.txt
+prod_mobile_state.json

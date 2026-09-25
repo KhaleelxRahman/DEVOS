@@ -6,7 +6,7 @@
       "type": "debugpy",
       "request": "launch",
       "module": "uvicorn",
-      "cwd": "${workspaceFolder}/03-backend",
+      "cwd": "${workspaceFolder}/backend",
       "args": [
         "app.main:app",
         "--reload",
@@ -15,7 +15,7 @@
         "--port",
         "8000"
       ],
-      "envFile": "${workspaceFolder}/03-backend/.env"
+      "envFile": "${workspaceFolder}/backend/.env"
     },
     {
       "name": "DEVOS Frontend",
@@ -26,7 +26,7 @@
         "run",
         "dev",
         "--prefix",
-        "02-frontend"
+        "frontend"
       ],
       "console": "integratedTerminal"
     }

@@ -2,14 +2,14 @@
     "name": "devos-workspace",
     "private": true,
     "version": "1.0.0",
-    "description": "DEVOS v1.0.0 monorepo root. Playwright e2e tests live in 02-frontend/tests and run from the frontend package.",
+    "description": "DEVOS v1.0.0 monorepo root. Playwright e2e tests live in frontend/tests and run from the frontend package.",
     "scripts": {
-        "test:e2e": "cd 02-frontend && npx playwright test --reporter=list",
-        "build": "npm run build --prefix 02-frontend",
-        "lint": "npm run lint --prefix 02-frontend",
-        "type-check": "npm run type-check --prefix 02-frontend",
-        "test:backend": "python -m pytest 04-tests",
-        "dev": "npm run dev --prefix 02-frontend"
+        "test:e2e": "cd frontend && npx playwright test --reporter=list",
+        "build": "npm run build --prefix frontend",
+        "lint": "npm run lint --prefix frontend",
+        "type-check": "npm run type-check --prefix frontend",
+        "test:backend": "python -m pytest tests",
+        "dev": "npm run dev --prefix frontend"
     },
     "devDependencies": {
         "playwright": "^1.63.0"
