@@ -1,5 +1,6 @@
 from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
+import re
 from typing import cast
 
 from fastapi import FastAPI, Request, Response
@@ -14,7 +15,7 @@ from slowapi.util import get_remote_address
 import app.models
 from app.api.v1.router import api_v1_router
 from app.core.app_logging import logger
-from app.core.config import _validate_production_safety, settings
+from app.core.config import _validate_production_safety, is_production_environment, settings
 from app.core.errors import (
     AppException,
     app_exception_handler,
@@ -39,6 +40,33 @@ from app import bootstrap_migrate
 # without changing runtime behaviour: handlers are still only ever invoked
 # with the exception type they were registered for.
 ExceptionHandlerT = Callable[[Request, Exception], Response | Awaitable[Response]]
+
+
+# Phase 2H cert finding: the preview proxy response is rendered inside the
+# workspace iframe and must be frameable from the app origins only. The match
+# is anchored to the real proxy route
+#   /api/v1/projects/{project}/executions/{execution}/preview/{path...}
+# so a lookalike path that merely contains both substrings keeps the strict
+# no-framing default. Note `re.match` anchors at the start; the trailing `/`
+# in the pattern requires the preview *segment* itself, matching how the
+# backend builds `{preview_url}/...` in ExecutionService.start_dev_server.
+PREVIEW_PROXY_PATH = re.compile(
+    r"^/api/v1/projects/[^/]+/executions/[^/]+/preview/"
+)
+
+
+def _preview_frame_ancestors() -> str | None:
+    """Return the CSP frame-ancestors value for the preview proxy, or None.
+
+    A wildcard CORS list must never be passed through literally: `frame-`
+    `ancestors *` would let any site frame an authenticated dev-server
+    preview. When no explicit origins are configured (or a wildcard slips
+    in), fall back to the strict default instead.
+    """
+    origins = [o for o in settings.BACKEND_CORS_ORIGINS if o and o != "*"]
+    if not origins:
+        return None
+    return " ".join(origins)
 
 # Fail fast at startup when a production deployment is missing the minimum
 # security requirements (strong AUTH_SECRET, allow-listed CORS origins, DB).
@@ -102,10 +130,15 @@ app.add_exception_handler(
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
     # The preview proxy response is rendered inside the workspace iframe. It
-    # must be frameable from the configured app origins only; every other
-    # route keeps the strict no-framing default (Phase 2H cert finding).
-    if "/executions/" in request.url.path and "/preview/" in request.url.path:
-        ancestors = " ".join(settings.BACKEND_CORS_ORIGINS)
+    # is frameable from the configured app origins only; every other route
+    # keeps the strict no-framing default. When no safe origin list exists
+    # the proxy falls back to the strict default as well.
+    ancestors = (
+        _preview_frame_ancestors()
+        if PREVIEW_PROXY_PATH.match(request.url.path)
+        else None
+    )
+    if ancestors is not None:
         response.headers.setdefault(
             "Content-Security-Policy",
             f"default-src 'self'; frame-ancestors {ancestors}; "
@@ -121,7 +154,7 @@ async def security_headers(request: Request, call_next):
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
-    if settings.ENVIRONMENT == "production":
+    if is_production_environment(settings.ENVIRONMENT):
         response.headers.setdefault(
             "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
         )

@@ -85,3 +85,34 @@ def test_production_guard_accepts_secure_config():
         DATABASE_URL="postgresql+asyncpg://user:pass@host:5432/db",
     )
     assert _validate_production_safety(s) is s
+
+
+def test_production_guard_treats_all_capitalizations_as_production():
+    from app.core.config import (
+        Settings,
+        _validate_production_safety,
+        is_production_environment,
+    )
+
+    for spelling in ("production", "Production", "PRODUCTION"):
+        assert is_production_environment(spelling) is True
+        s = Settings(
+            ENVIRONMENT=spelling,
+            AUTH_SECRET="x" * 48,
+            BACKEND_CORS_ORIGINS=["https://app.example.com"],
+            DATABASE_URL="postgresql+asyncpg://user:pass@host:5432/db",
+        )
+        assert _validate_production_safety(s) is s
+        # Insecure defaults must raise for every production capitalization.
+        bad = Settings(ENVIRONMENT=spelling)
+        try:
+            _validate_production_safety(bad)
+            raised = False
+        except ValueError:
+            raised = True
+        assert raised, "production guard bypassed for ENVIRONMENT=%r" % spelling
+
+    assert is_production_environment("development") is False
+    assert is_production_environment("staging") is False
+    assert is_production_environment("") is False
+    assert is_production_environment(None) is False

@@ -1,9 +1,9 @@
 ﻿{
   "include": [
-    "03-backend",
-    "04-tests"
+    "backend",
+    "tests"
   ],
   "extraPaths": [
-    "03-backend"
+    "backend"
   ]
 }
