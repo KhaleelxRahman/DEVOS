@@ -2,7 +2,7 @@
 
 > AI-powered Developer Workspace with Git, AI Assistant, Terminal, and GitHub Integration.
 
-[![DEVOS v1.0.0 banner](./01-docs/assets/devos-banner.svg)](./01-docs/README.md)
+[![DEVOS v1.0.0 banner](./docs/assets/devos-banner.svg)](./docs/README.md)
 
 [![Python](https://img.shields.io/badge/Python-3.13%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=111827)](https://react.dev/)
@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](./frontend/public/manifest.webmanifest)
 
-**Project links:** [Live Demo](#live-demo) · [Documentation](./01-docs/README.md) · [Deployment Checklist](./01-docs/deployment/DEPLOYMENT_CHECKLIST.md) · [Release Notes](./01-docs/releases/RELEASE_NOTES.md) · [Rollback Plan](./01-docs/deployment/ROLLBACK_PLAN.md)
+**Project links:** [Live Demo](#live-demo) · [Documentation](./docs/README.md) · [Deployment Checklist](./docs/deployment/DEPLOYMENT_CHECKLIST.md) · [Release Notes](./docs/releases/RELEASE_NOTES.md) · [Rollback Plan](./docs/deployment/ROLLBACK_PLAN.md)
 
 ## Project Status
 
@@ -47,9 +47,9 @@ FastAPI ── SQLAlchemy async ── SQLite or PostgreSQL
 
 ```text
 frontend/   React, TypeScript, and Vite client
-03-backend/    FastAPI service and database layer
-04-tests/      API and unit test suites
-01-docs/       Architecture, operations, security, and product docs
+backend/    FastAPI service and database layer
+tests/      API and unit test suites
+docs/       Architecture, operations, security, and product docs
 .github/       Community health files and CI/security workflows
 ```
 
@@ -58,7 +58,7 @@ frontend/   React, TypeScript, and Vite client
 ### Backend
 
 ```bash
-cd 03-backend
+cd backend
 python -m venv .venv
 
 # Windows: .venv\Scripts\activate
@@ -90,15 +90,15 @@ The Vite server proxies `/api` to `http://localhost:8000`. Override it with `VIT
 ### Tests and build
 
 ```bash
-python -m ruff check 03-backend
-python -m pytest -q 04-tests
+python -m ruff check backend
+python -m pytest -q tests
 cd frontend
 npm run build
 ```text
 
 ## Screenshots
 
-The public landing page includes an accessible workspace illustration. Add reviewed product screenshots to `01-docs/assets/` before publishing external marketing material.
+The public landing page includes an accessible workspace illustration. Add reviewed product screenshots to `docs/assets/` before publishing external marketing material.
 
 ## Live Demo
 
@@ -136,7 +136,7 @@ deployment configuration remain human-owned environment settings.
 
 ## Documentation
 
-Start at [01-docs/README.md](./01-docs/README.md). Security details are in [01-docs/security/SECURITY.md](./01-docs/security/SECURITY.md); API and deployment references are linked there.
+Start at [docs/README.md](./docs/README.md). Security details are in [docs/security/SECURITY.md](./docs/security/SECURITY.md); API and deployment references are linked there.
 
 ## Contributing
 
