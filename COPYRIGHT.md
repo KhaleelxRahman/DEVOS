@@ -36,7 +36,7 @@ The following are original works created by Md Khaleel Ur Rahman:
 
 - All source code in `/03-backend` (Python/FastAPI)
 
-- All source code in `/02-frontend` (React/TypeScript)
+- All source code in `/frontend` (React/TypeScript)
 
 - All custom diagrams and flowcharts
 

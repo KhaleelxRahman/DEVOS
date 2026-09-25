@@ -8,7 +8,7 @@
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=111827)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](./02-frontend/public/manifest.webmanifest)
+[![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)](./frontend/public/manifest.webmanifest)
 
 **Project links:** [Live Demo](#live-demo) · [Documentation](./01-docs/README.md) · [Deployment Checklist](./01-docs/deployment/DEPLOYMENT_CHECKLIST.md) · [Release Notes](./01-docs/releases/RELEASE_NOTES.md) · [Rollback Plan](./01-docs/deployment/ROLLBACK_PLAN.md)
 
@@ -46,7 +46,7 @@ FastAPI ── SQLAlchemy async ── SQLite or PostgreSQL
 ## Repository Structure
 
 ```text
-02-frontend/   React, TypeScript, and Vite client
+frontend/   React, TypeScript, and Vite client
 03-backend/    FastAPI service and database layer
 04-tests/      API and unit test suites
 01-docs/       Architecture, operations, security, and product docs
@@ -80,7 +80,7 @@ Interactive API documentation is available at `http://localhost:8000/api/v1/docs
 ### Frontend
 
 ```bash
-cd 02-frontend
+cd frontend
 npm ci
 npm run dev
 ```
@@ -92,7 +92,7 @@ The Vite server proxies `/api` to `http://localhost:8000`. Override it with `VIT
 ```bash
 python -m ruff check 03-backend
 python -m pytest -q 04-tests
-cd 02-frontend
+cd frontend
 npm run build
 ```text
 
