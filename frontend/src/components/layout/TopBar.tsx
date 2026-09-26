@@ -127,9 +127,14 @@ export const TopBar: React.FC<TopBarProps> = ({
         <Link className="top-bar-icon-action" to="/app/projects?github=1" aria-label="GitHub" title="GitHub">
           <Github size={15} />
         </Link>
-        <Link className="top-bar-icon-action" to="/app/projects?deploy=1" aria-label="Deploy" title="Deploy">
+        <span
+          className="top-bar-icon-action top-bar-icon-action-disabled"
+          aria-disabled="true"
+          aria-label="Deploy — coming soon"
+          title="Deploy — coming soon"
+        >
           <Rocket size={15} />
-        </Link>
+        </span>
         <Link className="top-bar-icon-action" to="/app/settings" aria-label="Open settings" title="Settings">
           <Settings size={15} />
         </Link>

@@ -102,10 +102,15 @@ export const Sidebar: React.FC<{ onNavigate?: () => void; collapsed?: boolean; o
           <Github size={16} />
           {!collapsed && <span>GitHub</span>}
         </NavLink>
-        <NavLink to="/app/projects?deploy=1" className="sidebar-item" onClick={onNavigate} title={collapsed ? 'Deploy' : undefined}>
+        <div
+          className="sidebar-item sidebar-item-disabled"
+          aria-disabled="true"
+          title="Deploy — coming soon"
+        >
           <Rocket size={16} />
           {!collapsed && <span>Deploy</span>}
-        </NavLink>
+          {!collapsed && <span className="sidebar-item-badge">Soon</span>}
+        </div>
       </div>
 
       {!collapsed && conversations.length > 0 && (

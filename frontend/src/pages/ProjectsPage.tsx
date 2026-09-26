@@ -4,7 +4,8 @@ import { Card, Button, Input, Modal, EmptyState, Badge, Spinner } from '../compo
 import { Project } from '../types/project';
 import { projectsApi } from '../api';
 import { useProject } from '../hooks/useProject';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
 import { useToast } from '../components/common/Toast';
 import { useSeo } from '../hooks/useSeo';
 
@@ -17,6 +18,8 @@ export const ProjectsPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { setActiveProject } = useProject();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isDeployView = searchParams.get('deploy') === '1';
   const { toast } = useToast();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -76,6 +79,19 @@ export const ProjectsPage: React.FC = () => {
       setDeletingId(null);
     }
   };
+  if (isDeployView) {
+    return (
+      <div>
+        <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700 }}>Deploy</h1>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+          Deployments aren't available yet. This feature is still in development and is not
+          connected to any hosting provider.
+        </p>
+      </div>
+    );
+  }
+
+
 
   return (
     <div>

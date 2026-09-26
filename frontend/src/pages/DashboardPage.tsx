@@ -99,7 +99,7 @@ export const DashboardPage: React.FC = () => {
         <div className="ai-home-context-item">
           <Rocket size={14} />
           <span className="ai-home-context-label">Deploy</span>
-          <span className="ai-home-context-value">{activeProject ? 'Ready' : 'Waiting'}</span>
+          <span className="ai-home-context-value ai-home-context-value-muted">Coming soon</span>
         </div>
       </div>
 

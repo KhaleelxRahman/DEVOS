@@ -7,7 +7,16 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
-const commands = [
+interface PaletteCommand {
+  label: string;
+  hint: string;
+  icon: React.ComponentType<{ size?: number | string }>;
+  path: string;
+  /** Not yet implemented — shown greyed out, cannot be executed. */
+  disabled?: boolean;
+}
+
+const commands: PaletteCommand[] = [
   { label: 'New conversation', hint: 'AI', icon: Sparkles, path: '/app/dashboard' },
   { label: 'Open workspace', hint: 'Pages', icon: Terminal, path: '/app/workspace' },
   { label: 'Search projects', hint: 'Projects', icon: Search, path: '/app/projects' },
@@ -16,11 +25,11 @@ const commands = [
   { label: 'Open conversations', hint: 'AI', icon: MessageSquare, path: '/app/workspace#ai-command-center' },
   { label: 'Open planner', hint: 'AI', icon: ListTodo, path: '/app/workspace#ai-command-center' },
   { label: 'Open GitHub', hint: 'GitHub', icon: Github, path: '/app/projects?github=1' },
-  { label: 'Open deployment', hint: 'Deploy', icon: Rocket, path: '/app/projects?deploy=1' },
+  { label: 'Open deployment', hint: 'Coming soon', icon: Rocket, path: '/app/projects?deploy=1', disabled: true },
   { label: 'Open settings', hint: 'Settings', icon: Settings, path: '/app/settings' },
 ];
 
-type Command = (typeof commands)[number];
+type Command = PaletteCommand;
 
 const fuzzyScore = (command: Command, query: string) => {
   if (!query.trim()) return 0;
@@ -70,6 +79,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   if (!open) return null;
 
   const execute = (command: Command) => {
+    if (command.disabled) return;
     setRecent((previous) => {
       const next = [command.label, ...previous.filter((label) => label !== command.label)].slice(0, 8);
       localStorage.setItem('devos_recent_commands', JSON.stringify(next));
@@ -121,11 +131,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
           <kbd>ESC</kbd>
         </div>
         <div className="command-palette-list">
-          {filtered.map(({ label, hint, icon: Icon }, index) => (
-            <button key={label} className={`command-palette-item ${index === activeIndex ? 'selected' : ''}`} onClick={() => {
-              const command = commands.find((item) => item.label === label);
-              if (command) execute(command);
-            }}>
+          {filtered.map(({ label, hint, icon: Icon, disabled }, index) => (
+            <button
+              key={label}
+              disabled={disabled}
+              aria-disabled={disabled || undefined}
+              className={`command-palette-item ${index === activeIndex && !disabled ? 'selected' : ''} ${disabled ? 'disabled' : ''}`}
+              onClick={() => {
+                const command = commands.find((item) => item.label === label);
+                if (command) execute(command);
+              }}
+            >
               <Icon size={16} />
               <span>{highlight(label)}</span>
               <small>{hint}</small>
