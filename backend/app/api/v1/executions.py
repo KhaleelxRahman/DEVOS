@@ -115,6 +115,24 @@ async def create_execution(
     execution = await ExecutionService.create_execution(
         db, current_user, project_id, payload
     )
+    # Phase 2H: audit parity for the execution lifecycle. The terminal UI now
+    # drives create/run instead of the legacy /terminal/execute route, so
+    # without this the command would leave no audit trail at all. Naming
+    # follows the existing <domain>.<verb> convention (terminal.executed,
+    # quality.executed, preview.started).
+    await ActivityService.record(
+        db,
+        user_id=current_user.id,
+        project_id=execution.project_id,
+        activity_type="execution.created",
+        metadata={
+            "execution_id": execution.execution_id,
+            "execution_type": execution.execution_type,
+            "command": execution.command,
+            "status": execution.status,
+        },
+    )
+    await db.commit()
     return ApiResponse(success=True, data=to_execution_response(execution))
 
 
@@ -134,6 +152,20 @@ async def run_execution(
     and captures stdout/stderr."""
     execution = await ExecutionService.run_queued_execution(
         db, current_user, project_id, execution_id)
+    await ActivityService.record(
+        db,
+        user_id=current_user.id,
+        project_id=execution.project_id,
+        activity_type="execution.executed",
+        metadata={
+            "execution_id": execution.execution_id,
+            "execution_type": execution.execution_type,
+            "command": execution.command,
+            "status": execution.status,
+            "exit_code": execution.exit_code,
+        },
+    )
+    await db.commit()
     return ApiResponse(success=True, data=to_execution_response(execution))
 
 
@@ -149,6 +181,22 @@ async def cancel_execution(
 ):
     execution = await ExecutionService.cancel_execution(
         db, current_user, project_id, execution_id)
+    # Phase 2H: a user-initiated stop is exactly the kind of event an audit
+    # trail exists for, so it gets its own entry.
+    await ActivityService.record(
+        db,
+        user_id=current_user.id,
+        project_id=execution.project_id,
+        activity_type="execution.cancelled",
+        metadata={
+            "execution_id": execution.execution_id,
+            "execution_type": execution.execution_type,
+            "command": execution.command,
+            "status": execution.status,
+            "process_id": execution.process_id,
+        },
+    )
+    await db.commit()
     return ApiResponse(success=True, data=to_execution_response(execution))
 
 

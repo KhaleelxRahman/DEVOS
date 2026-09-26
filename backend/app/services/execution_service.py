@@ -142,6 +142,13 @@ def _kill_process_tree_posix(proc: asyncio.subprocess.Process, pid: int) -> None
     """
     import signal as _signal
 
+    # SIGKILL exists on POSIX but not on Windows. Pylance resolves the module
+    # against the host platform, so name it through getattr with its documented
+    # numeric value as fallback. This path only runs on POSIX (the caller
+    # dispatches on os.name), so the constant is always present in production;
+    # the fallback only keeps static analysis and any defensive import quiet.
+    _sigkill = getattr(_signal, "SIGKILL", 9)
+
     def _stat(target: int) -> tuple[int, int] | None:
         try:
             with open("/proc/%d/stat" % target, encoding="utf-8",
@@ -192,7 +199,7 @@ def _kill_process_tree_posix(proc: asyncio.subprocess.Process, pid: int) -> None
             ordered.append(other)
     for target in ordered:
         try:
-            os.kill(target, _signal.SIGKILL)
+            os.kill(target, _sigkill)
         except Exception:
             pass
     try:
