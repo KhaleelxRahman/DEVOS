@@ -1,14 +1,48 @@
 import os
 import shutil
+import stat
 import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.errors import ProjectAccessDeniedException, ProjectNotFoundException
+from app.core.errors import AppException, ProjectAccessDeniedException, ProjectNotFoundException
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectUpdate
+
+
+def _force_remove_readonly(func, path, _exc) -> None:
+    """`onexc` handler that clears the Windows read-only bit, then retries.
+
+    Every project workspace is a real Git repository, and Git marks its object
+    files read-only on disk. On Windows `shutil.rmtree` therefore fails with
+    `PermissionError: [WinError 5]` on the first `.git/objects/xx/<sha>` file,
+    which aborted project deletion entirely. Clearing `S_IWRITE` and retrying the
+    same call is the standard Windows remedy; the original exception is re-raised
+    if the retry still fails, so a genuinely locked file is never swallowed.
+    """
+    try:
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    except Exception:
+        # Nothing else to try: surface the real failure to the caller rather
+        # than pretending the tree was removed.
+        raise
+
+
+def remove_project_directory(storage_path: str) -> None:
+    """Delete a project workspace, tolerating Windows read-only Git objects.
+
+    No-op when the directory is already absent, so repeated deletion attempts
+    are safe.
+    """
+    if not os.path.isdir(storage_path):
+        return
+    kwargs = {"onexc": _force_remove_readonly}
+    if not hasattr(shutil.rmtree, "onexc"):  # Python < 3.12
+        kwargs = {"onerror": lambda f, p, e: _force_remove_readonly(f, p, e)}
+    shutil.rmtree(storage_path, **kwargs)
 
 
 class ProjectService:
@@ -95,8 +129,22 @@ class ProjectService:
         storage_path = os.path.abspath(
             os.path.join(settings.PROJECTS_STORAGE_PATH, project_id)
         )
+
+        # Order matters. The workspace is removed from disk FIRST, and the row
+        # is only deleted once that has succeeded. Doing it the other way round
+        # (the previous order) meant a failed rmtree left the session flushed but
+        # never committed, so the request returned 500 while the project silently
+        # remained. If the filesystem step fails here, nothing has been written
+        # and the caller can roll back cleanly.
+        try:
+            remove_project_directory(storage_path)
+        except OSError as exc:
+            raise AppException(
+                f"Failed to delete project workspace: {exc}",
+                code="PROJECT_DELETE_FAILED",
+                status_code=500,
+            ) from exc
+
         await db.delete(project)
         await db.flush()
-        if os.path.isdir(storage_path):
-            shutil.rmtree(storage_path)
         return True
