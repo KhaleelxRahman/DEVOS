@@ -431,3 +431,150 @@ async def test_cancel_moves_running_generation_to_cancelled(client):
         assert status.json()["data"]["status"] == "CANCELLED"
     finally:
         BACKGROUND_STORE.pop(gen_id, None)
+
+
+# ---------------------------------------------------------------------------
+# Directory-structure regression (builder apply flattening)
+# ---------------------------------------------------------------------------
+# Original defect: the apply step called
+#   FileService.create_file(project_id, "", path.split("/")[-1], content)
+# which discarded every directory component, so the planned layout
+# (server/index.js, client/App.jsx, server/routes/tasks.js, ...) was written
+# flat into the project root. Same-named files in different directories then
+# silently overwrote each other and the generated app was unrunnable.
+
+NESTED_FILES = [
+    {"operation": "create", "path": "server/index.js", "content": "SERVER_INDEX"},
+    {"operation": "create", "path": "server/db.js", "content": "SERVER_DB"},
+    {"operation": "create", "path": "server/routes/tasks.js", "content": "SERVER_ROUTES"},
+    {"operation": "create", "path": "server/package.json", "content": "SERVER_PKG"},
+    {"operation": "create", "path": "client/App.jsx", "content": "CLIENT_APP"},
+    {"operation": "create", "path": "client/api.js", "content": "CLIENT_API"},
+    {"operation": "create", "path": "package.json", "content": "ROOT_PKG"},
+    {"operation": "create", "path": "README.md", "content": "ROOT_README"},
+]
+
+
+def _project_root(project_id: str) -> str:
+    from app.core.config import settings
+
+    return os.path.abspath(os.path.join(settings.PROJECTS_STORAGE_PATH, project_id))
+
+
+def _read(path: str):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return fh.read()
+    except OSError:
+        return None
+
+
+@pytest.mark.asyncio
+async def test_apply_preserves_generated_directory_structure(client):
+    """Apply must write each generated file at its full planned relative path.
+
+    This is the direct regression for the flattening bug.
+    """
+    headers = await _register(client, email="nest@example.com", name="Nest")
+    project_id = await _create_project(client, headers, name="nested-apply")
+    gen_id = str(uuid.uuid4())
+
+    record = _stub_record(project_id, "COMPLETED")
+    record["files"] = [dict(f) for f in NESTED_FILES]
+    BACKGROUND_STORE[gen_id] = record
+
+    res = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+    assert res.status_code == 200, res.text
+    data = res.json()["data"]
+
+    assert data["failed_operations"] == []
+    assert sorted(data["applied_files"]) == sorted(f["path"] for f in NESTED_FILES)
+
+    root = _project_root(project_id)
+
+    # Directories exist and files live at their planned nested paths.
+    assert os.path.isdir(os.path.join(root, "server"))
+    assert os.path.isdir(os.path.join(root, "client"))
+    assert os.path.isdir(os.path.join(root, "server", "routes"))
+    for rel in (f["path"] for f in NESTED_FILES):
+        assert os.path.isfile(os.path.join(root, *rel.split("/"))), rel
+
+    # Nothing was flattened into the project root.
+    assert not os.path.isfile(os.path.join(root, "index.js"))
+    assert not os.path.isfile(os.path.join(root, "App.jsx"))
+    assert not os.path.isfile(os.path.join(root, "api.js"))
+    assert not os.path.isfile(os.path.join(root, "db.js"))
+    assert not os.path.isfile(os.path.join(root, "tasks.js"))
+
+
+@pytest.mark.asyncio
+async def test_apply_does_not_overwrite_same_named_files_across_directories(client):
+    """`server/package.json` and root `package.json` must both survive.
+
+    Before the fix both collapsed to `./package.json`, so one silently
+    overwrote the other.
+    """
+    headers = await _register(client, email="collide@example.com", name="Collide")
+    project_id = await _create_project(client, headers, name="collision")
+    gen_id = str(uuid.uuid4())
+
+    record = _stub_record(project_id, "COMPLETED")
+    record["files"] = [dict(f) for f in NESTED_FILES]
+    BACKGROUND_STORE[gen_id] = record
+
+    res = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+    assert res.status_code == 200, res.text
+    assert res.json()["data"]["failed_operations"] == []
+
+    root = _project_root(project_id)
+    assert _read(os.path.join(root, "server", "package.json")) == "SERVER_PKG"
+    assert _read(os.path.join(root, "package.json")) == "ROOT_PKG"
+    assert _read(os.path.join(root, "server", "index.js")) == "SERVER_INDEX"
+    assert _read(os.path.join(root, "client", "App.jsx")) == "CLIENT_APP"
+
+
+@pytest.mark.asyncio
+async def test_generation_writes_nested_structure_to_disk(client):
+    """The generation pipeline itself must produce the nested layout on disk.
+
+    Covers the second call site (`_run_generation`), which had the same
+    `path.split("/")[-1]` flattening.
+    """
+    from app.core.config import settings
+
+    headers = await _register(client, email="gen@example.com", name="Gen")
+    project_id = await _create_project(client, headers, name="gen-nested")
+
+    started = await client.post(
+        f"{_base(project_id)}/start", json={"prompt": PROMPT}, headers=headers
+    )
+    gen_id = started.json()["data"]["generation_request_id"]
+    final = await _wait_terminal(client, headers, project_id, gen_id)
+    assert final in {"COMPLETED", "PARTIAL"}
+
+    root = os.path.abspath(os.path.join(settings.PROJECTS_STORAGE_PATH, project_id))
+    assert os.path.isdir(os.path.join(root, "server"))
+    assert os.path.isdir(os.path.join(root, "client"))
+    assert os.path.isfile(os.path.join(root, "server", "index.js"))
+    assert os.path.isfile(os.path.join(root, "client", "App.jsx"))
+    # Flattened artefacts must not exist.
+    assert not os.path.isfile(os.path.join(root, "index.js"))
+    assert not os.path.isfile(os.path.join(root, "App.jsx"))
+
+
+@pytest.mark.asyncio
+async def test_split_generated_path_preserves_structure_and_rejects_escape():
+    """Unit-level guard for the path-splitting helper."""
+    from app.api.v1.builder import split_generated_path
+
+    assert split_generated_path("server/index.js") == ("server", "index.js")
+    assert split_generated_path("server/routes/tasks.js") == (
+        "server/routes", "tasks.js",
+    )
+    assert split_generated_path("README.md") == ("", "README.md")
+    assert split_generated_path("server\\index.js") == ("server", "index.js")
+
+    for bad in ("../escape.js", "server/../../escape.js", "", "/"):
+        with pytest.raises(ValueError):
+            split_generated_path(bad)
+

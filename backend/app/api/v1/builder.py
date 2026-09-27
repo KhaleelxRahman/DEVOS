@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends
@@ -71,6 +72,52 @@ OP_CREATE = "create"
 OP_WRITE = "write"
 OP_MODIFY = "modify"
 OP_DELETE = "delete"
+
+
+def split_generated_path(path: str) -> tuple[str, str]:
+    """Split a generated file path into (parent_relative_path, filename).
+
+    The plan intentionally targets a nested layout (`server/index.js`,
+    `client/App.jsx`, `server/routes/tasks.js`, ...). Previously the apply step
+    called `FileService.create_file(project_id, "", path.split("/")[-1], ...)`,
+    which discarded every directory component and wrote everything flat into the
+    project root. Same-named files from different directories then silently
+    overwrote each other (`server/db.js` vs `client/api.js`,
+    `server/package.json` vs the root `package.json`) and the generated app was
+    unrunnable.
+
+    `FileService.create_file` requires a parent-relative path plus a single
+    filename (it rejects separators in the name) and already creates missing
+    parent directories, so splitting is all that is needed to preserve the
+    planned structure.
+    """
+    normalized = str(path).replace("\\", "/").strip()
+    parts = [p for p in normalized.split("/") if p not in ("", ".")]
+    if not parts:
+        raise ValueError(f"Invalid generated path: {path!r}")
+    if ".." in parts:
+        raise ValueError(f"Generated path escapes the project: {path!r}")
+    return "/".join(parts[:-1]), parts[-1]
+
+
+def create_generated_file(
+    project_id: str, path: str, content: str = ""
+) -> None:
+    """Write one generated file at its full planned relative path.
+
+    Preserves the directory structure by creating the parent directory when it
+    does not exist yet, then delegating to the owner-scoped, path-validated
+    `FileService.create_file`.
+    """
+    parent_rel, name = split_generated_path(path)
+    if parent_rel:
+        # Validate the parent through the same containment check the file write
+        # uses, then create it if missing. `os.makedirs(..., exist_ok=True)`
+        # is safe to repeat, so the second file in a directory is not an error.
+        parent_abs = FileService.validate_safe_path(project_id, parent_rel)
+        if not os.path.isdir(parent_abs):
+            os.makedirs(parent_abs, exist_ok=True)
+    FileService.create_file(project_id, parent_rel, name, content)
 
 
 def validate_transition(current_status: str | None, new_status: str) -> None:
@@ -423,7 +470,7 @@ async def apply(
             continue
         try:
             if op in ("create", "write"):
-                FileService.create_file(project_id, "", path.split("/")[-1], content)
+                create_generated_file(project_id, path, content)
                 created.append(path)
             elif op == "modify":
                 FileService.save_file(project_id, path, content)
@@ -531,8 +578,7 @@ async def _run_generation(
             try:
                 path = file_op["path"]
                 content = file_op.get("content", "")
-                filename = path.split("/")[-1]
-                FileService.create_file(project_id, "", filename, content)
+                create_generated_file(project_id, path, content)
             except Exception as exc:
                 store.setdefault("failed_operations", []).append(f"{path}: {exc}")
         store["status"] = "SYNCING"
