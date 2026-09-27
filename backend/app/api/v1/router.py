@@ -4,6 +4,7 @@ from app.api.v1.activity import router as activity_router
 from app.api.v1.ai import router as ai_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.builder import router as builder_router
+from app.api.v1.diagnostics import router as diagnostics_router
 from app.api.v1.executions import router as executions_router
 from app.api.v1.files import router as files_router
 from app.api.v1.git import router as git_router
@@ -31,3 +32,4 @@ api_v1_router.include_router(public_forms_router)
 api_v1_router.include_router(builder_router)
 api_v1_router.include_router(preview_router)
 api_v1_router.include_router(executions_router)
+api_v1_router.include_router(diagnostics_router)
