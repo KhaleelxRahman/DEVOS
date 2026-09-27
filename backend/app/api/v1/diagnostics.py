@@ -17,7 +17,7 @@ from app.phase3_diagnostics.service import (
     DiagnosisNotDiagnosableError,
     DiagnosisService,
 )
-from app.schemas.common import ApiResponse
+from app.schemas.common import ApiResponse, ErrorDetail
 from app.schemas.diagnosis import DiagnosisResponse
 
 router = APIRouter(prefix="/projects/{project_id}/diagnostics", tags=["diagnostics"])
@@ -66,7 +66,7 @@ async def diagnose_execution(
         return ApiResponse(
             success=False,
             data=None,
-            error={"code": "NOT_DIAGNOSABLE", "message": str(exc)},
+            error=ErrorDetail(code="NOT_DIAGNOSABLE", message=str(exc)),
         )
     return ApiResponse(success=True, data=_to_response(diagnosis))
 
@@ -89,6 +89,6 @@ async def diagnose_latest_failure(
         return ApiResponse(
             success=False,
             data=None,
-            error={"code": "NOT_DIAGNOSABLE", "message": str(exc)},
+            error=ErrorDetail(code="NOT_DIAGNOSABLE", message=str(exc)),
         )
     return ApiResponse(success=True, data=_to_response(diagnosis))

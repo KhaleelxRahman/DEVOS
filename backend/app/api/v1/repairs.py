@@ -22,7 +22,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.phase3_diagnostics.service import DiagnosisService
 from app.phase4_repair.service import RepairApplyError, RepairService
-from app.schemas.common import ApiResponse
+from app.schemas.common import ApiResponse, ErrorDetail
 from app.schemas.repair import (
     RepairProposalResponse,
     RepairVerificationResponse,
@@ -89,28 +89,31 @@ async def apply_repair(
     if not proposal.supported:
         return ApiResponse(
             success=False, data=None,
-            error={"code": "REPAIR_UNSUPPORTED",
-                   "message": proposal.reason},
+            error=ErrorDetail(
+                code="REPAIR_UNSUPPORTED", message=proposal.reason,
+            ),
         )
     if proposal.requires_approval:
         # Gate: the proposal route already returned the exact diff; the
         # caller must now explicitly approve before anything is written.
         return ApiResponse(
             success=False, data=None,
-            error={
-                "code": "APPROVAL_REQUIRED",
-                "message": (
+            error=ErrorDetail(
+                code="APPROVAL_REQUIRED",
+                message=(
                     "This repair requires explicit approval. Review the diff "
                     "from GET proposal, then re-submit with approve=true."
                 ),
-            },
+            ),
         )
     try:
         diff, backups = RepairService.apply(proposal, project_id)
     except RepairApplyError as exc:
         return ApiResponse(
             success=False, data=None,
-            error={"code": "REPAIR_APPLY_FAILED", "message": str(exc)},
+            error=ErrorDetail(
+                code="REPAIR_APPLY_FAILED", message=str(exc),
+            ),
         )
     return ApiResponse(
         success=True,
@@ -150,8 +153,9 @@ async def verify_repair(
     if not proposal.supported:
         return ApiResponse(
             success=False, data=None,
-            error={"code": "REPAIR_UNSUPPORTED",
-                   "message": proposal.reason},
+            error=ErrorDetail(
+                code="REPAIR_UNSUPPORTED", message=proposal.reason,
+            ),
         )
 
     diff, backups = RepairService.apply(proposal, project_id)
