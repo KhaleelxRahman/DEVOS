@@ -121,6 +121,44 @@ def create_generated_file(
     FileService.create_file(project_id, parent_rel, name, content)
 
 
+# Result of writing one generated file to the workspace.
+WRITE_CREATED = "created"
+WRITE_MODIFIED = "modified"
+WRITE_UNCHANGED = "unchanged"
+
+
+def sync_generated_file(project_id: str, path: str, content: str = "") -> str:
+    """Converge one generated file to the generated content (upsert).
+
+    Returns one of WRITE_CREATED / WRITE_MODIFIED / WRITE_UNCHANGED.
+
+    `apply` is the sole writer, but the same project can be generated and
+    applied more than once (a new generation against an existing workspace, or
+    a re-applied transaction). A plain create failed for every file with "A file
+    or folder with this name already exists" in those cases. Treating the write
+    as a sync against a desired state makes apply idempotent (re-running
+    changes nothing) and convergent (an edited or deleted file is restored to
+    the generated snapshot), which is what "apply a change set" means.
+    """
+    abs_path = FileService.validate_safe_path(project_id, path)
+    if not os.path.isfile(abs_path):
+        create_generated_file(project_id, path, content)
+        return WRITE_CREATED
+
+    try:
+        with open(abs_path, encoding="utf-8") as fh:
+            existing = fh.read()
+    except OSError:
+        existing = None
+    if existing == content:
+        return WRITE_UNCHANGED
+
+    # Content differs (the user edited it, or it was changed since generation):
+    # converge the workspace back to the generated snapshot.
+    FileService.save_file(project_id, path, content)
+    return WRITE_MODIFIED
+
+
 def validate_transition(current_status: str | None, new_status: str) -> None:
     """Validate that a state transition is allowed.
 
@@ -458,6 +496,7 @@ async def apply(
     files: list[dict] = record.get("files", [])
     created: list[str] = []
     modified: list[str] = []
+    unchanged: list[str] = []
     failed: list[str] = []
     for f in files:
         if not isinstance(f, dict):
@@ -471,8 +510,14 @@ async def apply(
             continue
         try:
             if op in ("create", "write"):
-                create_generated_file(project_id, path, content)
-                created.append(path)
+                # Upsert: idempotent on re-apply, convergent on edited files.
+                result = sync_generated_file(project_id, path, content)
+                if result == WRITE_CREATED:
+                    created.append(path)
+                elif result == WRITE_MODIFIED:
+                    modified.append(path)
+                else:
+                    unchanged.append(path)
             elif op == "modify":
                 FileService.save_file(project_id, path, content)
                 modified.append(path)

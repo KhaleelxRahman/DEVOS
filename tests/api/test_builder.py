@@ -745,3 +745,96 @@ async def test_env_example_is_visible_and_readable_but_real_env_is_blocked(clien
 
 
 
+
+
+# ---------------------------------------------------------------------------
+# Apply idempotency regression
+# ---------------------------------------------------------------------------
+# Apply is the sole writer, but the same project can be generated and applied
+# more than once. A plain create failed for every file with "A file or folder
+# with this name already exists". Apply is now an upsert: identical content is a
+# no-op, differing content is converged back to the generated snapshot.
+
+
+@pytest.mark.asyncio
+async def test_apply_creates_every_planned_file_and_reports_no_failures(client):
+    """A first apply against an empty workspace creates the whole file set."""
+    headers = await _register(client, email="idem@example.com", name="Idem")
+    project_id = await _create_project(client, headers, name="idempotent-apply")
+    gen_id = str(uuid.uuid4())
+
+    record = _stub_record(project_id, "COMPLETED")
+    record["files"] = [dict(f) for f in NESTED_FILES]
+    BACKGROUND_STORE[gen_id] = record
+
+    res = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+    assert res.status_code == 200, res.text
+    data = res.json()["data"]
+    assert data["failed_operations"] == []
+    assert sorted(data["applied_files"]) == sorted(f["path"] for f in NESTED_FILES)
+    assert data["modified_files"] == []
+
+    root = _project_root(project_id)
+    assert _read(os.path.join(root, "server", "index.js")) == "SERVER_INDEX"
+    assert _read(os.path.join(root, "package.json")) == "ROOT_PKG"
+
+
+@pytest.mark.asyncio
+async def test_apply_twice_is_a_clean_noop(client):
+    """Re-applying the same content must not report failures or change files.
+
+    The endpoint-level guard already refuses a repeat apply of one generation
+    (GENERATION_NOT_READY), so the record status is reset here to exercise the
+    write path itself.
+    """
+    headers = await _register(client, email="idem2@example.com", name="Idem2")
+    project_id = await _create_project(client, headers, name="idempotent-twice")
+    gen_id = str(uuid.uuid4())
+
+    record = _stub_record(project_id, "COMPLETED")
+    record["files"] = [dict(f) for f in NESTED_FILES]
+    BACKGROUND_STORE[gen_id] = record
+
+    first = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+    assert first.json()["data"]["failed_operations"] == []
+
+    BACKGROUND_STORE[gen_id]["status"] = "COMPLETED"
+    second = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+    assert second.status_code == 200, second.text
+    data = second.json()["data"]
+    assert data["failed_operations"] == [], data["failed_operations"]
+    # Nothing changed the second time.
+    assert data["applied_files"] == []
+    assert data["modified_files"] == []
+
+    root = _project_root(project_id)
+    assert _read(os.path.join(root, "server", "index.js")) == "SERVER_INDEX"
+    assert _read(os.path.join(root, "client", "App.jsx")) == "CLIENT_APP"
+
+
+@pytest.mark.asyncio
+async def test_apply_restores_edited_file_to_generated_content(client):
+    """Upsert semantics: a user-edited file is converged back on re-apply."""
+    headers = await _register(client, email="idem3@example.com", name="Idem3")
+    project_id = await _create_project(client, headers, name="idempotent-edit")
+    gen_id = str(uuid.uuid4())
+
+    record = _stub_record(project_id, "COMPLETED")
+    record["files"] = [dict(f) for f in NESTED_FILES]
+    BACKGROUND_STORE[gen_id] = record
+
+    await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+
+    root = _project_root(project_id)
+    target = os.path.join(root, "server", "index.js")
+    with open(target, "w", encoding="utf-8") as fh:
+        fh.write("USER EDIT")
+
+    BACKGROUND_STORE[gen_id]["status"] = "COMPLETED"
+    res = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+    assert res.status_code == 200, res.text
+    data = res.json()["data"]
+    assert data["failed_operations"] == []
+    assert "server/index.js" in data["modified_files"]
+    assert _read(target) == "SERVER_INDEX"
+
