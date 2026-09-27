@@ -17,6 +17,17 @@ SENSITIVE_PATTERNS = {
 
 SENSITIVE_EXTENSIONS = {".key", ".pem", ".p12", ".pfx"}
 
+# Exact-match filenames that are secret-free templates by convention and are
+# therefore safe to store, show, and commit inside a project. This is
+# deliberately an EXACT set, never a prefix rule: `.env`, `.env.local`,
+# `.env.production`, `.env.staging` and every other `.env.*` name remain
+# blocked as sensitive, because those carry real credentials.
+#
+# `.env.example` is required by the builder: the generated project documents
+# `cp ../.env.example .env` in its README, so without this file the generated
+# app's own setup instructions are broken.
+ALLOWED_TEMPLATE_FILENAMES = {".env.example"}
+
 # Directories never exposed through the file API or the AI context engine
 EXCLUDED_DIRECTORIES = {
     "node_modules",
@@ -51,7 +62,18 @@ EXTENSION_LANGUAGE_MAP = {
 
 class FileService:
     @staticmethod
+    def is_allowed_template(name: str) -> bool:
+        """True only for exact-match, secret-free template filenames.
+
+        Never a prefix or glob rule: `.env.example` is allowed, while `.env`,
+        `.env.local`, and every other `.env.*` name are not.
+        """
+        return name in ALLOWED_TEMPLATE_FILENAMES
+
+    @staticmethod
     def is_sensitive(name: str) -> bool:
+        if FileService.is_allowed_template(name):
+            return False
         if name in SENSITIVE_PATTERNS or name.startswith(".env."):
             return True
         _, ext = os.path.splitext(name.lower())
@@ -176,7 +198,10 @@ class FileService:
             raise FileAccessDeniedException(
                 "Invalid name: path separators are not allowed"
             )
-        if name.startswith("."):
+        # Hidden files are blocked by default. The only exception is the exact
+        # set of secret-free template filenames (e.g. `.env.example`), which the
+        # builder generates and the generated README depends on.
+        if name.startswith(".") and not FileService.is_allowed_template(name):
             raise FileAccessDeniedException("Hidden files and folders are not allowed")
         if FileService.is_sensitive(name):
             raise FileAccessDeniedException(

@@ -1,10 +1,10 @@
-"""Phase 1 builder API tests (D-03..D-17 surface).
+﻿"""Phase 1 builder API tests (D-03..D-17 surface).
 
-Covers: classify, plan, start, status, stream, summary, apply, cancel —
+Covers: classify, plan, start, status, stream, summary, apply, cancel â€”
 including invalid prompts, unsupported requests, generation state rules,
 error responses, idempotent retry identity, and safe path handling.
 
-Failure invariant under test: FAILURE MUST NOT LOOK LIKE SUCCESS — a failed
+Failure invariant under test: FAILURE MUST NOT LOOK LIKE SUCCESS â€” a failed
 operation is always asserted through its real error code or terminal state,
 never through HTTP 200 alone.
 """
@@ -228,7 +228,7 @@ async def test_start_returns_idle_and_rejects_invalid_prompt(client):
 @pytest.mark.asyncio
 async def test_start_reuses_generation_identity_on_retry(client):
     """Idempotent retry: an explicit id is either still running (rejected) or
-    replaced in place — never duplicated into an unrelated generation record."""
+    replaced in place â€” never duplicated into an unrelated generation record."""
     headers = await _register(client)
     project_id = await _create_project(client, headers)
     gen_id = str(uuid.uuid4())
@@ -311,7 +311,7 @@ async def test_stream_delivers_real_events_to_terminal_state(client):
     assert stream.status_code == 200, stream.text
     assert "text/x-event-stream" in stream.headers.get("content-type", "")
 
-    # Real SSE frames only — no fabricated progress beyond backend events.
+    # Real SSE frames only â€” no fabricated progress beyond backend events.
     assert '"event":"status"' in stream.text
     assert '"event":"finished"' in stream.text
     assert '"event":"error"' not in stream.text
@@ -371,16 +371,20 @@ async def test_apply_writes_real_files_and_requires_terminal_state(client):
     assert data["status"] == "SYNCING"
     assert data["generation_request_id"] == gen_id
     if final == "COMPLETED":
+        # Apply is the SOLE writer to the workspace: generation only records the
+        # generated file set, so a first apply creates every planned file and
+        # nothing is written twice.
         assert sorted(data["applied_files"]) == sorted(created)
         assert data["failed_operations"] == []
+        assert data["modified_files"] == []
 
-        # Safe path handling: generated files land inside project storage and
-        # are readable through the existing files API.
-        base_name = created[0].split("/")[-1]
-        fetched = await client.get(
-            f"/api/v1/projects/{project_id}/files/{base_name}", headers=headers
-        )
-        assert fetched.status_code == 200, fetched.text
+        # Every planned file is present on disk at its full relative path and
+        # readable through the existing files API.
+        for rel in created:
+            fetched = await client.get(
+                f"/api/v1/projects/{project_id}/files/{rel}", headers=headers
+            )
+            assert fetched.status_code == 200, (rel, fetched.text)
 
     # Apply consumed the transaction: a second apply must be refused.
     again = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
@@ -421,7 +425,7 @@ async def test_cancel_moves_running_generation_to_cancelled(client):
         assert data["status"] == "CANCELLED"
         assert data["completed_at"]
 
-        # Terminal transactions are not cancellable — failure stays distinct.
+        # Terminal transactions are not cancellable â€” failure stays distinct.
         again = await client.post(f"{_base(project_id)}/cancel/{gen_id}", headers=headers)
         assert again.json()["success"] is False
         assert again.json()["error"]["code"] == "GENERATION_NOT_CANCELLABLE"
@@ -534,13 +538,16 @@ async def test_apply_does_not_overwrite_same_named_files_across_directories(clie
 
 
 @pytest.mark.asyncio
-async def test_generation_writes_nested_structure_to_disk(client):
-    """The generation pipeline itself must produce the nested layout on disk.
+async def test_generation_stores_nested_structure_without_writing_to_disk(client):
+    """Generation records the nested file set; only Apply writes to disk.
 
-    Covers the second call site (`_run_generation`), which had the same
-    `path.split("/")[-1]` flattening.
+    Generation is side-effect free: it stores the planned paths and their
+    contents in the transaction, and the workspace stays untouched until Apply.
+    This is the regression for the original flattening (`path.split("/")[-1]`)
+    AND for generation silently writing files before the user applied them.
     """
     from app.core.config import settings
+    from app.services.builder_service import BACKGROUND_STORE as STORE
 
     headers = await _register(client, email="gen@example.com", name="Gen")
     project_id = await _create_project(client, headers, name="gen-nested")
@@ -552,10 +559,27 @@ async def test_generation_writes_nested_structure_to_disk(client):
     final = await _wait_terminal(client, headers, project_id, gen_id)
     assert final in {"COMPLETED", "PARTIAL"}
 
+    # The generated set keeps the nested structure in the transaction...
+    stored = {f["path"] for f in STORE[gen_id]["files"]}
+    assert "server/index.js" in stored
+    assert "server/routes/tasks.js" in stored
+    assert "client/App.jsx" in stored
+    # ...with no flattened basenames recorded.
+    assert "index.js" not in stored
+    assert "App.jsx" not in stored
+
+    # ...and nothing has been written to the workspace yet.
     root = os.path.abspath(os.path.join(settings.PROJECTS_STORAGE_PATH, project_id))
+    assert not os.path.isfile(os.path.join(root, "server", "index.js"))
+    assert not os.path.isfile(os.path.join(root, "client", "App.jsx"))
+
+    # Apply is the sole writer, and it produces the nested layout on disk.
+    res = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+    assert res.status_code == 200, res.text
     assert os.path.isdir(os.path.join(root, "server"))
     assert os.path.isdir(os.path.join(root, "client"))
     assert os.path.isfile(os.path.join(root, "server", "index.js"))
+    assert os.path.isfile(os.path.join(root, "server", "routes", "tasks.js"))
     assert os.path.isfile(os.path.join(root, "client", "App.jsx"))
     # Flattened artefacts must not exist.
     assert not os.path.isfile(os.path.join(root, "index.js"))
@@ -577,4 +601,147 @@ async def test_split_generated_path_preserves_structure_and_rejects_escape():
     for bad in ("../escape.js", "server/../../escape.js", "", "/"):
         with pytest.raises(ValueError):
             split_generated_path(bad)
+
+
+
+# ---------------------------------------------------------------------------
+# .env.example generation regression
+# ---------------------------------------------------------------------------
+# The plan always includes `.env.example`, but `FileService` rejected it as a
+# hidden file, so every generation ended PARTIAL and the generated project's
+# documented `cp ../.env.example .env` setup step had no file to copy.
+
+
+@pytest.mark.asyncio
+async def test_generation_stores_env_example_and_completes(client):
+    """Generation must COMPLETE and record a real .env.example with content."""
+    from app.services.builder_service import BACKGROUND_STORE as STORE
+
+    headers = await _register(client, email="envok@example.com", name="EnvOk")
+    project_id = await _create_project(client, headers, name="env-generation")
+
+    started = await client.post(
+        f"{_base(project_id)}/start", json={"prompt": PROMPT}, headers=headers
+    )
+    gen_id = started.json()["data"]["generation_request_id"]
+    final = await _wait_terminal(client, headers, project_id, gen_id)
+
+    assert final == "COMPLETED", f"expected COMPLETED, got {final}"
+
+    # Generation recorded it with real content (it does not touch the disk).
+    stored = {f["path"]: f.get("content", "") for f in STORE[gen_id]["files"]}
+    assert ".env.example" in stored
+    assert "DATABASE_URL=" in stored[".env.example"]
+    assert "PORT=" in stored[".env.example"]
+    assert "NODE_ENV=" in stored[".env.example"]
+    assert stored[".env.example"].strip(), ".env.example must not be empty"
+
+    # Apply (the sole writer) puts it on disk with that content.
+    res = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+    assert res.status_code == 200, res.text
+    env_path = os.path.join(_project_root(project_id), ".env.example")
+    assert os.path.isfile(env_path)
+    with open(env_path, encoding="utf-8") as fh:
+        content = fh.read()
+    assert "DATABASE_URL=" in content
+    assert "PORT=" in content
+    assert "NODE_ENV=" in content
+
+
+@pytest.mark.asyncio
+async def test_generated_files_have_real_content_not_empty_placeholders(client):
+    """Every generated file must carry real content, not an empty string.
+
+    `_run_generation` previously hardcoded `content: ""` for every planned
+    path, so applying a generation produced a correct file tree of entirely
+    EMPTY files.
+    """
+    from app.services.builder_service import BACKGROUND_STORE as STORE
+
+    headers = await _register(client, email="content@example.com", name="Content")
+    project_id = await _create_project(client, headers, name="content-generation")
+
+    started = await client.post(
+        f"{_base(project_id)}/start", json={"prompt": PROMPT}, headers=headers
+    )
+    gen_id = started.json()["data"]["generation_request_id"]
+    await _wait_terminal(client, headers, project_id, gen_id)
+
+    expected = (
+        "server/index.js",
+        "server/db.js",
+        "server/routes/tasks.js",
+        "client/App.jsx",
+        "client/api.js",
+        "client/index.html",
+        "client/index.js",
+        "client/App.css",
+        "package.json",
+        "server/package.json",
+        "README.md",
+        ".env.example",
+    )
+    stored = {f["path"]: f.get("content", "") for f in STORE[gen_id]["files"]}
+
+    # Every planned path is recorded with non-empty content.
+    for rel in expected:
+        assert rel in stored, rel
+        assert stored[rel].strip(), f"{rel} was generated empty"
+
+    # Apply is the sole writer, and it lands that content on disk.
+    res = await client.post(f"{_base(project_id)}/apply/{gen_id}", headers=headers)
+    assert res.status_code == 200, res.text
+    assert res.json()["data"]["failed_operations"] == []
+
+    root = _project_root(project_id)
+    for rel in expected:
+        path = os.path.join(root, *rel.split("/"))
+        assert os.path.isfile(path), rel
+        with open(path, encoding="utf-8") as fh:
+            body = fh.read()
+        assert body.strip(), f"{rel} was written empty"
+        assert body == stored[rel], f"{rel} content differs from generated"
+
+
+@pytest.mark.asyncio
+async def test_env_example_is_visible_and_readable_but_real_env_is_blocked(client):
+    """The allowed template is a normal project file; real .env stays denied."""
+    headers = await _register(client, email="envsec@example.com", name="EnvSec")
+    project_id = await _create_project(client, headers, name="env-security")
+
+    # Create the template through the normal file API: it must be allowed.
+    res = await client.post(
+        "/api/v1/projects/{}/files/file".format(project_id),
+        json={"parent_path": "", "name": ".env.example", "content": "PORT=4000\n"},
+        headers=headers,
+    )
+    assert res.status_code == 200, res.text
+
+    # It is visible in the tree and readable.
+    tree = await client.get(f"/api/v1/projects/{project_id}/files", headers=headers)
+    assert ".env.example" in [f["name"] for f in tree.json()["data"]["files"]]
+    read_res = await client.get(
+        f"/api/v1/projects/{project_id}/files/.env.example", headers=headers
+    )
+    assert read_res.status_code == 200, read_res.text
+
+    # Real credential files remain blocked through the API.
+    for name in (".env", ".env.local", ".env.production", ".env.development"):
+        blocked = await client.post(
+            "/api/v1/projects/{}/files/file".format(project_id),
+            json={"parent_path": "", "name": name, "content": "SECRET=1"},
+            headers=headers,
+        )
+        assert blocked.status_code in (403, 400), (name, blocked.status_code)
+
+    # Other hidden files are still rejected too (the allowlist is exact-match).
+    for name in (".gitignore", ".secret", ".envrc"):
+        blocked = await client.post(
+            "/api/v1/projects/{}/files/file".format(project_id),
+            json={"parent_path": "", "name": name, "content": "x"},
+            headers=headers,
+        )
+        assert blocked.status_code in (403, 400), (name, blocked.status_code)
+
+
 

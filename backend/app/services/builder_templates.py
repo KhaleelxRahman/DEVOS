@@ -10,18 +10,30 @@ def generate_file_map() -> dict[str, str]:
     return {
         "client/package.json": CLIENT_PACKAGE_JSON,
         "client/index.html": CLIENT_INDEX_HTML,
+        "client/index.js": CLIENT_INDEX_JS,
         "client/api.js": CLIENT_API_JS,
         "client/App.jsx": CLIENT_APP_JSX,
+        "client/App.css": CLIENT_APP_CSS,
         "server/package.json": SERVER_PACKAGE_JSON,
         "server/db.js": SERVER_DB_JS,
         "server/routes/tasks.js": SERVER_TASKS_JS,
         "server/index.js": SERVER_INDEX_JS,
+        "package.json": ROOT_PACKAGE_JSON,
         ".env.example": ENV_EXAMPLE,
         "README.md": README_MD,
     }
 
 
 CLIENT_PACKAGE_JSON = '{\n  "name": "todo-client",\n  "private": true,\n  "version": "1.0.0",\n  "type": "module",\n  "scripts": { "dev": "vite", "build": "vite build" },\n  "dependencies": { "react": "^18.2.0", "react-dom": "^18.2.0" },\n  "devDependencies": { "vite": "^5.0.0" }\n}\n'
+
+# Workspace root manifest: the generated app is a two-package project
+# (client/ and server/), so the root only orchestrates them.
+ROOT_PACKAGE_JSON = '{\n  "name": "todo-app",\n  "private": true,\n  "version": "1.0.0",\n  "workspaces": ["client", "server"],\n  "scripts": {\n    "install:all": "npm install --prefix server && npm install --prefix client",\n    "dev:server": "npm start --prefix server",\n    "dev:client": "npm run dev --prefix client"\n  }\n}\n'
+
+CLIENT_INDEX_JS = 'import React from "react";\nimport { createRoot } from "react-dom/client";\nimport App from "./App.jsx";\nimport "./App.css";\n\ncreateRoot(document.getElementById("root")).render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);\n'
+
+CLIENT_APP_CSS = ':root {\n  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;\n  line-height: 1.5;\n}\n\nbody {\n  margin: 0;\n  display: flex;\n  justify-content: center;\n  background: #f7f7f8;\n}\n\nmain {\n  width: 100%;\n  max-width: 40rem;\n  padding: 2rem 1rem;\n}\n\nul {\n  list-style: none;\n  padding: 0;\n}\n\nli {\n  display: flex;\n  align-items: center;\n  gap: 0.5rem;\n  padding: 0.4rem 0;\n}\n\ninput[type="text"] {\n  flex: 1;\n  padding: 0.4rem 0.6rem;\n}\n'
+
 
 CLIENT_INDEX_HTML = '<!doctype html>\n<html lang="en">\n  <head><meta charset="UTF-8" />\n  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n  <title>Todo App</title></head>\n  <body><div id="root"></div>\n  <script type="module" src="/App.jsx"></script></body>\n</html>\n'
 

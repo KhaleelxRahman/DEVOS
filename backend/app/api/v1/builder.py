@@ -42,6 +42,7 @@ from app.services.builder_service import (
 )
 from app.services.file_service import FileService
 from app.services.project_service import ProjectService
+from app.services.builder_templates import generate_file_map
 
 logger = logging.getLogger(__name__)
 
@@ -568,19 +569,27 @@ async def _run_generation(
         store["status"] = "GENERATING"
         # spec.files is list[str] of file paths (see NormalizedBuildSpec),
         # not objects with .path/.contents attributes.
+        #
+        # Content comes from the deterministic template map. Previously every
+        # file was created with `content: ""`, so generation produced a correct
+        # set of EMPTY files (including an empty `.env.example`, which made the
+        # generated app's documented `cp ../.env.example .env` step useless).
+        template_map = generate_file_map()
         store["files"] = [
-            {"operation": "create", "path": path, "content": ""}
+            {
+                "operation": "create",
+                "path": path,
+                "content": template_map.get(path, ""),
+            }
             for path in spec.files
         ]
         store["status"] = "APPLYING"
-        # Apply files through FileService (path-validated, owner-scoped).
-        for file_op in store["files"]:
-            try:
-                path = file_op["path"]
-                content = file_op.get("content", "")
-                create_generated_file(project_id, path, content)
-            except Exception as exc:
-                store.setdefault("failed_operations", []).append(f"{path}: {exc}")
+        # Generation is intentionally side-effect free: it only records the
+        # generated file set in the transaction. `apply` is the sole writer to
+        # the workspace. Previously generation wrote the files itself and apply
+        # wrote them again, so the second write failed for every file with
+        # "A file or folder with this name already exists", and files appeared
+        # in the user's workspace before they ever pressed "Apply".
         store["status"] = "SYNCING"
         store["completed_at"] = utcnow().isoformat()
         if store.get("failed_operations"):

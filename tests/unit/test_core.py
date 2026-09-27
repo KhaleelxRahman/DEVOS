@@ -37,6 +37,34 @@ def test_sensitive_file_detection():
     assert FileService.is_sensitive("main.py") is False
 
 
+def test_env_example_template_is_allowed_but_real_env_files_are_not():
+    """`.env.example` is a secret-free template; real credential files are not.
+
+    The allowlist is an EXACT filename match, never a prefix rule, so every other
+    `.env.*` variant must remain blocked.
+    """
+    # The one allowed template.
+    assert FileService.is_allowed_template(".env.example") is True
+    assert FileService.is_sensitive(".env.example") is False
+
+    # Every real credential variant stays blocked.
+    for name in (
+        ".env",
+        ".env.local",
+        ".env.production",
+        ".env.development",
+        ".env.staging",
+        ".env.secret",
+        ".env.example.local",
+    ):
+        assert FileService.is_allowed_template(name) is False, name
+        assert FileService.is_sensitive(name) is True, name
+
+    # Other secret-bearing names are unaffected.
+    for name in ("id_rsa", "id_ed25519", "secrets.json", "app.pem", "certs.p12"):
+        assert FileService.is_sensitive(name) is True, name
+
+
 def test_secret_scrubbing():
     text = "Here is my api_key = 'sk-1234567890abcdef' for testing"
     sanitized = ContextService.sanitize_text(text)
