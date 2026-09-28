@@ -6,6 +6,8 @@ observed result is asserted (blocked = non-200 with the right error shape).
 No attack is reasoned about without being executed.
 """
 
+from pathlib import Path
+
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -14,6 +16,7 @@ from app.db.base import Base
 from app.db.session import engine
 from app.main import app
 from app.services.execution_service import _PROCESSES
+from app.services.project_service import ProjectService
 
 
 @pytest_asyncio.fixture
@@ -176,26 +179,85 @@ async def test_workspace_id_mismatch_rejected(client):
 
 
 @pytest.mark.asyncio
-async def test_path_traversal_working_directory_blocked(client):
+@pytest.mark.parametrize("cwd", [
+    "..",
+    "../",
+    "../..",
+    "sub/../../",
+    "..\\..",
+    "..\\../..",
+    "a/../b/../../../..",
+    "/etc",
+    "C:\\Windows",
+    "C:foo",
+    "\\\\server\\share",
+    "a\\..\\..",
+    "a\x00b",
+])
+async def test_path_traversal_working_directory_blocked(client, cwd):
+    """Every traversal / absolute / null-byte form is refused.
+
+    Parametrized over both path dialects: on POSIX a backslash is an
+    ordinary filename character, so "..\\.." must still be recognised as
+    traversal. "/" is deliberately NOT in this list — it is accepted by
+    design and means "the workspace root".
+    """
     headers_a, _ = await _register(client, "secg-t@example.com", "T")
     project_a = await _create_project(client, headers_a, "trav-project")
+    res = await client.post(
+        _exec_base(project_a),
+        headers=headers_a,
+        json={
+            "execution_type": "CUSTOM_SAFE_COMMAND",
+            "command": "python",
+            "arguments": ["-c", "print('escape')"],
+            "working_directory": cwd,
+            "workspace_id": project_a,
+        },
+    )
+    assert res.status_code in (403, 422), (cwd, res.status_code, res.text)
 
-    async def try_cwd(cwd):
-        return await client.post(
-            _exec_base(project_a),
-            headers=headers_a,
-            json={
-                "execution_type": "CUSTOM_SAFE_COMMAND",
-                "command": "python",
-                "arguments": ["-c", "print('escape')"],
-                "working_directory": cwd,
-                "workspace_id": project_a,
-            },
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("cwd", [
+    "src/components",
+    "src\\components",
+    "src",
+    ".",
+    "/",
+])
+async def test_valid_working_directory_accepted(client, cwd):
+    """A valid relative subdirectory resolves INSIDE the workspace.
+
+    Assertions use pathlib only, never an os.path.sep literal, so the same
+    test is meaningful on Windows and Linux.
+    """
+    headers_a, _ = await _register(client, "secg-ok@example.com", "O")
+    project_a = await _create_project(client, headers_a, "ok-project")
+    res = await client.post(
+        _exec_base(project_a),
+        headers=headers_a,
+        json={
+            "execution_type": "CUSTOM_SAFE_COMMAND",
+            "command": "python",
+            "arguments": ["-c", "print('inside')"],
+            "working_directory": cwd,
+            "workspace_id": project_a,
+        },
+    )
+    assert res.status_code == 200, (cwd, res.text)
+    data = res.json()["data"]
+    assert data["status"] == "QUEUED", (cwd, data)
+
+    workspace = Path(
+        ProjectService.get_project_storage_path(project_a)
+    ).resolve()
+    returned = Path(data["working_directory"]).resolve()
+    assert returned.is_relative_to(workspace), (cwd, returned, workspace)
+    if cwd in ("src/components", "src\\components"):
+        assert returned.relative_to(workspace).parts == ("src", "components"), (
+            cwd, returned
         )
-
-    for cwd in ("..", "../", "../..", "sub/../../", "a/../b/../../../.."):
-        res = await try_cwd(cwd)
-        assert res.status_code in (403, 422), (cwd, res.status_code, res.text)
 
 
 @pytest.mark.asyncio
@@ -559,3 +621,73 @@ async def test_preview_proxy_frameable_app_only_other_routes_denied(client):
         f"/api/v1/projects/{project_a}/preview/stop", headers=headers_a)
     assert stop.status_code == 200, stop.text
     assert _PROCESSES == {}
+
+
+# ---------------------------------------------------------------------------
+# Pure unit tests of resolve_working_directory itself (no HTTP, no app boot).
+# The workspace root is monkeypatched to a tmp_path, so these exercise the
+# path logic directly and identically on Windows and Linux.
+# ---------------------------------------------------------------------------
+
+def _patch_workspace(monkeypatch, tmp_path):
+    """Point ProjectService.get_project_storage_path at tmp_path."""
+    root = tmp_path / "ws"
+    root.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(
+        ProjectService, "get_project_storage_path",
+        staticmethod(lambda project_id: str(root)),
+    )
+    return root.resolve()
+
+
+@pytest.mark.parametrize("cwd", [
+    "..",
+    "../",
+    "../..",
+    "sub/../../",
+    "..\\..",
+    "..\\../..",
+    "a/../b/../../../..",
+    "a\\..\\..",
+    "/etc",
+    "C:\\Windows",
+    "C:foo",
+    "\\\\server\\share",
+    "a\x00b",
+])
+def test_resolve_working_directory_rejects_traversal(monkeypatch, tmp_path, cwd):
+    """Traversal, absolute, drive-relative and null-byte inputs are refused."""
+    from app.core.errors import ExecutionInvalidWorkingDirectoryException
+    from app.services.execution_service import resolve_working_directory
+
+    _patch_workspace(monkeypatch, tmp_path)
+    with pytest.raises(ExecutionInvalidWorkingDirectoryException):
+        resolve_working_directory("p1", cwd)
+
+
+@pytest.mark.parametrize("cwd,expected_parts", [
+    ("src/components", ("src", "components")),
+    ("src\\components", ("src", "components")),
+    ("src", ("src",)),
+    (".", ()),
+    ("", ()),
+    ("/", ()),
+    ("a/b/c", ("a", "b", "c")),
+    ("./a/./b", ("a", "b")),
+])
+def test_resolve_working_directory_accepts_relative(
+    monkeypatch, tmp_path, cwd, expected_parts
+):
+    """Valid relative paths resolve inside the workspace, host-native."""
+    from app.services.execution_service import resolve_working_directory
+
+    workspace = _patch_workspace(monkeypatch, tmp_path)
+    resolved = Path(resolve_working_directory("p1", cwd)).resolve()
+    assert resolved.is_relative_to(workspace), (cwd, resolved, workspace)
+    assert resolved.relative_to(workspace).parts == expected_parts, (
+        cwd, resolved
+    )
+    # Never mixed separators: the string form uses the host separator only.
+    assert str(resolved).replace("\\", "/").count("/") == len(
+        resolved.parts
+    ) - 1, (cwd, resolved)

@@ -1,12 +1,15 @@
 """Phase 2A execution foundation tests (AC-2A-01..2A-16 coverage)."""
 import os
 import uuid
+from pathlib import Path
+
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from app.main import app
 from app.db.base import Base
 from app.db.session import engine
+from app.services.project_service import ProjectService
 
 
 @pytest_asyncio.fixture
@@ -168,6 +171,17 @@ async def test_create_execution_accepts_subdirectory(client):
     data = res.json()["data"]
     assert data["status"] == "QUEUED"
     assert "src" + os.path.sep + "components" in data["working_directory"]
+    # Additional, platform-neutral check: the resolved path must be a real
+    # descendant of the workspace with the expected parts. The original
+    # os.path.sep assertion above is kept unchanged.
+    workspace = Path(
+        ProjectService.get_project_storage_path(project_id)
+    ).resolve()
+    resolved = Path(data["working_directory"]).resolve()
+    assert resolved.is_relative_to(workspace), resolved
+    assert resolved.relative_to(workspace).parts == ("src", "components"), (
+        resolved
+    )
 
 
 @pytest.mark.asyncio

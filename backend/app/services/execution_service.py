@@ -18,6 +18,7 @@ import sys
 import time
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -256,23 +257,60 @@ def require_allowed_command(command: str, arguments: list[str] | None) -> str:
     return classification
 
 def resolve_working_directory(project_id: str, working_directory: str) -> str:
-    project_root = os.path.realpath(
-        ProjectService.get_project_storage_path(project_id))
-    candidate = (working_directory or "").strip()
-    if not candidate or candidate == "/":
-        return project_root
-    normalized = ntpath.normpath(candidate)
-    parts = normalized.split("/")
-    if (ntpath.isabs(working_directory) or candidate.startswith("/")
-            or (len(candidate) >= 2 and candidate[1] == ":")
-            or candidate.startswith("\\") or ".." in parts):
+    """Resolve a user-supplied working directory inside the project workspace.
+
+    Platform-neutral by construction. The input is first folded to a single
+    dialect (both "/" and "\\" become "/"), then every path operation uses
+    pathlib on the host OS. A backslash therefore cannot smuggle a ".."
+    segment past the checks on POSIX — the previous ntpath.normpath-based
+    version rewrote "../.." to "..\\..", which split on "/" into a single
+    element and slipped through the traversal check on Linux.
+
+    The returned path is always OS-native and contains no mixed separators.
+    """
+    workspace = Path(
+        ProjectService.get_project_storage_path(project_id)
+    ).resolve()
+    raw = (working_directory or "").strip()
+    if not raw or raw == "/":
+        return str(workspace)
+
+    # Fold Windows separators so "..\\.." is seen as traversal on POSIX too.
+    unified = raw.replace("\\", "/")
+
+    # Reject null bytes explicitly: Path.resolve() does not validate them
+    # on every platform/Python version, and a NUL must never reach the OS.
+    if "\x00" in raw:
         raise ExecutionInvalidWorkingDirectoryException(
             "Working directory must stay within the project workspace")
-    target = os.path.realpath(os.path.join(project_root, normalized))
-    if os.path.commonpath((project_root, target)) != project_root:
+
+    # Reject absolute paths in either dialect, Windows drive-relative forms
+    # such as "C:foo", and any ".." segment.
+    if (
+        unified.startswith("/")
+        or ntpath.isabs(raw)
+        or (len(raw) >= 2 and raw[1] == ":")
+        or raw.startswith("\\")
+    ):
+        raise ExecutionInvalidWorkingDirectoryException(
+            "Working directory must stay within the project workspace")
+    if ".." in unified.split("/"):
+        raise ExecutionInvalidWorkingDirectoryException(
+            "Working directory must stay within the project workspace")
+
+    # Single authoritative containment check on the resolved path. resolve()
+    # raises ValueError for null bytes and OSError for overlong paths; both
+    # are client input errors and must surface as 4xx, never as a 500.
+    try:
+        target = (workspace / unified).resolve()
+    except (ValueError, OSError) as exc:
+        raise ExecutionInvalidWorkingDirectoryException(
+            "Working directory must stay within the project workspace"
+        ) from exc
+    if not target.is_relative_to(workspace):
         raise ExecutionInvalidWorkingDirectoryException(
             "Working directory escapes the project workspace")
-    return target
+    return str(target)
 
 def redact_for_log(data: str) -> str:
     redacted = data
