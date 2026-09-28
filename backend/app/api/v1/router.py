@@ -13,6 +13,7 @@ from app.api.v1.preview import router as preview_router
 from app.api.v1.projects import router as projects_router
 from app.api.v1.public_forms import router as public_forms_router
 from app.api.v1.repairs import router as repairs_router
+from app.api.v1.repo_index import router as repo_index_router
 from app.api.v1.terminal import router as terminal_router
 from app.api.v1.testing import router as testing_router
 from app.api.v1.users import router as users_router
@@ -35,3 +36,4 @@ api_v1_router.include_router(preview_router)
 api_v1_router.include_router(executions_router)
 api_v1_router.include_router(diagnostics_router)
 api_v1_router.include_router(repairs_router)
+api_v1_router.include_router(repo_index_router)

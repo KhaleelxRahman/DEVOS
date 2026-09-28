@@ -6,6 +6,7 @@ from app.models.generation import Generation
 from app.models.github_connection import GitHubConnection
 from app.models.message import ConversationMessage
 from app.models.project import Project
+from app.models.repo_index import RepoFile, RepoIndex, RepoSymbol
 from app.models.user import User
 from app.models.waitlist import ContactMessage, WaitlistEntry
 
@@ -19,6 +20,9 @@ __all__ = [
     "Generation",
     "GitHubConnection",
     "Project",
+    "RepoFile",
+    "RepoIndex",
+    "RepoSymbol",
     "User",
     "WaitlistEntry",
 ]
