@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class GitStatusResponse(BaseModel):
@@ -12,6 +12,18 @@ class GitStatusResponse(BaseModel):
 
 class GitCommitRequest(BaseModel):
     message: str
+    files: list[str] = Field(
+        default_factory=list,
+        description="Explicit allow-list to stage. Never 'git add .'.",
+    )
+    commit_all: bool = Field(
+        default=False,
+        description=(
+            "Opt-in: stage every tracked change with `git add -u`-equivalent "
+            "semantics. Off by default; Phase 5 provenance commits never set "
+            "it, so a verified change is never widened in scope."
+        ),
+    )
 
 
 class GitDiffResponse(BaseModel):

@@ -21,7 +21,6 @@ from app.phase4_repair.planner import (
     RepairPlanner,
     RepairProposal,
     RiskLevel,
-    is_plannable,
 )
 from app.phase4_repair.service import (
     RepairApplyError,
@@ -37,5 +36,4 @@ __all__ = [
     "RepairService",
     "RiskLevel",
     "VerificationResult",
-    "is_plannable",
 ]

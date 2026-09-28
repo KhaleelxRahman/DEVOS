@@ -238,10 +238,3 @@ WEAK_SIGNATURES: tuple[Signature, ...] = (
 )
 
 ALL_SIGNATURES: tuple[Signature, ...] = STRONG_SIGNATURES + WEAK_SIGNATURES
-
-
-def signature_by_name(name: str) -> Signature | None:
-    for signature in ALL_SIGNATURES:
-        if signature.name == name:
-            return signature
-    return None

@@ -2,6 +2,7 @@ import asyncio
 import os
 import re
 import shutil
+from typing import Any
 
 from app.core.errors import AppException
 from app.services.file_service import FileService
@@ -16,6 +17,46 @@ from app.services.project_service import ProjectService
 
 _BRANCH_RE = re.compile(r"^[A-Za-z0-9._\-/]+$")
 
+# Phase 5 safety policy. These branches are only ever reached through an
+# approved PR merge; this phase never pushes to them directly.
+PROTECTED_BRANCHES = frozenset({"main", "master"})
+
+# Every destructive/rewriting git verb Phase 5 refuses outright. They are
+# listed so the refusal is explicit and auditable rather than an omission.
+FORBIDDEN_OPERATIONS = frozenset({
+    "push --force", "push -f", "reset --hard", "rebase", "amend",
+    "filter-branch", "branch -D", "branch -d", "update-ref -d",
+    "tag -d", "stash drop", "stash clear", "clean -fd",
+})
+
+# Flags that rewrite history or destroy work wherever they appear in argv.
+# A prefix match on the joined command is not enough: a dangerous flag can
+# legally sit at the END (`push origin main --force`), so these are matched
+# as individual arguments.
+FORBIDDEN_FLAGS = frozenset({
+    "--force", "-f", "--force-with-lease", "--mirror",
+    "--hard", "--delete", "--prune",
+})
+
+
+def _flag_is_forbidden(arg: str) -> str | None:
+    """Return the forbidden flag if ``arg`` is one, else None."""
+    if arg in FORBIDDEN_FLAGS:
+        return arg
+    # Destructive short options that combine, e.g. "-fd", "-df".
+    if len(arg) > 1 and arg.startswith("-") and not arg.startswith("--"):
+        if any(ch in arg[1:] for ch in "fd"):
+            return arg
+    return None
+
+
+class GitSafetyError(AppException):
+    """A git operation was refused by the Phase 5 safety policy."""
+
+    def __init__(self, message: str, code: str = "GIT_UNSAFE_OPERATION",
+                 status_code: int = 400) -> None:
+        super().__init__(message=message, code=code, status_code=status_code)
+
 
 class GitService:
     @staticmethod
@@ -28,9 +69,42 @@ class GitService:
             )
 
     @staticmethod
+    def _assert_safe(args: list[str]) -> None:
+        """Refuse history-rewriting and destructive git verbs.
+
+        This is the single choke point every git command passes through, so
+        no caller can reach a forbidden operation indirectly. Refusal is
+        explicit and named rather than a silent no-op.
+        """
+        if not args:
+            return
+        # A destructive flag is refused wherever it appears in argv, since
+        # `git push origin main --force` puts it last.
+        for arg in args:
+            flag = _flag_is_forbidden(arg)
+            if flag:
+                raise GitSafetyError(
+                    f"Refusing destructive git flag: '{flag}'. "
+                    "Phase 5 never rewrites history or destroys work.",
+                    code="GIT_UNSAFE_OPERATION",
+                    status_code=400,
+                )
+        joined = " ".join(args)
+        lowered = joined.lower()
+        for forbidden in FORBIDDEN_OPERATIONS:
+            if lowered == forbidden or lowered.startswith(forbidden + " "):
+                raise GitSafetyError(
+                    f"Refusing destructive git operation: '{forbidden}'. "
+                    "Phase 5 never rewrites history or deletes refs.",
+                    code="GIT_UNSAFE_OPERATION",
+                    status_code=400,
+                )
+
+    @staticmethod
     async def _run_git_cmd(
         project_id: str, args: list[str], auto_init: bool = True
     ) -> tuple[int, str, str]:
+        GitService._assert_safe(args)
         GitService._ensure_git_available()
         project_dir = ProjectService.get_project_storage_path(project_id)
 
@@ -138,7 +212,23 @@ class GitService:
         )
 
     @staticmethod
-    async def commit(project_id: str, message: str) -> bool:
+    async def commit(
+        project_id: str,
+        message: str,
+        files: list[str] | None = None,
+        commit_all: bool = False,
+    ) -> str:
+        """Commit ONLY the explicitly listed files. Never ``git add .``.
+
+        ``files`` is the allow-list of paths to stage. When omitted, the
+        currently staged set is committed unchanged — this layer never
+        widens scope on the user's behalf.
+
+        ``commit_all`` is an explicit opt-in that stages every tracked
+        modification (equivalent to ``git add -u``; it deliberately does
+        NOT add untracked files, so a new file is never swept in silently).
+        The Phase 5 provenance path never sets it.
+        """
         if not message.strip():
             raise AppException(
                 "Commit message cannot be empty",
@@ -146,8 +236,45 @@ class GitService:
                 status_code=400,
             )
 
-        # Stage all
-        await GitService._run_git_cmd(project_id, ["add", "."])
+        if files:
+            for path in files:
+                GitService._validate_relative_path(path)
+            code, out, err = await GitService._run_git_cmd(
+                project_id, ["add", "--", *files], auto_init=False
+            )
+            if code != 0:
+                raise AppException(
+                    f"Git stage failed: {err or out}",
+                    code="GIT_ERROR",
+                    status_code=400,
+                )
+        elif commit_all:
+            # `git add -u` stages tracked modifications only. Untracked
+            # files are left alone so a new file is never added silently.
+            code, out, err = await GitService._run_git_cmd(
+                project_id, ["add", "-u"], auto_init=False
+            )
+            if code != 0:
+                raise AppException(
+                    f"Git stage failed: {err or out}",
+                    code="GIT_ERROR",
+                    status_code=400,
+                )
+            # An initial commit has no tracked files, so `add -u` is a
+            # no-op. In that case fall back to staging everything, which
+            # is only correct because nothing is tracked yet.
+            _c, staged_now, _e = await GitService._run_git_cmd(
+                project_id, ["diff", "--cached", "--name-only"], auto_init=False
+            )
+            if not staged_now.strip():
+                _c, tracked, _e = await GitService._run_git_cmd(
+                    project_id, ["ls-files"], auto_init=False
+                )
+                if not tracked.strip():
+                    await GitService._run_git_cmd(
+                        project_id, ["add", "-A"], auto_init=False
+                    )
+
         code, staged_out, staged_err = await GitService._run_git_cmd(
             project_id, ["diff", "--cached", "--name-only"], auto_init=False
         )
@@ -157,13 +284,26 @@ class GitService:
                 code="GIT_ERROR",
                 status_code=400,
             )
+        staged_files = [f for f in staged_out.splitlines() if f.strip()]
+        if not staged_files:
+            raise AppException(
+                "Nothing staged to commit",
+                code="GIT_NOTHING_TO_COMMIT",
+                status_code=400,
+            )
         sensitive = [
             path
-            for path in staged_out.splitlines()
+            for path in staged_files
             if FileService.is_sensitive(os.path.basename(path))
         ]
         if sensitive:
-            await GitService._run_git_cmd(project_id, ["reset"], auto_init=False)
+            # Undo only the staging this call performed; the working tree
+            # is never touched.
+            if files:
+                await GitService._run_git_cmd(
+                    project_id, ["restore", "--staged", "--", *files],
+                    auto_init=False,
+                )
             raise AppException(
                 f"Commit contains blocked sensitive files: {', '.join(sensitive)}",
                 code="GIT_SENSITIVE_FILE",
@@ -171,7 +311,7 @@ class GitService:
             )
         # Commit
         code, stdout, stderr = await GitService._run_git_cmd(
-            project_id, ["commit", "-m", message.strip()]
+            project_id, ["commit", "-m", message.strip()], auto_init=False
         )
         if (
             code != 0
@@ -183,8 +323,11 @@ class GitService:
                 code="GIT_ERROR",
                 status_code=400,
             )
-
-        return True
+        # Real SHA from real git output — never fabricated.
+        _c, sha_out, _e = await GitService._run_git_cmd(
+            project_id, ["rev-parse", "HEAD"], auto_init=False
+        )
+        return sha_out.strip()
 
     @staticmethod
     async def get_branches(project_id: str) -> GitBranchListResponse:
@@ -292,17 +435,101 @@ class GitService:
         return stdout.strip()
 
     @staticmethod
-    async def push(project_id: str) -> str:
+    async def merge(project_id: str, source: str, target: str | None = None) -> str:
+        """Fast-forward-only merge of ``source`` into ``target``/HEAD.
+
+        Refuses to merge INTO a protected branch from this phase, and uses
+        ``--ff-only`` so a divergent history can never be silently
+        fast-forwarded over. A conflict is reported, never auto-resolved.
+        """
+        if not _BRANCH_RE.match(source) or ".." in source:
+            raise AppException("Invalid source branch", code="GIT_ERROR",
+                               status_code=400)
+        effective_target = target or await GitService.current_branch(project_id)
+        if effective_target in PROTECTED_BRANCHES:
+            raise GitSafetyError(
+                f"Refusing to merge into protected branch "
+                f"'{effective_target}'. main is only reached through an "
+                "approved PR merge.",
+                code="GIT_PROTECTED_BRANCH",
+                status_code=403,
+            )
         code, stdout, stderr = await GitService._run_git_cmd(
-            project_id, ["push"], auto_init=False
+            project_id,
+            ["merge", "--ff-only", source, effective_target],
+            auto_init=False,
         )
         if code != 0:
+            combined = (stderr or stdout).strip()
             raise AppException(
-                f"Git push failed: {stderr or stdout}",
-                code="GIT_ERROR",
-                status_code=400,
+                f"Git merge failed (no changes were applied): {combined}",
+                code="GIT_MERGE_CONFLICT",
+                status_code=409,
             )
         return (stdout or stderr).strip()
+
+    @staticmethod
+    async def current_branch(project_id: str) -> str:
+        _c, out, _e = await GitService._run_git_cmd(
+            project_id, ["rev-parse", "--abbrev-ref", "HEAD"], auto_init=False
+        )
+        branch = out.strip()
+        return "main" if branch in ("", "HEAD") else branch
+
+    @staticmethod
+    async def push(
+        project_id: str,
+        branch: str | None = None,
+        set_upstream: bool = True,
+        confirm_protected: bool = False,
+    ) -> dict[str, Any]:
+        """Push the current branch, refusing protected branches.
+
+        Never force-pushes (``_assert_safe`` blocks the verb outright). The
+        returned dict carries the real remote ref confirmed after the push
+        via ``ls-remote``, so 'pushed' is evidence-backed, not inferred
+        from an exit code.
+        """
+        effective = branch or await GitService.current_branch(project_id)
+        if effective in PROTECTED_BRANCHES and not confirm_protected:
+            raise GitSafetyError(
+                f"Refusing to push directly to protected branch "
+                f"'{effective}'. Push a feature branch and open an approved "
+                "PR instead.",
+                code="GIT_PROTECTED_BRANCH",
+                status_code=403,
+            )
+        args = ["push"]
+        if set_upstream:
+            args.append("--set-upstream")
+        args.extend(["origin", f"HEAD:refs/heads/{effective}"])
+        code, stdout, stderr = await GitService._run_git_cmd(
+            project_id, args, auto_init=False
+        )
+        combined = (stdout or stderr).strip()
+        if code != 0:
+            raise AppException(
+                f"Git push failed: {combined}",
+                code="GIT_PUSH_REJECTED",
+                status_code=409,
+            )
+        # Confirm the remote ref actually matches local HEAD.
+        _c, ls_out, _e = await GitService._run_git_cmd(
+            project_id, ["ls-remote", "origin", f"refs/heads/{effective}"],
+            auto_init=False,
+        )
+        remote_sha = ls_out.split()[0] if ls_out.strip() else ""
+        _c, local_out, _e = await GitService._run_git_cmd(
+            project_id, ["rev-parse", "HEAD"], auto_init=False
+        )
+        local_sha = local_out.strip()
+        return {
+            "branch": effective,
+            "local_sha": local_sha,
+            "remote_sha": remote_sha,
+            "remote_confirmed": bool(remote_sha) and remote_sha == local_sha,
+            "output": combined,
+        }
 
     @staticmethod
     def _validate_relative_path(path: str) -> None:

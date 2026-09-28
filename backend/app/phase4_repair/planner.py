@@ -221,11 +221,6 @@ def _signature_of(diagnosis) -> str:
     return ""
 
 
-def is_plannable(diagnosis) -> bool:
-    """True only when a bounded, deterministic repair exists."""
-    return _signature_of(diagnosis) in REPAIR_TABLE
-
-
 def _risk_for(diagnosis) -> RiskLevel:
     """Risk rises with the blast radius of the planned edit."""
     if diagnosis.category.statement in {"configuration", "dependency"}:
