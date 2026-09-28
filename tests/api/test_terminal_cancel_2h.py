@@ -69,7 +69,8 @@ async def _create_queued(client, headers, project_id, command, args):
     return res.json()["data"]
 
 
-async def _wait_for_status(client, headers, project_id, eid, wanted, timeout=20.0):
+async def _wait_for_status(client, headers, project_id, eid, wanted,
+                          timeout=20.0) -> dict:
     """Stand in for the panel's poll loop: GET the record until it matches.
 
     Mirrors TerminalPanel.pollUntilTerminal, which reads
@@ -86,6 +87,10 @@ async def _wait_for_status(client, headers, project_id, eid, wanted, timeout=20.
         res = await client.get(f"{_exec_base(project_id)}/{eid}", headers=headers)
         assert res.status_code == 200, res.text
         last = res.json()["data"]
+        # A null payload would make the subscripts below fail cryptically;
+        # assert it here so the failure names the real problem.
+        assert last is not None, (
+            "execution record payload was null for %s" % eid)
         if wanted and last["status"] == wanted:
             return last
         if last["status"] in ("COMPLETED", "FAILED", "BLOCKED", "CANCELLED", "TIMED_OUT"):

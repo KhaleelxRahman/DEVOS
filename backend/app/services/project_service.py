@@ -39,10 +39,13 @@ def remove_project_directory(storage_path: str) -> None:
     """
     if not os.path.isdir(storage_path):
         return
-    kwargs = {"onexc": _force_remove_readonly}
-    if not hasattr(shutil.rmtree, "onexc"):  # Python < 3.12
-        kwargs = {"onerror": lambda f, p, e: _force_remove_readonly(f, p, e)}
-    shutil.rmtree(storage_path, **kwargs)
+    # Branch explicitly rather than building a **kwargs dict: the two
+    # handlers have different names and the dict form defeated type
+    # checking. `_force_remove_readonly` already matches both signatures.
+    if hasattr(shutil.rmtree, "onexc"):  # Python 3.12+
+        shutil.rmtree(storage_path, onexc=_force_remove_readonly)
+    else:  # Python < 3.12
+        shutil.rmtree(storage_path, onerror=_force_remove_readonly)
 
 
 class ProjectService:
