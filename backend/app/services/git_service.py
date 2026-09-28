@@ -541,13 +541,18 @@ class GitService:
         * null bytes (potential injection vector)
         * leading dash (prevents treating the argument as a git option)
 
+        Backslashes are folded to "/" before the traversal check: on POSIX a
+        backslash is an ordinary filename character, so without this "..\\.."
+        would split into a single element and slip through.
+
         Raises:
             AppException: with code "GIT_ERROR" and HTTP 400 when invalid.
         """
+        normalized = path.replace("\\", "/") if path else path
         if (
             not path
             or os.path.isabs(path)
-            or ".." in path.split("/")
+            or ".." in normalized.split("/")
             or "\x00" in path
             or path.startswith("-")
         ):

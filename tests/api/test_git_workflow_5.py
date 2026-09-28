@@ -396,3 +396,39 @@ async def test_cross_user_git_access_is_forbidden(client):
     ]:
         res = await client.request(method, path, json=body, headers=other)
         assert res.status_code in (403, 404), (method, res.text)
+
+
+@pytest.mark.parametrize("path", [
+    "..",
+    "../",
+    "../..",
+    "..\\..",
+    "a\\..\\..",
+    "a/../b",
+    "-rf",
+    "a\x00b",
+    "",
+])
+def test_validate_relative_path_rejects_traversal(path):
+    """Git pathspec validation folds backslashes before the ".." check.
+
+    On POSIX a backslash is an ordinary filename character, so without the
+    fold "..\\.." would split into a single element and be accepted.
+    """
+    from app.core.errors import AppException
+
+    with pytest.raises(AppException) as exc:
+        GitService._validate_relative_path(path)
+    assert exc.value.code == "GIT_ERROR", (path, exc.value.code)
+
+
+@pytest.mark.parametrize("path", [
+    "package.json",
+    "src/main.ts",
+    "src\\main.ts",
+    "a/b/c.py",
+    "file-with-dash-in-middle.js",
+])
+def test_validate_relative_path_accepts_safe(path):
+    """Ordinary relative paths are still accepted, in either dialect."""
+    GitService._validate_relative_path(path)
