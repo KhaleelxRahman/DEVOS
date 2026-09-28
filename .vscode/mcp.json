@@ -1,11 +1,30 @@
 {
-  "servers": {
-    "reticle": {
-      "command": "npx",
-      "args": [
-        "@reticlehq/server",
-        "mcp"
-      ]
-    }
-  }
+	"servers": {
+		"reticle": {
+			"command": "npx",
+			"args": [
+				"@reticlehq/server",
+				"mcp"
+			],
+			"type": "stdio"
+		},
+		"io.github.upstash/context7": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"@upstash/context7-mcp@4.1.1"
+			],
+			"env": {
+				"CONTEXT7_API_KEY": "${input:CONTEXT7_API_KEY}"
+			}
+		}
+	},
+	"inputs": [
+		{
+			"id": "CONTEXT7_API_KEY",
+			"type": "promptString",
+			"description": "API key for authentication",
+			"password": true
+		}
+	]
 }
