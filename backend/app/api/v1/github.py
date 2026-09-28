@@ -51,6 +51,10 @@ async def callback(
     await GitHubService.save_connection(
         db, payload["sub"], github_user, token_payload["access_token"]
     )
+    # save_connection only flushes; get_db yields a bare session with no
+    # autocommit, so without this the connection is rolled back when the
+    # request ends and the user is never actually connected.
+    await db.commit()
     return RedirectResponse(
         url=f"{settings.FRONTEND_APP_URL.rstrip('/')}/app/settings", status_code=303
     )

@@ -108,16 +108,14 @@ async def test_git_status_branches_commit_log(client):
     ) as f:
         f.write("SECRET=should-not-be-committed\n")
     # A sensitive file must never reach a commit. Phase 5 no longer runs
-    # `git add .`, so .env is not staged at all; the commit correctly
-    # refuses with nothing to commit and the secret is left untouched.
-    # (Explicitly targeting .env is also refused, as a second guard.)
+    # `git add .`, so the commit stages only the named file and the
+    # sensitive-file guard rejects it outright.
     blocked_commit = await client.post(
         f"{base}/commit", json={"message": "blocked secret", "files": [".env"]},
         headers=headers,
     )
-    assert blocked_commit.status_code in (400, 403), blocked_commit.text
-    if blocked_commit.status_code == 403:
-        assert blocked_commit.json()["error"]["code"] == "GIT_SENSITIVE_FILE"
+    assert blocked_commit.status_code == 403, blocked_commit.text
+    assert blocked_commit.json()["error"]["code"] == "GIT_SENSITIVE_FILE"
 
     # Empty commit message rejected
     assert (
