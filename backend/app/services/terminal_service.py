@@ -37,7 +37,7 @@ BLOCKED_PATTERNS = {
     "shutdown",
     "reboot",
 }
-SHELL_METACHARACTERS = re.compile(r"[;&|<>`$()\r\n]")
+SHELL_METACHARACTERS = re.compile(r"[;&|<>`$()^%\r\n]")
 
 
 class TerminalService:

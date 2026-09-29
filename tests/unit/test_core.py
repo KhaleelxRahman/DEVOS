@@ -91,6 +91,20 @@ def test_terminal_allowlist():
     assert exc_info3.value.code == "TERMINAL_BLOCKED"
 
 
+def test_terminal_blocks_cmd_exe_metacharacters():
+    """Phase 12.1 hardening: % (cmd.exe variable expansion) and ^ (cmd.exe
+    escape char) must be rejected. Before the fix, `echo %PATH%` passed
+    validation and cmd.exe live-expanded the child's full PATH into stdout
+    (confirmed exploit: env-value disclosure through the terminal echo)."""
+    for args in (["%PATH%"], ["%AUTH_SECRET%"], ["^^&whoami"], ["a^b"]):
+        with pytest.raises(AppException) as exc_info:
+            TerminalService.validate_command("echo", args)
+        assert exc_info.value.code == "TERMINAL_BLOCKED"
+        with pytest.raises(AppException) as exc_info_dir:
+            TerminalService.validate_command("dir", args)
+        assert exc_info_dir.value.code == "TERMINAL_BLOCKED"
+
+
 def test_production_guard_rejects_insecure_defaults(monkeypatch):
     from app.core.config import Settings, _validate_production_safety
 
