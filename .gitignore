@@ -93,3 +93,14 @@ prod_mobile_*.png
 # Example env files are documentation, not secrets: keep them trackable.
 !backend/.env.example
 !backend/.env.render.example
+
+# Runtime state, not source: the SQLite database (DATABASE_URL=./data/devos.db)
+# and the generated per-project workspace storage (PROJECTS_STORAGE_PATH).
+# Both are recreated by running the app, so they must never be committed.
+data/
+
+# Local throwaway artifacts from test/lint runs and one-off launcher scripts.
+# The repo already ignores its Phase-2H equivalents (run_cert_*.py, *_out.log).
+rv_*.txt
+phase11_complete.py
+run_phase11.py
