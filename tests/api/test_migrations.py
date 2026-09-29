@@ -13,8 +13,30 @@ import sqlite3
 import subprocess
 import sys
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
+
 # Locate the backend root the same way the sibling API tests do.
 BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backend"))
+
+
+def _expected_head() -> str:
+    """The revision the bootstrap is expected to leave the database at.
+
+    Derived from the migration scripts rather than pinned to a literal: a
+    hardcoded head turns every new migration into three unrelated test
+    failures, which punishes adding migrations instead of catching a broken
+    bootstrap. This also fails loudly if the revision graph ever branches,
+    because `upgrade head` would then be ambiguous.
+    """
+    config = Config()
+    config.set_main_option(
+        "script_location", os.path.join(BACKEND_ROOT, "alembic").replace(os.sep, "/")
+    )
+    script = ScriptDirectory.from_config(config)
+    heads = script.get_heads()
+    assert len(heads) == 1, f"expected a single Alembic head, found {heads}"
+    return heads[0]
 
 LEGACY_CREATE_ALL = (
     "import asyncio\n"
@@ -92,7 +114,7 @@ def test_bootstrap_upgrades_fresh_database(tmp_path):
     result = _run_bootstrap(db_path)
     assert result.returncode == 0, result.stderr[-1000:]
     assert "is_pinned" in _conversation_columns(db_path)
-    assert _alembic_head(db_path) == "c520db81c7c6"
+    assert _alembic_head(db_path) == _expected_head()
 
 
 def test_bootstrap_upgrades_legacy_database(tmp_path):
@@ -105,7 +127,7 @@ def test_bootstrap_upgrades_legacy_database(tmp_path):
     result = _run_bootstrap(db_path)
     assert result.returncode == 0, result.stderr[-1000:]
     assert "is_pinned" in _conversation_columns(db_path)
-    assert _alembic_head(db_path) == "c520db81c7c6"
+    assert _alembic_head(db_path) == _expected_head()
 
 
 def test_bootstrap_is_idempotent(tmp_path):
@@ -116,6 +138,6 @@ def test_bootstrap_is_idempotent(tmp_path):
     assert first.returncode == 0, first.stderr[-1000:]
     second = _run_bootstrap(db_path)
     assert second.returncode == 0, second.stderr[-1000:]
-    assert _alembic_head(db_path) == "c520db81c7c6"
+    assert _alembic_head(db_path) == _expected_head()
     assert "is_pinned" in _conversation_columns(db_path)
 
