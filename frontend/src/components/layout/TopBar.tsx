@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Terminal, Bot, GitBranch, FolderGit2, Menu, X, Settings, Wifi, WifiOff, ChevronDown, Rocket, Github } from 'lucide-react';
+import { Terminal, Bot, GitBranch, FolderGit2, Menu, X, Settings, Wifi, WifiOff, ChevronDown, Rocket, Github, Search } from 'lucide-react';
 import { Badge } from '../common/Badge';
 import { Link } from 'react-router-dom';
 import { useProject } from '../../hooks/useProject';
@@ -11,6 +11,8 @@ export interface TopBarProps {
   gitBranch?: string;
   menuOpen?: boolean;
   onMenuToggle?: () => void;
+  /** Touch entry point for the command palette, which otherwise needs Ctrl+K. */
+  onOpenPalette?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -18,6 +20,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   gitBranch = 'main',
   menuOpen = false,
   onMenuToggle,
+  onOpenPalette,
 }) => {
   const [online, setOnline] = useState(() => navigator.onLine);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -59,6 +62,15 @@ export const TopBar: React.FC<TopBarProps> = ({
       <div className="top-bar-brand">
         <button className="app-menu-toggle" onClick={onMenuToggle} aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen}>
           {menuOpen ? <X size={18} /> : <Menu size={18} />}
+        </button>
+        <button
+          type="button"
+          className="command-palette-trigger"
+          onClick={onOpenPalette}
+          aria-label="Open command palette"
+          title="Command palette"
+        >
+          <Search size={18} />
         </button>
         <Terminal size={18} color="var(--color-accent)" />
         <span>DEVOS</span>

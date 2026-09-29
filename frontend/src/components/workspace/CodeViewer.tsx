@@ -51,6 +51,14 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ tabs, activePath, onActi
   const saveTimerRef = useRef<number | null>(null);
   const valueRef = useRef('');
   const baselineRef = useRef('');
+  // The save action and the auto-save timer both outlive the render that
+  // created them: editor.addAction() registers its run callback once at mount,
+  // and the 1200ms timer fires long after its render. Reading dirty/saving
+  // from state inside those callbacks captured an always-empty set, so Ctrl+S
+  // and auto-save silently did nothing until a later render happened to
+  // re-register them. These refs are the source of truth for the guards.
+  const dirtyPathsRef = useRef<Set<string>>(new Set());
+  const savingRef = useRef(false);
   const active = tabs.find((tab) => tab.path === activePath) || null;
 
   useEffect(() => {
@@ -70,6 +78,8 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ tabs, activePath, onActi
   }, []);
 
   const markDirty = (path: string, dirty: boolean) => {
+    if (dirty) dirtyPathsRef.current.add(path);
+    else dirtyPathsRef.current.delete(path);
     setDirtyPaths((previous) => {
       const next = new Set(previous);
       if (dirty) next.add(path);
@@ -79,13 +89,16 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ tabs, activePath, onActi
   };
 
   const saveCurrent = async (path = activePath) => {
-    if (!path || !dirtyPaths.has(path) || saving) return;
+    const target = path || activePath;
+    if (!target || !dirtyPathsRef.current.has(target) || savingRef.current) return;
+    savingRef.current = true;
     setSaving(true);
-    const ok = await onSave(path, valueRef.current);
+    const ok = await onSave(target, valueRef.current);
+    savingRef.current = false;
     setSaving(false);
     if (ok) {
       baselineRef.current = valueRef.current;
-      markDirty(path, false);
+      markDirty(target, false);
     }
   };
 

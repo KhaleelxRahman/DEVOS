@@ -41,6 +41,7 @@ export const AppShell: React.FC = () => {
         gitBranch={activeProject?.default_branch || 'main'}
         menuOpen={menuOpen}
         onMenuToggle={() => setMenuOpen((open) => !open)}
+        onOpenPalette={() => setPaletteOpen(true)}
       />
       <div className="app-body">
         <Sidebar onNavigate={() => setMenuOpen(false)} collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((collapsed) => !collapsed)} />

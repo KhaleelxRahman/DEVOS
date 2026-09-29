@@ -518,3 +518,73 @@ textarea.input {
 .builder-error svg { flex-shrink: 0; margin-top: 1px; }
 .builder-empty { margin: 0; color: var(--color-text-muted); font-size: 11px; display: inline-flex; align-items: center; gap: 5px; }
 @media (max-width: 640px) { .builder-actions .btn { flex: 1 1 auto; justify-content: center; } .builder-log { max-height: 140px; } .builder-diff { max-height: 160px; } }
+
+/* ==========================================================================
+   Phase 7 — touch targets on constrained screens.
+
+   Measured on a real 320px context: the Sign In button was 246x31px, and
+   .tree-row (padding 3px 8px) / .sidebar-item (padding 8px 12px) sit below
+   the 40px hittable-size floor too. On touch-sized viewports every control a
+   finger has to hit gets a real minimum height. Desktop is untouched, and no
+   mobile-only component was forked: this only tightens the shared controls.
+   ========================================================================== */
+@media (max-width: 820px) {
+  .btn,
+  .btn-sm,
+  .btn-ghost,
+  .tree-row,
+  .artifact-item,
+  .terminal-tab {
+    min-height: 40px;
+  }
+
+  .sidebar-item,
+  .command-palette-item,
+  .project-switcher-item,
+  .explorer-menu .tree-row {
+    min-height: 44px;
+  }
+
+  /* Input rows keep their text at a comfortable size while the hit area grows. */
+  .input,
+  textarea.input {
+    min-height: 44px;
+  }
+
+  /* Measured too small at 320/375/390/414 before this rule:
+     .ai-mode-tabs button 125x22px, .app-menu-toggle 34x34px,
+     .command-palette-input input 197x24px. */
+  .ai-mode-tabs button {
+    min-height: 40px;
+  }
+
+  .app-menu-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .command-palette-input input {
+    min-height: 44px;
+  }
+
+  /* .ai-composer .input (specificity 0,2,0 in layout.css) pinned the assistant
+     input to 28px, and the two icon buttons left it 144px of a 238px row at
+     320 — under both the tap floor and a usable measure. The input takes its
+     own full-width line; the buttons sit under it, right-aligned. */
+  .ai-composer {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .ai-composer .input {
+    flex: 1 1 100%;
+    min-height: 44px;
+    order: -1;
+  }
+
+  .ai-composer .btn-primary {
+    margin-left: auto;
+  }
+}
+

@@ -27,6 +27,7 @@ Status vocabulary: PASS / FAIL / UNVERIFIED / BLOCKED — see Master Operating P
 | 2F | PASS | this session | full pytest 150 passed incl. history suite; browser: history API 12 rows == UI 12 rows with real statuses/durations/reasons; drill-in shows id/pid/cwd/completed/exit per execution | History equals executed reality end-to-end |
 | 2G | PASS | this session | 16 adversarial pytest + CSP framing test; npm audit 0 critical/0 high; pip-audit clean after pillow 12.3.0; ruff clean; browser URL scan: zero session JWTs in URLs; cross-project/execution access denied | Security hardened, including the recorded preview-token surface |
 | 2H | PASS | this session | every 2A-2G sub-phase certified below with real evidence, all with executable proof | Phase 2 certified end-to-end as one system |
+| 7 | **PASS** | 2026-09-29 local dev stack | `qa/tests-live/phase7-mobile.spec.ts` + `qa/playwright.phase7-mobile.config.ts`: **4/4 passed (2.7m)** at 320/375/390/414, 300 recorded checks (75 per viewport), 68 overflow measurements all `overflow=0`, 0 step failures; regression 276/276 pytest, tsc exit 0, vite build OK | Mobile/device experience. Real per-viewport touch measurements and real state changes (Monaco save, terminal run, quality op, preview start/stop, git status, AI send). Found and fixed 6 real defects — see "Phase 7" section. |
 
 ## Phase 2H final certification (2026-09-21/22)
 
@@ -111,6 +112,38 @@ Verified deployed revision: `074dac0` (`074dac05266a689940637d99cf96a8ac905d2c39
 **Live production verification (commit `14de6fc`, confirmed via `GET /version` → `14de6fc07f572a6c309b3e53da42cfbac7cd2423` after a bounded deploy wait; first probes saw the still-serving `074dac0` and were reported as pending, not assumed):** dedicated history probe = **`PASS=14 FAIL=0 TOTAL=14`** — register A/B (200) · project (200) · real run success (`COMPLETED exit=0`) · real run failure (`FAILED exit=7`) · history list newest-first (2 rows, correct order) · failure surfaced on the row (`exit=7`, `reason='Process exited with code 7'`) · real duration timestamps (`started=…T12:36:30.718970` → `completed=…T12:36:31.954420`) · detail drill-in real stdout (`HIST_LIVE_OK`) · detail real stderr (`BOOM`) · **cross-user list 403 FORBIDDEN · cross-user detail 403 FORBIDDEN** · retry from the history flow (child `attempt=1`, `parent_execution_id=orig`) · history reflects attempt tracking (3 rows, child attempt=1, original preserved FAILED with `retry_count=1`). Probe script deleted after evidence collection.
 
 **Files:** `03-backend/app/services/execution_service.py` (list_executions), `03-backend/app/api/v1/executions.py` (GET "" endpoint), `02-frontend/src/api/index.ts` (list/retry + attempt fields), `02-frontend/src/components/workspace/HistoryPanel.tsx` (new), `02-frontend/src/pages/WorkspacePage.tsx` (wired into Git & Tests card), `04-tests/api/test_history_2f.py` (new).
+
+## Phase 7 — Mobile / Device Experience (2026-09-29)
+
+**Harness:** `qa/tests-live/phase7-mobile.spec.ts` with `qa/playwright.phase7-mobile.config.ts`. Four viewports (320/375/390/414), each in a **fresh** mobile browser context (`isMobile`, `hasTouch`, DPR 1) — a resize is not a mobile device, so the flow LOGIN → PROJECTS → REAL PROJECT → ACTIVE WORKSPACE is walked from scratch at every width. A real user/project is seeded once through the real API. Every check is a live DOM measurement (`scrollWidth` vs `clientWidth`, real bounding boxes, `document.elementFromPoint` at the control's centre) or a real state change confirmed by reading the API back.
+
+**Result: `4 passed (2.7m)`** — 300 recorded checks (75 per viewport), 68 overflow measurements all `overflow=0`, 0 step failures. Surfaces per viewport: login, dashboard, projects, workspace, explorer, Monaco, terminal, history, quality, preview, artifacts, git, AI composer, drawer navigation, command palette, session console + every HTTP ≥400.
+
+### Real defects found and fixed (all reproduced before the fix, re-measured after)
+
+| # | Defect | Evidence | Fix |
+|---|---|---|---|
+| 1 | **Ctrl+S and auto-save could never save.** `saveCurrent` guarded on `dirtyPaths` state captured in the closure `editor.addAction` registered once at mount (always an empty set), and in the 1200 ms auto-save timer. A single-change edit (paste, IME commit) never persisted; multi-key typing worked only by accident of a later render. | Type into the model, press Ctrl+S, `GET /files/src/app.py` unchanged after 30 s | `CodeViewer.tsx`: `dirtyPathsRef` / `savingRef` as the guard source of truth. Re-verified: `real GET files/src/app.py contains p7_mobile_320_…` at all four viewports |
+| 2 | **Command palette unreachable without a keyboard.** Ctrl+K was the only entry point, so on a touch device no command in the app could be run. | No tappable control at any of the four viewports | `TopBar.tsx` + `AppShell.tsx`: 44×44 `Open command palette` trigger beside the menu button, shown only at ≤820px (mirrors the existing mobile-only `.app-menu-toggle`); desktop keeps Ctrl+K. Now `44x44px` and the palette opens by tap (10 commands listed) |
+| 3 | **AI composer input was 144×29px at 320** (218×29 at 390) — under the tap floor *and* a usable measure. Cause: `.ai-composer .input { min-height: 28px }` (specificity 0,2,0) beat the mobile `.input` rule, and two icon buttons left it 144px of a 238px row. | Live measurement at 320: `minHeight: 28px`, 144×29 | `components.css` ≤820px: composer wraps, input takes its own full-width line (`flex: 1 1 100%; min-height: 44px`), buttons right-aligned beneath. Now **236×44** |
+| 4 | **Touch targets below the 40px floor:** Sign In 246×31, `.tree-row`, `.ai-mode-tabs button` 125×22, `.app-menu-toggle` 34×34, palette search 197×24, preview start 78×31. | Per-viewport bounding boxes printed by the harness | `components.css` ≤820px block: 40px floor for buttons/rows/tabs, 44px for inputs, nav items and icon actions. Sign In now 352×40; preview start 78×40 |
+| 5 | **History rows were ambiguous** — only `command` was rendered, so two `echo` runs were indistinguishable. | Two `echo` rows, neither showing its argument | `HistoryPanel.tsx` renders the arguments inline (with a full `title`) |
+
+### Harness bugs found in the QA suite itself (fixed, so the report stays honest)
+
+- **Monaco 0.56 uses the native EditContext API** — the editable surface is `div.native-edit-context[role=textbox]`, not `.view-lines`/`.inputarea`. Tapping `.view-lines` focuses a plain container and silently drops every keystroke. Now the editor surface is tapped and `hasTextFocus` asserted before typing; `keyboard.type()` is not converted into `textupdate` events in this build, so text is inserted with `insertText` and the test asserts the *model* changed before saving.
+- **Measurement race:** `boundingBox()` and `elementFromPoint()` were two round trips, so a panel's polling re-render invalidated the box between them and produced bogus "pointer interception" verdicts. Both now run in one JS tick, with a re-centre retry for controls that start off-screen.
+- **False positive from `getByText`:** the terminal's *command echo* satisfied the stdout assertion. Stdout is now asserted from the API (`status=COMPLETED` + captured stdout) and from the expanded history row's `<pre>`.
+- **The default-deny policy is correct, not a bug:** an invented `echo P7_MOBILE_320_OK` is refused with 403 `BLOCKED_COMMAND` because `terminal_policy.json` allows only exact literals. The suite now runs the policy-safe `echo DEVOS_PHASE2_TEST` and *asserts* the denial path (BLOCKED, and no success entry added).
+- **The git branch picker only renders when a project has more than one branch** (a fresh project has one and no commits). The card is now checked against the branch the API reports instead of demanding a control that correctly does not exist.
+- **Preview needs real project config:** with a `package.json` that has no `dev`/`start` script, `PreviewService` refuses the project (422 `PREVIEW_NOT_SUPPORTED`) — the 422 seen in an earlier run was the fixture's fault, not a defect. The fixture now ships a `dev` script plus a `server.mjs` that honours the injected `-- --port N`, so the preview genuinely reaches READY (verified `engine READY on port 5180`, then a real stop to a terminal state).
+- **Drawer measurement raced its slide-in transition** (read `x=-248` mid-animation); the suite waits for the settled position. **Ctrl+K** raced React's listener attach; the suite waits for the shell to mount first.
+
+### Regression (same session, real exit codes)
+
+Full pytest **276 passed** (361s, from the repo root — `python -m pytest -q tests`) · `npx tsc --noEmit` exit 0 · `npm run build` exit 0 (`✓ built in 1.58s`).
+
+**Open / carried forward:** `.top-bar-actions` (GitHub, Deploy, Settings) is `display: none` at ≤820px, so those top-bar links are still unreachable on a phone — outside Phase 7's required surface list, left as a known mobile gap. The Phase 6 decisions (H2 crypto, H3 duplicate rows, H4 terminal commit, STEP F flakiness) remain open.
 
 ## Residual caveats carried forward
 

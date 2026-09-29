@@ -122,6 +122,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ projectId }) => {
         {records.map((record) => {
           const expanded = expandedId === record.execution_id;
           const shown = expanded && detail ? detail : record;
+          const args = record.arguments || [];
           return (
             <li key={record.execution_id} style={{ border: '1px solid var(--color-border)', borderRadius: 6, padding: 8 }}>
               <div
@@ -141,8 +142,12 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ projectId }) => {
                 <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)' }}>
                   {record.execution_type}
                 </span>
-                <code style={{ fontSize: 11, flex: 1, minWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <code
+                  style={{ fontSize: 11, flex: 1, minWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  title={`${record.command} ${args.join(' ')}`.trim()}
+                >
                   {record.command}
+                  {args.length ? ` ${args.join(' ')}` : ''}
                 </code>
                 <span style={{ fontSize: 11, fontWeight: 700, color: statusColor(record.status) }}>
                   {record.status}
