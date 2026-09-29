@@ -98,7 +98,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void; collapsed?: boolean; o
           <Bot size={16} />
           {!collapsed && <span>AI</span>}
         </NavLink>
-        <NavLink to="/app/projects?github=1" className="sidebar-item" onClick={onNavigate} title={collapsed ? 'GitHub' : undefined}>
+        <NavLink to="/app/settings" className="sidebar-item" onClick={onNavigate} title={collapsed ? 'GitHub' : undefined}>
           <Github size={16} />
           {!collapsed && <span>GitHub</span>}
         </NavLink>

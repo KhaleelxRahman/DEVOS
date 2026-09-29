@@ -24,7 +24,7 @@ const commands: PaletteCommand[] = [
   { label: 'AI command center', hint: 'AI', icon: Sparkles, path: '/app/workspace#ai-command-center' },
   { label: 'Open conversations', hint: 'AI', icon: MessageSquare, path: '/app/workspace#ai-command-center' },
   { label: 'Open planner', hint: 'AI', icon: ListTodo, path: '/app/workspace#ai-command-center' },
-  { label: 'Open GitHub', hint: 'GitHub', icon: Github, path: '/app/projects?github=1' },
+  { label: 'Open GitHub', hint: 'GitHub', icon: Github, path: '/app/settings' },
   { label: 'Open deployment', hint: 'Coming soon', icon: Rocket, path: '/app/projects?deploy=1', disabled: true },
   { label: 'Open settings', hint: 'Settings', icon: Settings, path: '/app/settings' },
 ];

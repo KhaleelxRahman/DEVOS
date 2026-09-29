@@ -124,7 +124,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       <div className="top-bar-actions">
-        <Link className="top-bar-icon-action" to="/app/projects?github=1" aria-label="GitHub" title="GitHub">
+        <Link className="top-bar-icon-action" to="/app/settings" aria-label="GitHub" title="GitHub">
           <Github size={15} />
         </Link>
         <span
