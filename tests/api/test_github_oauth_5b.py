@@ -32,6 +32,23 @@ async def client():
         await conn.run_sync(Base.metadata.drop_all)
 
 
+@pytest.fixture(autouse=True)
+def _encryption_key(monkeypatch):
+    """Tokens are stored encrypted, so saving a connection needs a Fernet key.
+
+    Injected per test rather than set in the environment, so the suite never
+    depends on a real TOKEN_ENCRYPTION_KEY being configured.
+    """
+    from cryptography.fernet import Fernet
+
+    from app.core.config import settings
+
+    monkeypatch.setattr(
+        settings, "TOKEN_ENCRYPTION_KEY", Fernet.generate_key().decode(),
+        raising=False,
+    )
+
+
 async def _register(client):
     res = await client.post("/api/v1/auth/register", json={
         "name": "P5bOAuth", "email": "p5b-oauth-cb@example.com",

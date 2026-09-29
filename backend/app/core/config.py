@@ -95,6 +95,15 @@ class Settings(BaseSettings):
     GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/github/callback"
     GITHUB_TOKEN: str = ""
 
+    # --- Secret encryption at rest ---
+    # Fernet key used to encrypt github_connections.access_token. Never
+    # hardcoded and never derived from another secret: a dedicated key means
+    # rotating it does not invalidate JWT sessions. Generate with:
+    #   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    # When empty, encryption is unavailable and callers get a clear
+    # TOKEN_ENCRYPTION_UNAVAILABLE error rather than silently storing plaintext.
+    TOKEN_ENCRYPTION_KEY: str = ""
+
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def _parse_cors_origins(cls, v: Any) -> Any:

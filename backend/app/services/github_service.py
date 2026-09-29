@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.crypto import decrypt_token, encrypt_token
 from app.core.errors import AppException
 from app.models.github_connection import GitHubConnection
 
@@ -93,7 +94,8 @@ class GitHubService:
             db.add(connection)
         connection.github_user_id = str(github_user.get("id", ""))
         connection.github_username = github_user.get("login", "")
-        connection.access_token = token
+        # Stored encrypted: the column is ciphertext, never the live token.
+        connection.access_token = encrypt_token(token)
         await db.flush()
         await db.refresh(connection)
         return connection
@@ -116,9 +118,14 @@ class GitHubService:
     @staticmethod
     def resolve_token(connection: GitHubConnection | None) -> str | None:
         """Return a usable token: the user's stored OAuth token, else the
-        server-configured GITHUB_TOKEN. Tokens never leave the server."""
+        server-configured GITHUB_TOKEN. Tokens never leave the server.
+
+        The stored value is ciphertext; it is decrypted here, on the one path
+        that needs a live credential, so no other code path ever handles the
+        plaintext.
+        """
         if connection and connection.access_token:
-            return connection.access_token
+            return decrypt_token(connection.access_token)
         if settings.GITHUB_TOKEN:
             return settings.GITHUB_TOKEN
         return None
