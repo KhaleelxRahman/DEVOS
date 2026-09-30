@@ -158,6 +158,25 @@ Every item previously listed as open was re-investigated against the code before
 
 **Release gate (all real exit codes, this pass):** `python -m pytest -q tests` → **276 passed in 552.27s** · `npx tsc --noEmit` → exit 0 · `npm run build` → exit 0 (`✓ built in 1.81s`) · Playwright `4 passed (3.4m)` at 320/375/390/414, fresh `isMobile`+`hasTouch` context each, log `c:\Users\DELL\p7_final_mobile.log`. An earlier pytest invocation that died mid-run was discarded, not counted. Only `qa/tests-live/phase7-mobile.spec.ts` (added drawer-reachability coverage) and this file changed; no product source was modified in this pass.
 
+## Phase 8 readiness (2026-09-29 — plan only, nothing implemented)
+
+Per the roadmap-aligned table, **Phase 8 = Premium UI/UX** (Phase 9 = Autonomous Development Agent, Phase 10 = Final Release & Certification). Note the original `05_DEVELOPMENT_PLAN.md` numbers phases differently (its "Phase 8" is Git/GitHub, which already shipped as Phase 5 here); the `phase-status.md` table is the working numbering and governs.
+
+**Specification already in the repository (read in full this pass):**
+- `01-docs/getting-started/04_UI_UX.md` — 1398 lines, the authoritative UI/UX spec: purpose and core principle (the PROJECT is the centre), design personality, colour tokens, typography, spacing (4px base), radius, shadows, iconography, shell/top-bar/sidebar, dashboard, projects, workspace, file explorer and search, code viewer, AI panel, terminal, git panel, diff, activity, buttons, inputs, validation, modals, toasts, loading/skeleton/empty/error states, **responsive behaviour**, panel resizing, keyboard UX, command palette, **accessibility**, focus states, motion, data responsiveness, design system, UI security UX, UI testing, browser compatibility, and the UI Definition of Done.
+- `01-docs/branding/` — `BRANDING_GUIDE.md`, `brand-guidelines.md`, `color-palette.md`, `typography.md`, `icon-specification.md`, `favicon-spec.md`, `social-banner-spec.md`.
+
+**Prerequisites — satisfied:** Phase 7 is verified (4 viewports green, 276 pytest, tsc 0, build 0). Phase 8 must start from this baseline and must not regress it.
+
+**Dependencies on Phase 7 that Phase 8 inherits:**
+- `qa/tests-live/phase7-mobile.spec.ts` is the regression harness for the responsive half of this spec (04_UI_UX §RESPONSIVE DESIGN/§RESPONSIVE BEHAVIOR, and §ACCESSIBILITY focus/label rules). The ≤820px touch floor in `components.css` is now a contract to preserve, not a setting to relax.
+- The token names in §COLOR SYSTEM match the existing `--color-*` custom properties, and the §DESIGN SYSTEM layout (`tokens/globals/components/layouts`) partly exists as `styles/` — the work is consolidation, not invention.
+- The Phase 7 harness rules carry forward: measure real DOM, prove real state via the API, never assert on text that can be produced by an echo, no sleeps.
+
+**Proposed gate for Phase 8 (to be agreed before implementation):** the 13-item UI Definition of Done at `04_UI_UX.md` L1313–1328 (consistent design system · predictable navigation · active project always clear · workspace panels work together · loading/error/empty states exist · buttons have real behaviour · forms validate · keyboard interaction works · desktop workspace polished · responsive behaviour acceptable · accessibility fundamentals · no major visual inconsistencies), each proven with a real check, plus full pytest, tsc, vite build, and the 4-viewport mobile suite re-run unchanged.
+
+**Status: NOT STARTED.** No Phase 8 code, tokens, or design changes were made. Implementation begins only on explicit instruction.
+
 ## Residual caveats carried forward
 
 - **Phase 2B cancellation**: backend `/cancel` exists and is locally tested; production UI did not expose Stop/Cancel at the time of the prior closure. **Updated in Phase 2E (2026-09-15):** backend cancellation is now *production-verified* — live `POST .../cancel` on a genuinely RUNNING execution returned HTTP 200 with `status=CANCELLED`, `cancelled=True`, a real `process_id`, a real `completed_at`, and the state persisted on re-read; the deployed terminal UI *still* has no Stop/Cancel control, so the UX gap remains open. Treat as an open UX gap, not a security defect or a backend defect.
