@@ -11,8 +11,8 @@
   --color-surface-active: #1d3158;
   --color-glass: rgba(13, 21, 40, 0.72);
   --color-glass-strong: rgba(17, 29, 53, 0.88);
-  --color-aurora-blue: rgba(37, 99, 235, 0.18);
-  --color-aurora-cyan: rgba(14, 165, 233, 0.12);
+  /* Phase 8: --color-aurora-blue / --color-aurora-cyan removed with the
+     animated gradient blobs that were their only consumer. */
   
   /* Borders */
   --color-border: rgba(100, 137, 205, 0.22);

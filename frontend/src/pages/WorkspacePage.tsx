@@ -164,71 +164,66 @@ export const WorkspacePage: React.FC = () => {
         }
       : null;
 
-  const panelStyle: React.CSSProperties = { overflow: 'hidden', display: 'flex', flexDirection: 'column' };
-
+  // Phase 8: layout is driven by the .workspace-grid rules in components.css
+  // (named areas + real row floors) instead of inline grid math. The inline
+  // version resolved its `1fr` rows to 41px on a 1440x900 desktop, which
+  // collapsed the explorer to 198x0 and left Monaco unmounted. Component order,
+  // ids, titles and class names are unchanged so every existing selector and
+  // the Phase 7 mobile suite keep working.
   return (
     <div className="workspace-page">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="workspace-heading">
         <div>
-          <h1 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700 }}>
-            Workspace: {activeProject.name}
-          </h1>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)' }}>
-            Default Branch: {activeProject.default_branch || 'main'}
+          <h1 className="workspace-heading-title">{activeProject.name}</h1>
+          <p className="workspace-heading-meta">
+            <span className="workspace-heading-branch">{activeProject.default_branch || 'main'}</span>
+            <span className="workspace-heading-sep" aria-hidden="true">·</span>
+            Workspace
           </p>
         </div>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(200px, 240px) 1fr minmax(260px, 340px)',
-          gridTemplateRows: '1fr minmax(140px, 18%) minmax(300px, 1fr)',
-          gap: 'var(--space-3)',
-          flex: 1,
-          minHeight: 480,
-        }}
-        className="workspace-grid"
-      >
-        <Card title="Files" subtitle="Project Explorer" style={panelStyle}>
+      <div className="workspace-grid">
+        <Card className="ws-panel ws-files" title="Files" subtitle="Project Explorer">
           <FileExplorer projectId={activeProject.id} onSelectFile={openFile} activeFile={activePath} refreshToken={fileRefreshToken} onPathRenamed={renameOpenPath} onPathDeleted={deleteOpenPath} />
         </Card>
 
-        <Card title="Code Viewer" subtitle="View & edit" style={panelStyle}>
+        <Card className="ws-panel ws-code" title="Code Viewer" subtitle="View & edit">
           <CodeViewer tabs={tabs} activePath={activePath} onActivate={setActivePath} onClose={closeTab} onSave={saveFile} onContentChange={updateOpenFile} />
         </Card>
 
-        <Card id="ai-command-center" title="AI Assistant" subtitle="Context Engine" style={panelStyle}>
+        <Card id="ai-command-center" className="ws-panel ws-ai" title="AI Assistant" subtitle="Context Engine">
           <AIPanel projectId={activeProject.id} activeFile={activeFileForAI} onWorkspaceChanged={() => setFileRefreshToken((value) => value + 1)} />
         </Card>
 
-        <Card title="Terminal" subtitle="Sandboxed · allowlisted commands" style={{ ...panelStyle, gridColumn: 'span 2' }}>
+        <Card className="ws-panel ws-terminal" title="Terminal" subtitle="Sandboxed · allowlisted commands">
           <TerminalPanel projectId={activeProject.id} />
         </Card>
 
-        <Card title="Git & Tests" subtitle="Version control + Testing Center" style={panelStyle}>
+        <Card className="ws-panel ws-ops" title="Git & Tests" subtitle="Version control + Testing Center">
           <GitPanel projectId={activeProject.id} />
-          <div style={{ borderTop: '1px solid var(--color-border)', margin: '8px 0' }} />
+          <div className="ws-divider" />
           <TestingPanel projectId={activeProject.id} />
-          <div style={{ borderTop: '1px solid var(--color-border)', margin: '8px 0' }} />
+          <div className="ws-divider" />
           <QualityPanel projectId={activeProject.id} />
-          <div style={{ borderTop: '1px solid var(--color-border)', margin: '8px 0' }} />
+          <div className="ws-divider" />
           <PreviewPanel projectId={activeProject.id} />
-          <div style={{ borderTop: '1px solid var(--color-border)', margin: '8px 0' }} />
+          <div className="ws-divider" />
           <HistoryPanel projectId={activeProject.id} />
         </Card>
 
-        <Card title="Builder" subtitle="Plan · Generate · Apply" style={{ ...panelStyle, gridColumn: '1 / -1', gridRow: '3', minHeight: 320 }}>
+        <Card className="ws-panel ws-builder" title="Builder" subtitle="Plan · Generate · Apply">
           <BuilderPanel
             projectId={activeProject.id}
             onWorkspaceChanged={() => setFileRefreshToken((value) => value + 1)}
             onOpenFile={openFile}
           />
         </Card>
+
+        <Card className="ws-panel ws-artifacts" title="Artifacts" subtitle="Generated code, markdown, JSON, and previews">
+          <ArtifactPanel projectId={activeProject.id} onOpenInMonaco={openArtifactInMonaco} />
+        </Card>
       </div>
-      <Card title="Artifacts" subtitle="Generated code, markdown, JSON, and previews" style={{ marginTop: 'var(--space-3)', minHeight: 220 }}>
-        <ArtifactPanel projectId={activeProject.id} onOpenInMonaco={openArtifactInMonaco} />
-      </Card>
       <RepositoryDashboard project={activeProject} />
     </div>
   );
