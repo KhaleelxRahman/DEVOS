@@ -334,7 +334,51 @@ async function verifyNavigation(page: Page, w: number) {
   note(w, "NAVIGATION", "drawer open (settled after slide-in)", `sidebar x=${Math.round(box.x)} w=${Math.round(box.width)}`);
   await assertNoOverflow(page, w, "NAVIGATION");
 
+  // The three top-bar actions (GitHub / Deploy / Settings) are display:none at
+  // <=820px so a 320px bar stays uncluttered. They must still be reachable on a
+  // phone, and the drawer is where DEVOS puts them. Prove that here rather than
+  // assume it: a hidden control with no mobile equivalent is a real gap, a
+  // hidden duplicate of a drawer control is not.
+  const drawer = page.locator(".sidebar");
+  const deploy = drawer.locator(".sidebar-item-disabled").first();
+  await expect(deploy, `drawer exposes the Deploy affordance @${w}`).toBeVisible({ timeout: 15_000 });
+  const deployBox = await deploy.boundingBox();
+  if (!deployBox) throw new Error("Deploy row is rendered but has no box");
+  if (Math.round(deployBox.height) < MIN_TOUCH) {
+    throw new Error(`Deploy row ${Math.round(deployBox.width)}x${Math.round(deployBox.height)}px is below the ${MIN_TOUCH}px floor`);
+  }
+  const deployDisabled = await deploy.getAttribute("aria-disabled");
+  expect(deployDisabled, "Deploy stays honestly disabled (coming soon)").toBe("true");
+  note(w, "NAVIGATION", "top-bar actions reachability", `GitHub/Deploy/Settings live in the drawer; Deploy ${Math.round(deployBox.width)}x${Math.round(deployBox.height)}px, aria-disabled=true`);
+
+  // A real tap on the drawer equivalent, landing on the real route.
+  await tapTarget(page, w, "NAVIGATION", "drawer link GitHub", drawer.getByRole("link", { name: "GitHub" }));
+  await expect(page, "drawer GitHub reaches Settings").toHaveURL(/\/app\/settings$/, { timeout: 20_000 });
+  note(w, "NAVIGATION", "top-bar action by tap", "GitHub -> /app/settings (hidden top-bar control is not the only path)");
+
+  // And the Settings entry itself, tapped from a freshly opened drawer.
+  await page.getByRole("button", { name: "Open navigation" }).tap({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: "Close navigation" }).first()).toBeVisible({ timeout: 15_000 });
+  await expect
+    .poll(
+      async () => Math.round((await page.locator(".sidebar").boundingBox())?.x ?? -999),
+      { timeout: 10_000, message: "sidebar never reached an on-screen x" },
+    )
+    .toBeGreaterThanOrEqual(0);
+  await tapTarget(page, w, "NAVIGATION", "drawer link Settings", drawer.getByRole("link", { name: "Settings" }));
+  await expect(page, "drawer Settings reaches Settings").toHaveURL(/\/app\/settings$/, { timeout: 20_000 });
+  await assertNoOverflow(page, w, "NAVIGATION");
+
   // Real navigation from inside the drawer.
+  await page.goto(`${BASE}/app/dashboard`, { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Open navigation" }).tap({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: "Close navigation" }).first()).toBeVisible({ timeout: 15_000 });
+  await expect
+    .poll(
+      async () => Math.round((await page.locator(".sidebar").boundingBox())?.x ?? -999),
+      { timeout: 10_000, message: "sidebar never reached an on-screen x" },
+    )
+    .toBeGreaterThanOrEqual(0);
   await tapTarget(page, w, "NAVIGATION", "drawer link Projects", page.getByRole("link", { name: "Projects" }).first());
   await expect(page).toHaveURL(/\/app\/projects$/, { timeout: 20_000 });
   note(w, "NAVIGATION", "drawer link navigated", "/app/projects");
