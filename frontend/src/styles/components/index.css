@@ -525,7 +525,44 @@ textarea.input {
 @media (max-width: 640px) { .builder-actions .btn { flex: 1 1 auto; justify-content: center; } .builder-log { max-height: 140px; } .builder-diff { max-height: 160px; } }
 
 /* ==========================================================================
-   Phase 7 — touch targets on constrained screens.
+   /* ==========================================================================
+   Phase 9 — agent panel.
+
+   State colour follows the real run state, and the state NAME is always
+   printed beside it, so status never depends on colour alone.
+   ========================================================================== */
+.agent-panel { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-3); overflow-y: auto; }
+.agent-task-label { display: block; margin-bottom: var(--space-1); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.agent-task { min-height: 72px; resize: vertical; }
+.agent-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.agent-status { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.agent-state { padding: 2px 8px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); font-family: var(--font-mono, ui-monospace, monospace); font-size: var(--font-size-xs); font-weight: 700; letter-spacing: 0.04em; }
+.agent-state--completed { color: var(--color-success); border-color: var(--color-success); }
+.agent-state--failed { color: var(--color-error); border-color: var(--color-error); }
+.agent-state--cancelled { color: var(--color-text-muted); }
+.agent-state--planning,
+.agent-state--editing,
+.agent-state--building,
+.agent-state--testing,
+.agent-state--diagnosing,
+.agent-state--fixing,
+.agent-state--verifying { color: var(--color-accent); border-color: var(--color-accent); }
+.agent-task-echo { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.agent-meters { display: flex; gap: var(--space-4); margin: 0; }
+.agent-meters dt { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.agent-meters dd { margin: 0; font-family: var(--font-mono, ui-monospace, monospace); font-size: var(--font-size-xs); color: var(--color-text-primary); }
+.agent-reason { padding: var(--space-2); border-left: 2px solid var(--color-error); background: var(--color-surface-elevated); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.agent-error { padding: var(--space-2); border-left: 2px solid var(--color-error); font-size: var(--font-size-xs); color: var(--color-error); }
+.agent-steps { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.agent-step { display: flex; gap: var(--space-2); align-items: baseline; font-size: var(--font-size-xs); }
+.agent-step-state { min-width: 84px; font-family: var(--font-mono, ui-monospace, monospace); color: var(--color-accent); }
+.agent-step-detail { color: var(--color-text-secondary); }
+.agent-approval { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--color-warning); border-radius: var(--radius-md); }
+.agent-approval-note { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-xs); color: var(--color-warning); }
+.agent-proposals { margin: 0; padding-left: var(--space-4); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.agent-policy { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+
+/* Phase 7 — touch targets on constrained screens.
 
    Measured on a real 320px context: the Sign In button was 246x31px, and
    .tree-row (padding 3px 8px) / .sidebar-item (padding 8px 12px) sit below

@@ -397,12 +397,13 @@
 .workspace-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
-  grid-template-rows: minmax(360px, 1.25fr) minmax(300px, 1fr) minmax(260px, auto);
+  grid-template-rows: minmax(360px, 1.25fr) minmax(300px, 1fr) minmax(260px, auto) minmax(300px, auto);
   grid-template-areas:
     "code     files"
     "ai       terminal"
     "builder  ops"
-    "builder  artifacts";
+    "builder  artifacts"
+    "agent    artifacts";
   gap: var(--space-4);
   align-content: start;
   flex: 0 0 auto;
@@ -416,6 +417,8 @@
 .ws-terminal { grid-area: terminal; }
 .ws-ops { grid-area: ops; }
 .ws-artifacts { grid-area: artifacts; }
+/* Phase 9: the agent loop, in the centre column under the builder. */
+.ws-agent { grid-area: agent; }
 
 /* One panel treatment for every workspace surface: a real surface, a single
    hairline border, and depth from surface contrast rather than shadow. */

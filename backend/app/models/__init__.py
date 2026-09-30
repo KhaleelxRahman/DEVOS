@@ -1,4 +1,5 @@
 from app.models.activity import Activity
+from app.models.agent_run import AgentRun
 from app.models.artifact import Artifact
 from app.models.conversation import Conversation
 from app.models.execution import Execution
@@ -12,6 +13,7 @@ from app.models.waitlist import ContactMessage, WaitlistEntry
 
 __all__ = [
     "Activity",
+    "AgentRun",
     "Artifact",
     "ContactMessage",
     "Conversation",

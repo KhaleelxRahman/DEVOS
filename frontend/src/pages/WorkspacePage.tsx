@@ -18,6 +18,7 @@ import { useToast } from '../components/common/Toast';
 import { useSeo } from '../hooks/useSeo';
 import { RepositoryDashboard } from '../components/workspace/RepositoryDashboard';
 import { ArtifactPanel } from '../components/workspace/ArtifactPanel';
+import { AgentPanel } from '../components/workspace/AgentPanel';
 
 export const WorkspacePage: React.FC = () => {
   useSeo({ title: 'Workspace', noindex: true });
@@ -222,6 +223,10 @@ export const WorkspacePage: React.FC = () => {
 
         <Card className="ws-panel ws-artifacts" title="Artifacts" subtitle="Generated code, markdown, JSON, and previews">
           <ArtifactPanel projectId={activeProject.id} onOpenInMonaco={openArtifactInMonaco} />
+        </Card>
+
+        <Card className="ws-panel ws-agent" title="Agent" subtitle="Bounded autonomous loop">
+          <AgentPanel projectId={activeProject.id} />
         </Card>
       </div>
       <RepositoryDashboard project={activeProject} />

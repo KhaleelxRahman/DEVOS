@@ -192,6 +192,55 @@ export interface QualityOperation {
   reason: string | null;
 }
 
+export interface AgentStep {
+  state: string;
+  detail: string;
+  evidence: Record<string, unknown>;
+  at: number;
+}
+
+export interface AgentRun {
+  id: string;
+  project_id: string;
+  task: string;
+  state: string;
+  terminal_reason: string | null;
+  iteration: number;
+  repair_attempts: number;
+  tokens_used: number;
+  max_iterations: number;
+  max_repair_attempts: number;
+  max_runtime_seconds: number;
+  max_tokens: number;
+  cancel_requested: boolean;
+  steps: AgentStep[];
+  commit_proposals: { path: string; summary: string }[];
+  approval_state: string;
+  summary: string | null;
+  /** Actions the loop will never take on its own. */
+  never_automatic: string[];
+}
+
+/** Phase 9: the bounded autonomous loop. Every call here maps 1:1 to a real
+ *  server capability — the panel never invents a state it did not read back. */
+export const agentApi = {
+  create: (payload: {
+    project_id: string;
+    task: string;
+    max_iterations?: number;
+    max_repair_attempts?: number;
+    max_runtime_seconds?: number;
+    max_tokens?: number;
+    start?: boolean;
+  }) => apiClient.post<AgentRun>('/agent/runs', payload),
+  get: (runId: string) => apiClient.get<AgentRun>(`/agent/runs/${runId}`),
+  cancel: (runId: string) => apiClient.post<{ cancel_requested: boolean }>(`/agent/runs/${runId}/cancel`),
+  approve: (runId: string, message: string) =>
+    apiClient.post<{ commit_sha: string; paths: string[] }>(`/agent/runs/${runId}/commits/approve`, { message }),
+  reject: (runId: string) => apiClient.post<{ approval_state: string }>(`/agent/runs/${runId}/commits/reject`),
+  retry: (runId: string) => apiClient.post<AgentRun>(`/agent/runs/${runId}/retry`),
+};
+
 export const qualityApi = {
   listOperations: (projectId: string) =>
     apiClient.get<{ project_id: string; operations: QualityOperation[] }>(
