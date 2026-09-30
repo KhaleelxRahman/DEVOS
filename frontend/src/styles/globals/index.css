@@ -1,4 +1,7 @@
-@import './tokens.css';
+/* Phase 8: the `@import './tokens.css'` that stood here is gone. main.tsx
+   loads styles/tokens/index.css before this file, so the custom properties
+   are already defined and the relative import only broke once the design
+   system moved into §DESIGN SYSTEM directories. */
 
 /* ==========================================================================
    Global Reset & Base Typography

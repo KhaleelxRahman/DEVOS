@@ -102,11 +102,13 @@ export const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, marginBottom: 'var(--space-2)' }}>Settings</h1>
-      <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-6)' }}>
-        Manage account and workspace preferences.
-      </p>
+    <div className="page-shell" style={{ maxWidth: 600 }}>
+      <div className="page-heading">
+        <div>
+          <h1 className="page-heading-title">Settings</h1>
+          <p className="page-heading-sub">Manage account and workspace preferences.</p>
+        </div>
+      </div>
 
       <Card title="Account Profile" subtitle="Your DEVOS v1.0.0 developer identity" style={{ marginBottom: 'var(--space-4)' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', fontSize: 'var(--font-size-sm)' }}>

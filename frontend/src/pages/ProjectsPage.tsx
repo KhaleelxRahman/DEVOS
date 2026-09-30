@@ -81,12 +81,16 @@ export const ProjectsPage: React.FC = () => {
   };
   if (isDeployView) {
     return (
-      <div>
-        <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700 }}>Deploy</h1>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-          Deployments aren't available yet. This feature is still in development and is not
-          connected to any hosting provider.
-        </p>
+      <div className="page-shell">
+        <div className="page-heading">
+          <div>
+            <h1 className="page-heading-title">Deploy</h1>
+            <p className="page-heading-sub">
+              Deployments aren't available yet. This feature is still in development and is not
+              connected to any hosting provider.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -94,11 +98,11 @@ export const ProjectsPage: React.FC = () => {
 
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
+    <div className="page-shell">
+      <div className="page-heading">
         <div>
-          <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700 }}>Projects</h1>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
+          <h1 className="page-heading-title">Projects</h1>
+          <p className="page-heading-sub">
             Manage and organize your development workspaces.
           </p>
         </div>

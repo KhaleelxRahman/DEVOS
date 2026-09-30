@@ -205,8 +205,13 @@ textarea.input {
 .card-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
 .card-title { font-size: var(--font-size-base); font-weight: 650; color: var(--color-text-primary); }
 .card-subtitle { margin-top: 2px; font-size: var(--font-size-xs); color: var(--color-text-muted); }
-.page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-5); margin-bottom: var(--space-8); }
-.page-heading h1 { font-size: clamp(1.7rem, 3vw, 2.35rem); letter-spacing: -0.04em; }
+/* Phase 8: the duplicate `.page-heading` / `.page-heading h1` rules that lived
+   here are removed. They were dead until ProjectsPage/SettingsPage adopted the
+   page shell, and `.page-heading h1` (0,1,1) out-specified the new
+   `.page-heading-title` (0,1,0), so they silently forced a
+   clamp(1.7rem, 3vw, 2.35rem) title — 37.6px at 1440px. layouts/index.css now
+   owns the single restrained definition (--font-size-lg, 600 weight), per
+   04_UI_UX.md §TYPOGRAPHY "avoid huge headings". */
 .eyebrow { margin-bottom: var(--space-2); color: var(--color-accent); font-size: var(--font-size-xs); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .dashboard-page { max-width: 1240px; margin: 0 auto; }
 .dashboard-grid { display: grid; gap: var(--space-4); margin-bottom: var(--space-4); }
