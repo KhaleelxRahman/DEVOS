@@ -3,8 +3,18 @@ import { Bot, Play, Square, Check, X, RotateCcw, ShieldAlert } from 'lucide-reac
 import { agentApi, type AgentRun } from '../../api';
 import { Button } from '../common/Button';
 
-const ACTIVE = new Set(['PLANNING', 'EDITING', 'BUILDING', 'TESTING', 'DIAGNOSING', 'FIXING', 'VERIFYING']);
+const ACTIVE = new Set([
+  'PLANNING', 'EDITING', 'BUILDING', 'TESTING',
+  'DIAGNOSING', 'FIXING', 'RETESTING', 'VERIFYING',
+  'REVIEW', 'WAITING_FOR_APPROVAL',
+]);
 const TERMINAL = new Set(['COMPLETED', 'FAILED', 'CANCELLED']);
+
+/** Token figures are only meaningful with their provenance attached, so the
+ *  source is always rendered next to the number. */
+const usageLabel = (source: string): string =>
+  source === 'provider_reported' ? 'Provider reported' :
+  source === 'estimated' ? 'Estimated' : 'No usage reported';
 
 /** Phase 9 agent control surface.
  *
@@ -100,10 +110,63 @@ export const AgentPanel: React.FC<{ projectId: string }> = ({ projectId }) => {
           </div>
 
           <dl className="agent-meters">
-            <div><dt>iteration</dt><dd>{run.iteration}/{run.max_iterations}</dd></div>
-            <div><dt>repairs</dt><dd>{run.repair_attempts}/{run.max_repair_attempts}</dd></div>
-            <div><dt>tokens</dt><dd>{run.tokens_used}/{run.max_tokens}</dd></div>
+            <div>
+              <dt>iteration</dt>
+              <dd>{run.iteration}/{run.max_iterations}</dd>
+            </div>
+            <div>
+              <dt>repairs</dt>
+              <dd>{run.repair_attempts}/{run.max_repair_attempts}</dd>
+            </div>
+            <div>
+              <dt>AI calls</dt>
+              <dd>{run.ai_calls}/{run.max_ai_calls}</dd>
+            </div>
+            <div>
+              <dt title={usageLabel(run.tokens.usage_source)}>tokens ({usageLabel(run.tokens.usage_source)})</dt>
+              <dd className={run.tokens.is_provider_reported ? 'agent-tokens--real' : 'agent-tokens--estimated'}>
+                {run.tokens.charged}/{run.tokens.max}
+              </dd>
+            </div>
           </dl>
+
+          {run.tokens.is_provider_reported ? (
+            <p className="agent-usage" data-testid="agent-usage-real">
+              Provider reported {run.tokens.provider_input} in / {run.tokens.provider_output} out.
+            </p>
+          ) : run.tokens.usage_source === 'estimated' ? (
+            <p className="agent-usage" data-testid="agent-usage-estimated">
+              Estimated usage only — no provider token counts were returned.
+            </p>
+          ) : null}
+
+          {run.repeated_failure_count > 1 && (
+            <p className="agent-reason" data-testid="agent-repeat">
+              Same failure {run.repeated_failure_count} times in a row (limit {run.max_repeated_failures}).
+            </p>
+          )}
+
+          {run.diagnosis && (
+            <details className="agent-detail" data-testid="agent-diagnosis">
+              <summary>Diagnosis</summary>
+              <pre>{JSON.stringify(run.diagnosis, null, 2)}</pre>
+            </details>
+          )}
+
+          {run.files_changed.length > 0 && (
+            <div className="agent-changes" data-testid="agent-changes">
+              <span className="agent-task-label">Files changed ({run.files_changed.length})</span>
+              <ul>
+                {run.files_changed.map((c) => (
+                  <li key={c.path}>
+                    <code>{c.operation}</code> <code>{c.path}</code>
+                    {c.result && <span className="agent-change-result"> — {c.result}</span>}
+                    {c.secrets_redacted && <span className="agent-change-warn"> — secrets redacted</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {run.terminal_reason && <p className="agent-reason">{run.terminal_reason}</p>}
 

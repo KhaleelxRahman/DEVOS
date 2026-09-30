@@ -32,7 +32,10 @@ AGENT_STATES: tuple[str, ...] = (
     "TESTING",
     "DIAGNOSING",
     "FIXING",
+    "RETESTING",
     "VERIFYING",
+    "REVIEW",
+    "WAITING_FOR_APPROVAL",
     "COMPLETED",
     "FAILED",
     "CANCELLED",
@@ -77,7 +80,6 @@ class AgentRun(Base, TimestampMixin):
     # Safety-limit counters, checked at every step boundary.
     iteration: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     repair_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    tokens_used: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     max_iterations: Mapped[int] = mapped_column(Integer, nullable=False, default=3)
     max_repair_attempts: Mapped[int] = mapped_column(
         Integer, nullable=False, default=3
@@ -87,7 +89,32 @@ class AgentRun(Base, TimestampMixin):
     )
     # Locked decision (Phase 9, Decision 5 C): a hard token ceiling. Hitting it
     # halts the run as FAILED/PARTIAL; it is never silently absorbed.
+    #
+    # Phase 9 hardening: estimated and provider-reported usage are stored
+    # SEPARATELY. `token_usage_source` says which one the UI is showing, so an
+    # estimate is never displayed or reported as provider usage.
     max_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=100_000)
+    estimated_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    provider_input_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    provider_output_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    provider_total_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    token_usage_source: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="none"
+    )
+
+    # AI calls are bounded too: an agent that can call a model without limit is
+    # an agent that can spend without limit.
+    ai_calls: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    max_ai_calls: Mapped[int] = mapped_column(Integer, nullable=False, default=20)
+
+    # Loop prevention: consecutive identical failures before the run gives up.
+    repeated_failure_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0
+    )
+    max_repeated_failures: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=2
+    )
+    last_failure_signature: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Real cancellation: the UI sets this, the orchestrator reads it at every
     # step boundary and stops. It is not a cosmetic UI state.
@@ -98,6 +125,14 @@ class AgentRun(Base, TimestampMixin):
     # Append-only evidence for every transition: state, what really happened,
     # and the concrete proof (exit code, diff, diagnosis id, ...).
     steps: Mapped[Any | None] = mapped_column(JSON, nullable=True)
+
+    # The validated structured plan, the real changes that were written, and
+    # the real diagnosis that drove any repair. All three are model- or
+    # service-derived and are stored so the UI shows what happened, not a
+    # reconstruction of it.
+    plan: Mapped[Any | None] = mapped_column(JSON, nullable=True)
+    files_changed: Mapped[Any | None] = mapped_column(JSON, nullable=True)
+    diagnosis: Mapped[Any | None] = mapped_column(JSON, nullable=True)
 
     # Commits the run WANTS to make. Nothing here is in git until the user
     # approves the batch (Phase 9 Decision 4 B).

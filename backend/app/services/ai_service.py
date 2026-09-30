@@ -7,13 +7,22 @@ presented as coming from a real provider.
 """
 
 from abc import ABC, abstractmethod
+import asyncio
 from collections.abc import AsyncIterator
+import json
+import re
 from typing import Any
 
 import httpx
 
 from app.core.config import settings
-from app.schemas.ai import AIMessageResponse
+from app.schemas.ai import AIMessageResponse, AIUsage
+
+# Phase 9: structured output is requested in the prompt and then parsed
+# defensively. Models wrap JSON in prose or ``` fences constantly, so the
+# extraction has to be forgiving while the *validation* stays strict.
+_FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL)
+_JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
 
 
 class BaseAIProvider(ABC):
@@ -44,6 +53,32 @@ class BaseAIProvider(ABC):
         response = await self.generate_response(prompt, context, history)
         for index in range(0, len(response.content), 64):
             yield response.content[index : index + 64]
+
+    async def generate_structured(
+        self,
+        prompt: str,
+        context: dict[str, Any],
+        history: list[dict[str, str]],
+    ) -> AIMessageResponse:
+        """Structured-output variant, added in Phase 9.
+
+        The default implementation simply asks for JSON in the prompt and
+        returns the raw text, so every existing provider inherits a working
+        structured path without being modified. A provider that supports a
+        native JSON/schema mode can override this to use it.
+
+        Kept as a concrete method (not abstract) on purpose: adding an abstract
+        method would break every out-of-tree provider.
+        """
+        return await self.generate_response(prompt, context, history)
+
+    @staticmethod
+    def estimate_tokens(text: str) -> int:
+        """Local fallback estimate, roughly 4 characters per token.
+
+        This is explicitly an ESTIMATE and is never reported as provider usage.
+        """
+        return max(1, len(text or "") // 4)
 
 
 def _render_context(context: dict[str, Any]) -> str:
@@ -163,8 +198,18 @@ class GeminiProvider(BaseAIProvider):
             .get("parts", [{}])[0]
             .get("text", "")
         )
+        meta = data.get("usageMetadata") or {}
         return AIMessageResponse(
-            role="assistant", content=text or "(empty response)", provider=self.name
+            role="assistant", content=text or "(empty response)", provider=self.name,
+            model=self.model,
+            usage=AIUsage(
+                source="provider_reported",
+                input_tokens=meta.get("promptTokenCount"),
+                output_tokens=meta.get("candidatesTokenCount"),
+                total_tokens=meta.get("totalTokenCount"),
+            )
+            if meta.get("totalTokenCount")
+            else None,
         )
 
 
@@ -200,8 +245,18 @@ class OpenAIProvider(BaseAIProvider):
             resp.raise_for_status()
             data = resp.json()
         text = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+        meta = data.get("usage") or {}
         return AIMessageResponse(
-            role="assistant", content=text or "(empty response)", provider=self.name
+            role="assistant", content=text or "(empty response)", provider=self.name,
+            model=self.model,
+            usage=AIUsage(
+                source="provider_reported",
+                input_tokens=meta.get("prompt_tokens"),
+                output_tokens=meta.get("completion_tokens"),
+                total_tokens=meta.get("total_tokens"),
+            )
+            if meta.get("total_tokens")
+            else None,
         )
 
 
@@ -255,6 +310,89 @@ class AIService:
         history: list[dict[str, str]] | None = None,
     ) -> AIMessageResponse:
         return await self.provider.generate_response(prompt, context, history or [])
+
+    @staticmethod
+    def extract_json(content: str) -> dict[str, Any] | None:
+        """Best-effort JSON object extraction from a model reply.
+
+        Returns None rather than raising: an unparseable reply is a normal,
+        expected outcome that the caller must handle honestly, not an error
+        that should be papered over.
+        """
+        if not content:
+            return None
+        for candidate in _FENCE_RE.findall(content) or [content]:
+            candidate = candidate.strip()
+            if not candidate:
+                continue
+            try:
+                parsed = json.loads(candidate)
+            except json.JSONDecodeError:
+                match = _JSON_OBJECT_RE.search(candidate)
+                if not match:
+                    continue
+                try:
+                    parsed = json.loads(match.group(0))
+                except json.JSONDecodeError:
+                    continue
+            if isinstance(parsed, dict):
+                return parsed
+        return None
+
+    async def structured(
+        self,
+        prompt: str,
+        context: dict[str, Any],
+        history: list[dict[str, str]] | None = None,
+        timeout: float = 60.0,
+        max_retries: int = 1,
+    ) -> tuple[dict[str, Any] | None, AIMessageResponse]:
+        """Call the provider for structured JSON, with timeout and retry.
+
+        Returns ``(parsed_or_None, response)``. The response is always present
+        so the caller can record the real provider/model and the real outcome,
+        including failures. Usage is taken from the provider when it reports
+        any, and otherwise explicitly marked as an estimate or as none - it is
+        never silently presented as provider usage.
+        """
+        last_error: str | None = None
+        for attempt in range(max_retries + 1):
+            try:
+                response = await asyncio.wait_for(
+                    self.provider.generate_structured(
+                        prompt, context, history or []
+                    ),
+                    timeout=timeout,
+                )
+            except asyncio.TimeoutError:
+                last_error = f"provider timed out after {timeout}s"
+            except Exception as exc:  # noqa: BLE001 - surfaced, never hidden
+                last_error = f"{type(exc).__name__}: {exc}"
+            else:
+                if response.usage is None:
+                    response.usage = AIUsage(
+                        source="estimated",
+                        input_tokens=BaseAIProvider.estimate_tokens(prompt),
+                        output_tokens=BaseAIProvider.estimate_tokens(response.content),
+                        total_tokens=(
+                            BaseAIProvider.estimate_tokens(prompt)
+                            + BaseAIProvider.estimate_tokens(response.content)
+                        ),
+                    )
+                if response.model is None:
+                    response.model = self.provider.model
+                return self.extract_json(response.content), response
+            if attempt < max_retries:
+                await asyncio.sleep(0)
+
+        return None, AIMessageResponse(
+            role="assistant",
+            content="",
+            provider=self.provider.name,
+            model=self.provider.model,
+            usage=AIUsage(source="none"),
+            error=last_error or "provider call failed",
+        )
 
     async def stream_chat(
         self,

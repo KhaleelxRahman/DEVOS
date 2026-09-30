@@ -32,6 +32,14 @@ router = APIRouter(prefix="/agent", tags=["agent"])
 
 
 def _to_dict(run: AgentRun) -> dict[str, Any]:
+    """Serialise the run.
+
+    Token figures are returned as an explicit bundle rather than a single
+    number, because a single number cannot honestly distinguish "the provider
+    told us" from "we guessed". ``usage_source`` is the discriminator and the
+    UI must render it.
+    """
+    charged = AgentService.tokens_charged(run)
     return {
         "id": run.id,
         "project_id": run.project_id,
@@ -39,14 +47,29 @@ def _to_dict(run: AgentRun) -> dict[str, Any]:
         "state": run.state,
         "terminal_reason": run.terminal_reason,
         "iteration": run.iteration,
-        "repair_attempts": run.repair_attempts,
-        "tokens_used": run.tokens_used,
         "max_iterations": run.max_iterations,
+        "repair_attempts": run.repair_attempts,
         "max_repair_attempts": run.max_repair_attempts,
+        "ai_calls": run.ai_calls,
+        "max_ai_calls": run.max_ai_calls,
+        "repeated_failure_count": run.repeated_failure_count,
+        "max_repeated_failures": run.max_repeated_failures,
+        "tokens": {
+            "charged": charged,
+            "max": run.max_tokens,
+            "usage_source": run.token_usage_source,
+            "estimated": run.estimated_tokens,
+            "provider_input": run.provider_input_tokens,
+            "provider_output": run.provider_output_tokens,
+            "provider_total": run.provider_total_tokens,
+            "is_provider_reported": run.token_usage_source == "provider_reported",
+        },
         "max_runtime_seconds": run.max_runtime_seconds,
-        "max_tokens": run.max_tokens,
         "cancel_requested": run.cancel_requested,
         "steps": run.steps or [],
+        "plan": run.plan,
+        "files_changed": run.files_changed or [],
+        "diagnosis": run.diagnosis,
         "commit_proposals": run.commit_proposals or [],
         "approval_state": run.approval_state,
         "summary": run.summary,
@@ -100,6 +123,8 @@ async def create_run(
         max_repair_attempts=payload.max_repair_attempts,
         max_runtime_seconds=payload.max_runtime_seconds,
         max_tokens=payload.max_tokens,
+        max_ai_calls=payload.max_ai_calls,
+        max_repeated_failures=payload.max_repeated_failures,
     )
     db.add(run)
     await db.commit()
@@ -109,6 +134,8 @@ async def create_run(
         "max_repair_attempts": payload.max_repair_attempts,
         "max_runtime_seconds": payload.max_runtime_seconds,
         "max_tokens": payload.max_tokens,
+        "max_ai_calls": payload.max_ai_calls,
+        "max_repeated_failures": payload.max_repeated_failures,
     }})
     await db.commit()
     if payload.start:
@@ -263,6 +290,8 @@ async def retry_run(
             max_repair_attempts=previous.max_repair_attempts,
             max_runtime_seconds=previous.max_runtime_seconds,
             max_tokens=previous.max_tokens,
+            max_ai_calls=previous.max_ai_calls,
+            max_repeated_failures=previous.max_repeated_failures,
             start=True,
         ),
         current_user=current_user,

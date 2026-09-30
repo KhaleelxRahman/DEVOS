@@ -15,6 +15,9 @@ class AgentRunCreate(BaseModel):
     max_repair_attempts: int = 3
     max_runtime_seconds: int = 900
     max_tokens: int = 100_000
+    # Phase 9 hardening: model spend and loop prevention are bounded too.
+    max_ai_calls: int = 20
+    max_repeated_failures: int = 2
     start: bool = True
 
 

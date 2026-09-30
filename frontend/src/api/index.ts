@@ -199,6 +199,31 @@ export interface AgentStep {
   at: number;
 }
 
+export interface AgentTokens {
+  /** Tokens charged against the ceiling, from the source named below. */
+  charged: number;
+  max: number;
+  /** 'provider_reported' | 'estimated' | 'none'. The UI MUST show this. */
+  usage_source: 'provider_reported' | 'estimated' | 'none';
+  estimated: number;
+  provider_input: number | null;
+  provider_output: number | null;
+  provider_total: number | null;
+  is_provider_reported: boolean;
+}
+
+export interface AgentChangeRecord {
+  path: string;
+  operation: string;
+  reason: string;
+  existed: boolean;
+  warnings: string[];
+  secrets_redacted: boolean;
+  bytes: number;
+  result?: string;
+  error?: string;
+}
+
 export interface AgentRun {
   id: string;
   project_id: string;
@@ -206,17 +231,25 @@ export interface AgentRun {
   state: string;
   terminal_reason: string | null;
   iteration: number;
-  repair_attempts: number;
-  tokens_used: number;
   max_iterations: number;
+  repair_attempts: number;
   max_repair_attempts: number;
+  ai_calls: number;
+  max_ai_calls: number;
+  repeated_failure_count: number;
+  max_repeated_failures: number;
+  tokens: AgentTokens;
   max_runtime_seconds: number;
-  max_tokens: number;
   cancel_requested: boolean;
   steps: AgentStep[];
+  plan: Record<string, unknown> | null;
+  files_changed: AgentChangeRecord[];
+  diagnosis: Record<string, unknown> | null;
   commit_proposals: { path: string; summary: string }[];
   approval_state: string;
   summary: string | null;
+  created_at: string;
+  updated_at: string;
   /** Actions the loop will never take on its own. */
   never_automatic: string[];
 }
@@ -231,6 +264,8 @@ export const agentApi = {
     max_repair_attempts?: number;
     max_runtime_seconds?: number;
     max_tokens?: number;
+    max_ai_calls?: number;
+    max_repeated_failures?: number;
     start?: boolean;
   }) => apiClient.post<AgentRun>('/agent/runs', payload),
   get: (runId: string) => apiClient.get<AgentRun>(`/agent/runs/${runId}`),

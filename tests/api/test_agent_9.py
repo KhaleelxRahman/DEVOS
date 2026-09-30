@@ -105,12 +105,69 @@ async def _run_row(run_id):
         ).scalar_one()
 
 
-async def _execute(run_id):
+async def _execute(run_id, ai=None):
     """Drive the loop to a terminal state, exactly as the API background task does."""
     async with AsyncSessionLocal() as session:
         from app.services.agent_service import AgentService
 
-        return await AgentService.execute(session, run_id)
+        return await AgentService.execute(session, run_id, ai=ai)
+
+
+class _UsageProvider:
+    """A real (non-mock) provider that reports genuine token usage.
+
+    Used to prove the token ceiling and the AI-call budget against real
+    provider-reported numbers, rather than against the local estimate.
+    """
+
+    name = "stub-real"
+    model = "stub-model-1"
+    is_mock = False
+
+    def __init__(self, total_tokens=1000, plan=None, changes=None):
+        self.total_tokens = total_tokens
+        self.plan = plan
+        self.changes = changes
+        self.calls = 0
+
+    def _usage(self):
+        from app.schemas.ai import AIUsage
+
+        return AIUsage(
+            source="provider_reported",
+            input_tokens=self.total_tokens // 2,
+            output_tokens=self.total_tokens // 2,
+            total_tokens=self.total_tokens,
+        )
+
+    async def generate_response(self, prompt, context, history):
+        from app.schemas.ai import AIMessageResponse
+
+        self.calls += 1
+        return AIMessageResponse(
+            role="assistant", content="{}", provider=self.name,
+            model=self.model, usage=self._usage(),
+        )
+
+    async def generate_structured(self, prompt, context, history):
+        import json
+
+        from app.schemas.ai import AIMessageResponse
+
+        self.calls += 1
+        payload = self.plan if "planner inside DEVOS" in prompt else (
+            {"changes": self.changes} if self.changes is not None else {"changes": []}
+        )
+        return AIMessageResponse(
+            role="assistant", content=json.dumps(payload), provider=self.name,
+            model=self.model, usage=self._usage(),
+        )
+
+
+def _ai(provider):
+    from app.services.ai_service import AIService
+
+    return AIService(provider)
 
 
 # ---------------------------------------------------------------------------
@@ -280,28 +337,63 @@ async def test_safety_guards_raise_at_their_thresholds():
 
 
 @pytest.mark.asyncio
-async def test_max_tokens_halts_and_is_not_success(client):
-    """Locked Decision 5 C: a hard ceiling halts the run, and halting is not
-    reported as COMPLETED."""
+async def test_max_tokens_halts_against_real_provider_usage(client):
+    """Locked Decision 5 C: a hard ceiling halts the run, and halting is never
+    reported as COMPLETED.
+
+    Proven against REAL provider-reported usage (a non-mock provider that
+    returns usage), not against the local fallback estimate, so this exercises
+    the accounting path that matters when a model is configured.
+    """
     headers, _ = await _register(client, f"a{uuid.uuid4().hex[:8]}@x.com")
     pid = await _project_with_quality(client, headers, "Token Ceiling")
 
     res = await client.post(
         f"{AGENT}/runs",
         json={
-            "project_id": pid, "task": "x" * 200,
-            "max_tokens": 1,  # the plan step alone exceeds this
+            "project_id": pid, "task": "use the model",
+            "max_tokens": 500,  # the provider reports 1000 on the first call
             "start": False,
         },
         headers=headers,
     )
     run_id = res.json()["data"]["id"]
-    run = await _execute(run_id)
+    run = await _execute(run_id, ai=_ai(_UsageProvider(total_tokens=1000)))
 
-    assert run.state == "FAILED"
+    assert run.state == "FAILED", run.terminal_reason
     assert run.terminal_reason.startswith("MAX_TOKENS")
     assert run.state != "COMPLETED"
     assert "Completed on iteration" not in (run.summary or "")
+
+    # The usage is recorded as provider-reported, NOT as an estimate. Presenting
+    # a real number as a guess (or a guess as real) is the failure mode here.
+    assert run.token_usage_source == "provider_reported"
+    assert run.provider_total_tokens == 1000
+    assert run.provider_input_tokens == 500
+    assert run.provider_output_tokens == 500
+
+
+@pytest.mark.asyncio
+async def test_max_ai_calls_bounds_model_spend(client):
+    """An agent that can call a model without limit can spend without limit."""
+    headers, _ = await _register(client, f"a{uuid.uuid4().hex[:8]}@x.com")
+    pid = await _project_with_quality(client, headers, "AI Call Cap")
+
+    res = await client.post(
+        f"{AGENT}/runs",
+        json={
+            "project_id": pid, "task": "call the model a lot",
+            "max_tokens": 10_000_000, "max_ai_calls": 1,
+            "start": False,
+        },
+        headers=headers,
+    )
+    run_id = res.json()["data"]["id"]
+    run = await _execute(run_id, ai=_ai(_UsageProvider(total_tokens=10)))
+
+    assert run.state == "FAILED", run.terminal_reason
+    assert run.terminal_reason.startswith("MAX_AI_CALLS")
+    assert run.ai_calls <= 2
 
 
 @pytest.mark.asyncio
@@ -379,10 +471,10 @@ async def test_completed_run_does_not_commit_without_approval(client):
 
     # The edits are real, and the run is waiting on a human.
     res = await client.get(
-        f"/api/v1/projects/{pid}/files/AGENT_NOTES.md", headers=headers
+        f"/api/v1/projects/{pid}/files/DEVOS_AGENT_RUN.md", headers=headers
     )
     assert res.status_code == 200, res.text
-    assert "Agent run notes" in res.json()["data"]["content"]
+    assert "DEVOS agent run record" in res.json()["data"]["content"]
 
     fresh = await _run_row(run_id)
     assert fresh.approval_state == "PENDING"
@@ -422,7 +514,7 @@ async def test_approve_commits_commits_exact_proposed_paths(client):
     assert res.status_code == 200, res.text
     body = res.json()["data"]
     assert body["commit_sha"], "approval must produce a real commit sha"
-    assert body["paths"] == ["AGENT_NOTES.md"]
+    assert body["paths"] == ["DEVOS_AGENT_RUN.md"]
 
     res = await client.get(f"/api/v1/projects/{pid}/git/log", headers=headers)
     commits = res.json()["data"].get("commits", [])
