@@ -24,6 +24,17 @@ _SECRET_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("aws_key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("slack_token", re.compile(r"\bxox[abprs]-[A-Za-z0-9\-]{10,}\b")),
     ("bearer", re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._\-]{20,}")),
+    # Credential-bearing query parameters. httpx embeds the FULL request URL in
+    # HTTPStatusError, and Gemini puts the API key in `?key=...`. Without this
+    # pattern a provider auth failure writes a live key into persisted step
+    # evidence and the UI.
+    (
+        "url_query_secret",
+        re.compile(
+            r"(?i)([?&](?:key|api[_-]?key|apikey|access[_-]?token|token|secret|"
+            r"password|client[_-]?secret|signature)=)([^&\s'\"]{4,})"
+        ),
+    ),
     ("jwt", re.compile(r"\beyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}")),
     (
         "assignment",

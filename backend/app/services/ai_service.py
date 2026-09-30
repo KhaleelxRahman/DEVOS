@@ -23,6 +23,16 @@ from app.schemas.ai import AIMessageResponse, AIUsage
 # extraction has to be forgiving while the *validation* stays strict.
 _FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL)
 _JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
+# httpx puts the full request URL into HTTPStatusError, and provider APIs put
+# credentials in the query string. Strip query strings before an error message
+# can reach a log, the database, or the UI.
+_URL_QUERY_RE = re.compile(r"(https?://[^\s?'\"]+)\?[^\s'\"]*")
+
+
+def _safe_error(exc: BaseException) -> str:
+    """Render a provider failure without leaking the request URL's query."""
+    text = f"{type(exc).__name__}: {exc}"
+    return _URL_QUERY_RE.sub(r"\1?[REDACTED]", text)
 
 
 class BaseAIProvider(ABC):
@@ -367,7 +377,7 @@ class AIService:
             except asyncio.TimeoutError:
                 last_error = f"provider timed out after {timeout}s"
             except Exception as exc:  # noqa: BLE001 - surfaced, never hidden
-                last_error = f"{type(exc).__name__}: {exc}"
+                last_error = _safe_error(exc)
             else:
                 if response.usage is None:
                     response.usage = AIUsage(

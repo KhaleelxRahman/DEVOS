@@ -160,6 +160,41 @@ def test_redaction_removes_credential_shapes():
     assert not contains_secret("npm test passed")
 
 
+def test_provider_error_cannot_leak_the_api_key():
+    """Regression (Phase 10 defect): httpx embeds the FULL request URL in
+    HTTPStatusError, and Gemini carries the API key in `?key=...`. That string
+    reached step evidence and the UI with the live key intact.
+    """
+    from app.phase9_agent.redaction import REDACTED, redact
+    from app.services.ai_service import _safe_error
+
+    # A synthetic key that reproduces the SHAPE of a Gemini credential without
+    # being one. A real key must never be committed here: GitHub push
+    # protection correctly blocks a push containing one.
+    fake_key = "AQ.EXAMPLE-NOT-A-REAL-KEY_0000000000000000"
+    httpx_error = (
+        "HTTPStatusError: Client error '401 Unauthorized' for url "
+        "'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:"
+        f"generateContent?key={fake_key}'"
+    )
+
+    # 1. Defence in depth: the redaction layer catches a credential in a query.
+    out = redact(httpx_error)
+    assert fake_key not in out, "the key survived redaction"
+    assert REDACTED in out
+
+    # 2. Primary fix: the error string is sanitised at the provider funnel, so
+    #    the query never reaches a log, the database, or the UI at all.
+    class Boom(Exception):
+        def __str__(self):
+            return httpx_error
+
+    safe = _safe_error(Boom())
+    assert fake_key not in safe, "the key reached the caller"
+    assert "key=" not in safe, "the raw query string survived"
+    assert "401 Unauthorized" in safe, "the real failure reason must survive"
+
+
 def test_redaction_walks_nested_structures():
     from app.phase9_agent.redaction import REDACTED, redact_structure
 
