@@ -6,6 +6,7 @@ so a user can never read or reply inside another user's conversation.
 
 import asyncio
 import json
+import logging
 import re
 from collections.abc import AsyncIterator
 
@@ -38,6 +39,7 @@ from app.services.artifact_service import ArtifactService
 from app.core.errors import ValidationException
 
 router = APIRouter(prefix="/projects/{project_id}/ai", tags=["ai"])
+logger = logging.getLogger(__name__)
 
 
 def _sse(event: str, payload: dict) -> str:
@@ -209,7 +211,8 @@ async def chat_stream(
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            yield _sse("error", {"message": str(exc)})
+            logger.exception("AI streaming request failed: %s", exc)
+            yield _sse("error", {"message": "An internal error occurred while processing this request."})
 
     return StreamingResponse(events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
