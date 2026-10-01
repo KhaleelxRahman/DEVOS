@@ -13,11 +13,25 @@ from app.schemas.project import ProjectCreate, ProjectUpdate
 
 class ProjectService:
     @staticmethod
-    def get_project_storage_path(project_id: str) -> str:
-        base_dir = os.path.abspath(settings.PROJECTS_STORAGE_PATH)
-        project_dir = os.path.join(base_dir, project_id)
-        os.makedirs(project_dir, exist_ok=True)
+    def _resolve_project_storage_path(project_id: str, create: bool) -> str:
+        # Project IDs are UUIDs. Reject malformed IDs before using them in paths.
+        try:
+            normalized_id = str(uuid.UUID(str(project_id)))
+        except (TypeError, ValueError) as exc:
+            raise ProjectNotFoundException() from exc
+
+        base_dir = os.path.realpath(settings.PROJECTS_STORAGE_PATH)
+        project_dir = os.path.realpath(os.path.join(base_dir, normalized_id))
+        if os.path.commonpath((base_dir, project_dir)) != base_dir:
+            raise ProjectAccessDeniedException("Invalid project path")
+
+        if create:
+            os.makedirs(project_dir, exist_ok=True)
         return project_dir
+
+    @staticmethod
+    def get_project_storage_path(project_id: str) -> str:
+        return ProjectService._resolve_project_storage_path(project_id, create=True)
 
     @staticmethod
     async def create(db: AsyncSession, user_id: str, data: ProjectCreate) -> Project:
@@ -40,14 +54,11 @@ class ProjectService:
 
     @staticmethod
     async def get_by_id(db: AsyncSession, project_id: str) -> Project | None:
-        # Project ids are UUIDs; malformed ids can never match a row, so fail
-        # fast with a clean "not found" instead of relying on DB-specific
-        # behaviour for arbitrary strings.
         try:
-            uuid.UUID(str(project_id))
+            normalized_id = str(uuid.UUID(str(project_id)))
         except (TypeError, ValueError):
             return None
-        stmt = select(Project).where(Project.id == project_id)
+        stmt = select(Project).where(Project.id == normalized_id)
         result = await db.execute(stmt)
         return result.scalars().first()
 
@@ -92,9 +103,7 @@ class ProjectService:
     @staticmethod
     async def delete(db: AsyncSession, project_id: str, user_id: str) -> bool:
         project = await ProjectService.get_for_user(db, project_id, user_id)
-        storage_path = os.path.abspath(
-            os.path.join(settings.PROJECTS_STORAGE_PATH, project_id)
-        )
+        storage_path = ProjectService._resolve_project_storage_path(project.id, create=False)
         await db.delete(project)
         await db.flush()
         if os.path.isdir(storage_path):

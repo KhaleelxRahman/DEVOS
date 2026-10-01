@@ -31,6 +31,7 @@ const failedRequests: string[] = [];
 const apiResponses: Record<string, { status: number; acao: string | null; credentials: string | null }> = {};
 const streamRequests: string[] = [];
 const streamResponses: string[] = [];
+const ALLOWED_FAILURE_HOSTS = new Set(["devos-backend-f3ub.onrender.com", "devos-ebon.vercel.app"]);
 
 const IGNORED_FAILED = [
   /favicon/,
@@ -69,6 +70,18 @@ function attachListeners(page: Page): void {
     if (req.url().includes("/chat/stream")) streamRequests.push(req.url().split("?")[0]);
   });
 }
+
+function isTrackedApiFailure(entry: string): boolean {
+  const urlPart = entry.includes(": ") ? entry.split(": ").slice(1).join(": ").trim() : entry.trim();
+  if (!urlPart) return false;
+  try {
+    const parsed = new URL(urlPart);
+    return ALLOWED_FAILURE_HOSTS.has(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
 async function snapshot(page: Page, name: string): Promise<void> {
   await page.screenshot({ path: path.join(RESULT_DIR, `${name}.png`), fullPage: false }).catch(() => undefined);
   console.log(`[snapshot] ${name}`);
@@ -614,7 +627,7 @@ test.describe.serial("DEVOS Live Production QA", () => {
     await mobCtx2.close();
 
     // ================= 16. TELEMETRY + FINAL ASSERTIONS =================
-    const apiFailures = failedRequests.filter((f) => f.includes("onrender.com") || f.includes("vercel.app"));
+    const apiFailures = failedRequests.filter((f) => isTrackedApiFailure(f));
     const corsErrors = consoleErrors.filter((e) => /CORS|cross origin|has been blocked/i.test(e));
     const netErrors = consoleErrors.filter((e) => /net::ERR_FAILED/i.test(e));
 
