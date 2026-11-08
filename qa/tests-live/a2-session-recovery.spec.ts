@@ -42,6 +42,7 @@ async function signIn(page: Page): Promise<void> {
   await page.getByPlaceholder("••••••••").fill(PASSWORD);
   await page.getByRole("button", { name: "Sign In" }).click();
   await expect(page).toHaveURL(/\/app\/dashboard$/, { timeout: 30_000 });
+  await page.waitForLoadState("networkidle");
 }
 
 test.describe.configure({ mode: "serial" });

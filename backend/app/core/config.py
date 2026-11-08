@@ -169,17 +169,30 @@ class Settings(BaseSettings):
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def _parse_cors_origins(cls, v: Any) -> Any:
+        raw_list: list[Any] = []
         if isinstance(v, str):
             v = v.strip()
             if not v:
                 return []
             if v.startswith("["):
                 try:
-                    return json.loads(v)
+                    parsed = json.loads(v)
+                    if isinstance(parsed, list):
+                        raw_list = parsed
                 except json.JSONDecodeError:
                     return []
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v or []
+            else:
+                raw_list = [origin.strip() for origin in v.split(",") if origin.strip()]
+        elif isinstance(v, (list, tuple, set)):
+            raw_list = list(v)
+
+        clean_origins: list[str] = []
+        for o in raw_list:
+            if isinstance(o, str):
+                cleaned = o.strip().rstrip("/")
+                if cleaned and cleaned not in clean_origins:
+                    clean_origins.append(cleaned)
+        return clean_origins
 
 
 def is_production_environment(value: Any) -> bool:

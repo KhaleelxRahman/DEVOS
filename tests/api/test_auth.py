@@ -64,6 +64,20 @@ async def test_login_preflight_allows_configured_origin(client):
 
 
 @pytest.mark.asyncio
+async def test_login_preflight_rejects_unconfigured_origin(client):
+    res = await client.options(
+        "/api/v1/auth/login",
+        headers={
+            "Origin": "https://evil-untrusted-site.com",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert res.status_code == 400
+    assert "access-control-allow-origin" not in res.headers
+
+
+@pytest.mark.asyncio
 async def test_register_success(client):
     res = await client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
     assert res.status_code == 200, res.text

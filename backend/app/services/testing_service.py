@@ -17,7 +17,7 @@ from app.services.project_service import ProjectService
 ALLOWED_TEST_JOBS: dict[str, dict[str, Any]] = {
     "pytest": {
         "label": "Python test suite (pytest)",
-        "argv": ["pytest", "-q"],
+        "argv": ["pytest", "-q", "-o", "addopts="],
         "timeout_seconds": 180,
     },
     "typecheck": {

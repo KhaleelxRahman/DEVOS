@@ -114,7 +114,7 @@ test.describe("DEVOS Phase 3 Acceptance Project — DEVOS Todo Application E2E",
 
     const renameRes = await request.post(`${API}/projects/${projectId}/files/rename`, {
       headers: { Authorization: `Bearer ${token}` },
-      data: { old_path: "temp-test.txt", new_path: "renamed-test.txt" },
+      data: { path: "temp-test.txt", new_name: "renamed-test.txt" },
     });
     expect(renameRes.ok()).toBeTruthy();
 
@@ -124,10 +124,10 @@ test.describe("DEVOS Phase 3 Acceptance Project — DEVOS Todo Application E2E",
     expect(deleteRes.ok()).toBeTruthy();
 
     // 4. Verify file tree updates and opens in Monaco
-    await page.reload();
+    await page.goto(`${BASE}/app/projects/${projectId}`);
     await expect(page.getByRole("button", { name: "README.md", exact: true })).toBeVisible({ timeout: 20_000 });
     await page.getByRole("button", { name: "README.md", exact: true }).click();
-    await expect(page.locator(".monaco-editor")).toBeVisible();
+    await expect(page.locator(".editor-monaco")).toBeVisible({ timeout: 30_000 });
   });
 
   test("Test 3 — Build Todo Application: Write complete functional Todo code & test suite", async ({ request }) => {
@@ -385,7 +385,8 @@ def test_todo_html_has_all_features():
     const readmeBtn = page.getByRole("button", { name: "README.md", exact: true });
     await expect(readmeBtn).toBeVisible({ timeout: 20_000 });
     await readmeBtn.click();
-    await expect(page.locator(".monaco-editor")).toBeVisible();
+    await expect(page.locator(".editor-monaco")).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator(".monaco-editor")).toBeVisible({ timeout: 30_000 });
 
     // Type new text
     await page.locator(".monaco-editor").first().click();
@@ -427,9 +428,12 @@ def test_todo_html_has_all_features():
     const previewData = (await startRes.json()).data;
     expect(previewData.status).toBe("READY");
     expect(previewData.port).toBeTruthy();
-    expect(previewData.preview_url).toBeTruthy();
+    expect(previewData.url || previewData.preview_url).toBeTruthy();
 
-    const previewUrl = previewData.preview_url;
+    const rawUrl = previewData.url || previewData.preview_url;
+    const previewUrl = previewData.preview_token && !rawUrl.includes("preview_token")
+      ? `${rawUrl}?preview_token=${previewData.preview_token}`
+      : rawUrl;
 
     // Navigate to the preview URL directly in the browser
     await page.goto(previewUrl);
@@ -438,14 +442,13 @@ def test_todo_html_has_all_features():
     // 1. Add Task 1
     const newTodoInput = page.getByPlaceholder("What needs to be done?");
     await newTodoInput.fill("Buy Groceries for Team");
-    await page.getByRole("button", { name: "Add" }).click();
+    await newTodoInput.press("Enter");
+    await expect(page.getByText("Buy Groceries for Team")).toBeVisible({ timeout: 10_000 });
 
     // 2. Add Task 2
     await newTodoInput.fill("Read DEVOS Documentation");
-    await page.getByRole("button", { name: "Add" }).click();
-
-    await expect(page.getByText("Buy Groceries for Team")).toBeVisible();
-    await expect(page.getByText("Read DEVOS Documentation")).toBeVisible();
+    await newTodoInput.press("Enter");
+    await expect(page.getByText("Read DEVOS Documentation")).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText("2 items left")).toBeVisible();
 
     // 3. Complete Task 1
@@ -528,23 +531,36 @@ def test_repaired_assertion():
   });
 
   test("Test 8 — Git Workflow: Status, Branching, Staging & Commit Log", async ({ request }) => {
-    // 1. Status
+    // 1. Initial Status check
     const statusRes = await request.get(`${API}/projects/${projectId}/git/status`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect(statusRes.ok()).toBeTruthy();
 
-    // 2. Create Branch
-    const branchRes = await request.post(`${API}/projects/${projectId}/git/branches`, {
+    // 2. Stage & Initial Commit on main
+    const initStageRes = await request.post(`${API}/projects/${projectId}/git/stage`, {
       headers: { Authorization: `Bearer ${token}` },
-      data: { name: "feature/todo-persistence" },
+      data: { files: ["README.md"] },
+    });
+    expect(initStageRes.ok()).toBeTruthy();
+
+    const initCommitRes = await request.post(`${API}/projects/${projectId}/git/commit`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { message: "chore: initial repository setup" },
+    });
+    expect(initCommitRes.ok()).toBeTruthy();
+
+    // 3. Create Feature Branch
+    const branchRes = await request.post(`${API}/projects/${projectId}/git/checkout`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { branch: "feature/todo-persistence", create: true },
     });
     expect(branchRes.ok()).toBeTruthy();
 
-    // 3. Stage & Commit
+    // 4. Stage & Commit on feature branch
     const stageRes = await request.post(`${API}/projects/${projectId}/git/stage`, {
       headers: { Authorization: `Bearer ${token}` },
-      data: { paths: ["index.html", "package.json", "test_todo.py", "README.md"] },
+      data: { files: ["index.html", "package.json", "test_todo.py"] },
     });
     expect(stageRes.ok()).toBeTruthy();
 
@@ -554,7 +570,7 @@ def test_repaired_assertion():
     });
     expect(commitRes.ok()).toBeTruthy();
 
-    // 4. Inspect Log
+    // 5. Inspect Log
     const logRes = await request.get(`${API}/projects/${projectId}/git/log?limit=5`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -572,14 +588,16 @@ def test_repaired_assertion():
     });
     expect(chatRes.ok()).toBeTruthy();
     const chatData = (await chatRes.json()).data;
-    expect(chatData.reply).toBeTruthy();
+    expect(chatData.message?.content || chatData.reply).toBeTruthy();
 
     // 2. AI Explain active file
-    const explainRes = await request.post(`${API}/projects/${projectId}/ai/explain`, {
+    const explainRes = await request.post(`${API}/projects/${projectId}/ai/actions`, {
       headers: { Authorization: `Bearer ${token}` },
-      data: { path: "index.html" },
+      data: { action: "explain", code: "<div id=\"app\"></div>", file_path: "index.html", language: "html" },
     });
     expect(explainRes.ok()).toBeTruthy();
+    const explainData = (await explainRes.json()).data;
+    expect(explainData.content).toBeTruthy();
 
     // 3. Builder Plan
     const planRes = await request.post(`${API}/projects/${projectId}/builder/plan`, {

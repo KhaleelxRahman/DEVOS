@@ -99,30 +99,24 @@ class PreviewService:
                 pkg = {}
             scripts = pkg.get("scripts")
             scripts = scripts if isinstance(scripts, dict) else {}
-            if not scripts:
-                return PreviewStartInfo(
-                    supported=False,
-                    reason="package.json has no scripts section (no start/dev command)")
             script_key = None
-            for key in ("dev", "start"):
-                if key in scripts and str(scripts[key]).strip():
-                    script_key = key
-                    break
-            if script_key is None:
+            if scripts:
+                for key in ("dev", "start"):
+                    if key in scripts and str(scripts[key]).strip():
+                        script_key = key
+                        break
+            if script_key is not None:
+                command = "npm run dev" if script_key == "dev" else "npm run start"
+                if not _which("npm"):
+                    return PreviewStartInfo(
+                        supported=True, available=False, command=command,
+                        port=_port_from_vite_config(project_root),
+                        source="package.json",
+                        reason="'npm' is not installed on this server")
                 return PreviewStartInfo(
-                    supported=False,
-                    reason="package.json defines no 'dev' or 'start' script")
-            command = "npm run dev" if script_key == "dev" else "npm run start"
-            if not _which("npm"):
-                return PreviewStartInfo(
-                    supported=True, available=False, command=command,
+                    supported=True, available=True, command=command,
                     port=_port_from_vite_config(project_root),
-                    source="package.json",
-                    reason="'npm' is not installed on this server")
-            return PreviewStartInfo(
-                supported=True, available=True, command=command,
-                port=_port_from_vite_config(project_root),
-                source="package.json", reason=None)
+                    source="package.json", reason=None)
 
         # Python static file server fallback.
         if _read_text(project_root, "index.html") is not None:

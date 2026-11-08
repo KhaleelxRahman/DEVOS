@@ -24,3 +24,5 @@ services:
         sync: false
       - key: GITHUB_CLIENT_SECRET
         sync: false
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false

@@ -31,7 +31,6 @@ from app.phase9_agent.validation import (
     validate_changes,
 )
 from app.services.ai_service import AIService
-from app.services.context_service import ContextService
 from app.services.file_service import FileService
 
 CODE_PROMPT = """You are the code editor inside DEVOS, a development agent.

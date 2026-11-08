@@ -3,7 +3,6 @@
 Body-based, matching the rest of the DEVOS API (e.g. `POST /git/commit`).
 """
 
-from typing import Any
 
 from pydantic import BaseModel, Field
 

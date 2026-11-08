@@ -1,10 +1,11 @@
 import { ApiResponse } from '../types/api';
 
 // Default to same-origin requests locally, while production uses the deployed
-// API if the hosting provider has not injected VITE_API_BASE_URL at build time.
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.PROD ? 'https://devos-backend-f3ub.onrender.com/api/v1' : '/api/v1');
+// API if the hosting provider has not injected VITE_API_BASE_URL or VITE_API_URL at build time.
+const rawApiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+const API_BASE_URL = rawApiUrl
+  ? (rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/+$/, '')}/api/v1`)
+  : (import.meta.env.PROD ? 'https://devos-backend-f3ub.onrender.com/api/v1' : '/api/v1');
 export { API_BASE_URL };
 
 // ---------------------------------------------------------------------------

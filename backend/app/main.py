@@ -141,7 +141,7 @@ async def security_headers(request: Request, call_next):
     if ancestors is not None:
         response.headers.setdefault(
             "Content-Security-Policy",
-            f"default-src 'self'; frame-ancestors {ancestors}; "
+            f"default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors {ancestors}; "
             "base-uri 'self'; object-src 'none'",
         )
     else:
