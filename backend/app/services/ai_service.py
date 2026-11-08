@@ -16,6 +16,7 @@ from typing import Any
 import httpx
 
 from app.core.config import settings
+from app.core.errors import ValidationException
 from app.schemas.ai import AIMessageResponse, AIUsage
 
 # Phase 9: structured output is requested in the prompt and then parsed
@@ -175,9 +176,73 @@ class GeminiProvider(BaseAIProvider):
     name = "gemini"
     is_mock = False
 
-    def __init__(self, api_key: str, model: str = "gemini-1.5-flash"):
+    def __init__(self, api_key: str, model: str):
+        # No default: a model id must be chosen deliberately (AI_MODEL). The
+        # former default, "gemini-1.5-flash", was retired by Google and turned
+        # a configuration gap into an opaque provider 404.
         self.api_key = api_key
         self.model = model
+
+    async def stream_response(
+        self,
+        prompt: str,
+        context: dict[str, Any],
+        history: list[dict[str, str]],
+    ) -> AsyncIterator[str]:
+        """Yield text incrementally using Gemini's native SSE stream.
+
+        This deliberately does NOT inherit the BaseAIProvider fallback, which
+        waits for the whole completion and then slices it into pieces. That
+        fallback preserves the streaming *contract* but not genuine streaming:
+        the client receives nothing until the model has already finished, so
+        stop/abort cannot save any work and the UI shows no real progress.
+        The real ``:streamGenerateContent`` transport is used instead.
+
+        The key travels in the ``x-goog-api-key`` header rather than the query
+        string so it cannot end up in a URL on any log or traceback.
+        """
+        context_text = _render_context(context)
+        contents = [
+            {
+                "role": "user" if m.get("role") == "user" else "model",
+                "parts": [{"text": m.get("content", "")}],
+            }
+            for m in history[-10:]
+        ]
+        contents.append(
+            {
+                "role": "user",
+                "parts": [{"text": f"{context_text}\n\nUser question:\n{prompt}"}],
+            }
+        )
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{self.model}:streamGenerateContent"
+        )
+        async with httpx.AsyncClient(timeout=httpx.Timeout(60.0, read=120.0)) as client:
+            async with client.stream(
+                "POST",
+                url,
+                params={"alt": "sse"},
+                headers={"x-goog-api-key": self.api_key},
+                json={"contents": contents},
+            ) as response:
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    if not line or not line.startswith("data:"):
+                        continue
+                    payload = line[len("data:") :].strip()
+                    if not payload or payload == "[DONE]":
+                        continue
+                    try:
+                        chunk = json.loads(payload)
+                    except json.JSONDecodeError:
+                        continue
+                    for candidate in chunk.get("candidates") or []:
+                        for part in (candidate.get("content") or {}).get("parts") or []:
+                            text = part.get("text")
+                            if text:
+                                yield text
 
     async def generate_response(self, prompt, context, history) -> AIMessageResponse:
         context_text = _render_context(context)
@@ -227,7 +292,9 @@ class OpenAIProvider(BaseAIProvider):
     name = "openai"
     is_mock = False
 
-    def __init__(self, api_key: str, model: str = "gpt-4o-mini"):
+    def __init__(self, api_key: str, model: str):
+        # No default, for the same reason as GeminiProvider: the model must
+        # come from AI_MODEL rather than a value that can silently rot.
         self.api_key = api_key
         self.model = model
 
@@ -291,17 +358,36 @@ class AIService:
 
         A real provider is only used when its API key is actually configured;
         otherwise the labelled local mock provider is used.
+
+        AI_MODEL is REQUIRED for a real provider and is never defaulted. The
+        previous fallback silently called `gemini-1.5-flash`, a model Google
+        has since retired, so an unset AI_MODEL produced a confusing HTTP 404
+        from the provider that looked like a credential problem but was not.
+        A wrong model id is a configuration mistake and is now reported as
+        one, at startup, with the variable to set named.
         """
         provider_name = (settings.AI_PROVIDER or "mock").strip().lower()
+        model = (settings.AI_MODEL or "").strip()
 
-        if provider_name == "gemini":
-            key = settings.AI_API_KEY or settings.GEMINI_API_KEY
+        if provider_name in ("gemini", "openai"):
+            key = (settings.AI_API_KEY or "").strip() or (
+                settings.GEMINI_API_KEY if provider_name == "gemini"
+                else settings.OPENAI_API_KEY
+            )
             if key:
-                return cls(GeminiProvider(key, settings.AI_MODEL or "gemini-1.5-flash"))
-        elif provider_name == "openai":
-            key = settings.AI_API_KEY or settings.OPENAI_API_KEY
-            if key:
-                return cls(OpenAIProvider(key, settings.AI_MODEL or "gpt-4o-mini"))
+                if not model:
+                    raise ValidationException(
+                        f"AI_PROVIDER={provider_name} is selected and a key is "
+                        f"present, but AI_MODEL is empty. Set AI_MODEL to a model "
+                        f"id that is currently available on your key. There is no "
+                        f"safe default: the previously hardcoded id has been "
+                        f"retired by the provider, and silently calling it "
+                        f"produces a 404 that looks like a credential problem."
+                    )
+                provider_cls = (
+                    GeminiProvider if provider_name == "gemini" else OpenAIProvider
+                )
+                return cls(provider_cls(key, model))
 
         return cls(MockAIProvider())
 
@@ -319,7 +405,34 @@ class AIService:
         context: dict[str, Any],
         history: list[dict[str, str]] | None = None,
     ) -> AIMessageResponse:
-        return await self.provider.generate_response(prompt, context, history or [])
+        """Chat through the provider.
+
+        Provider failures are re-raised as a sanitised ValidationException.
+        httpx embeds the full request URL in HTTPStatusError and the Gemini
+        endpoint carries the API key in the query string, so letting the raw
+        exception escape would put a live credential into logs and potentially
+        into an API error response. `structured()` was already protected; this
+        path - the one used by run_action and the chat route - was not.
+        """
+        try:
+            return await self.provider.generate_response(prompt, context, history or [])
+        except Exception as exc:  # noqa: BLE001 - re-raised sanitised below
+            raise ValidationException(_safe_error(exc)) from None
+
+    async def stream_chat(
+        self,
+        prompt: str,
+        context: dict[str, Any],
+        history: list[dict[str, str]] | None = None,
+    ) -> AsyncIterator[str]:
+        """Stream from the provider, sanitising failures on the same rule."""
+        try:
+            async for chunk in self.provider.stream_response(
+                prompt, context, history or []
+            ):
+                yield chunk
+        except Exception as exc:  # noqa: BLE001 - re-raised sanitised below
+            raise ValidationException(_safe_error(exc)) from None
 
     @staticmethod
     def extract_json(content: str) -> dict[str, Any] | None:
@@ -403,15 +516,6 @@ class AIService:
             usage=AIUsage(source="none"),
             error=last_error or "provider call failed",
         )
-
-    async def stream_chat(
-        self,
-        prompt: str,
-        context: dict[str, Any],
-        history: list[dict[str, str]] | None = None,
-    ) -> AsyncIterator[str]:
-        async for chunk in self.provider.stream_response(prompt, context, history or []):
-            yield chunk
 
     async def run_action(
         self,

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Ban, CheckCircle2, Clipboard, Eraser, History, Play, Plus, Square, TerminalSquare, X } from 'lucide-react';
 import { executionApi } from '../../api';
+import { tokenizeCommandLine } from '../../lib/shellTokenize';
 
 interface TerminalPanelProps {
   projectId: string;
@@ -21,9 +22,10 @@ interface TerminalEntry {
 
 interface TerminalTab { id: number; label: string; entries: TerminalEntry[]; }
 
-// Mirrors the backend allowlist so users get instant feedback before calling
-// the API. The backend remains the authoritative enforcer.
-const BLOCKED_NOTE = 'Allowed: git, npm, node, python, python3, pip, pip3, pytest, cargo, ls, dir, echo, cat, pwd, tree';
+// Mirrors the backend execution policy (backend/app/services/execution_service.py)
+// so users see the exact commands permitted in the execution sandbox.
+const BLOCKED_NOTE =
+  'Allowed: pytest, python -m pytest, npm test, npm run build, npm run lint, npm run typecheck, npm install, npx tsc --noemit, python -c "<code >", python --version, node --version, npm --version, git --version';
 
 // States the backend will no longer transition out of on its own
 // (backend/app/services/execution_service.py -> cancel_execution).
@@ -135,11 +137,39 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
     const trimmed = input.trim();
     if (!trimmed || isRunning) return;
 
-    const [command, ...args] = trimmed.split(/\s+/);
+    const parsed = tokenizeCommandLine(trimmed);
+    if (parsed.error) {
+      // Report the malformed input instead of sending a mangled argv; a
+      // half-tokenized command could otherwise be executed with the wrong
+      // argument boundaries.
+      setCancelError(parsed.error);
+      return;
+    }
+    const [command, ...args] = parsed.tokens;
+    if (!command) { setCancelError('Enter a command to run'); return; }
     setInput('');
     setHistory((previous) => [...previous.filter((item) => item !== trimmed), trimmed].slice(-50));
     setHistoryIndex(-1);
     setCancelError(null);
+
+    if (command.toLowerCase() === 'clear') {
+      updateEntries([]);
+      return;
+    }
+    if (command.toLowerCase() === 'help') {
+      updateEntries((prev) => [
+        ...prev,
+        {
+          input: trimmed,
+          stdout: `DEVOS Execution Sandbox\n${BLOCKED_NOTE}\nTip: Use the Git panel for git status/diff/commit/branch operations, and the Quality / Preview panels for managed checks and dev servers.`,
+          stderr: '',
+          exitCode: 0,
+          status: 'COMPLETED',
+        },
+      ]);
+      return;
+    }
+
     setIsRunning(true);
     runningLabelRef.current = trimmed;
 
@@ -337,7 +367,7 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({ projectId }) => {
           type="text"
           className="input"
           style={{ flex: 1, fontFamily: 'monospace', fontSize: 12, padding: '6px 10px' }}
-          placeholder="git status"
+          placeholder="pytest or python --version (type help for allowed commands)"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleInputKeyDown}

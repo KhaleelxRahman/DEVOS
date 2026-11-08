@@ -118,6 +118,8 @@ def test_production_guard_rejects_insecure_defaults(monkeypatch):
 
 
 def test_production_guard_accepts_secure_config():
+    from cryptography.fernet import Fernet
+
     from app.core.config import Settings, _validate_production_safety
 
     s = Settings(
@@ -125,11 +127,16 @@ def test_production_guard_accepts_secure_config():
         AUTH_SECRET="x" * 48,
         BACKEND_CORS_ORIGINS=["https://app.example.com"],
         DATABASE_URL="postgresql+asyncpg://user:pass@host:5432/db",
+        # Phase 10: TOKEN_ENCRYPTION_KEY became a REQUIRED production setting, so
+        # a genuinely "secure" config must now supply one.
+        TOKEN_ENCRYPTION_KEY=Fernet.generate_key().decode(),
     )
     assert _validate_production_safety(s) is s
 
 
 def test_production_guard_treats_all_capitalizations_as_production():
+    from cryptography.fernet import Fernet
+
     from app.core.config import (
         Settings,
         _validate_production_safety,
@@ -143,6 +150,8 @@ def test_production_guard_treats_all_capitalizations_as_production():
             AUTH_SECRET="x" * 48,
             BACKEND_CORS_ORIGINS=["https://app.example.com"],
             DATABASE_URL="postgresql+asyncpg://user:pass@host:5432/db",
+            # Phase 10: required in production, so supply one.
+            TOKEN_ENCRYPTION_KEY=Fernet.generate_key().decode(),
         )
         assert _validate_production_safety(s) is s
         # Insecure defaults must raise for every production capitalization.

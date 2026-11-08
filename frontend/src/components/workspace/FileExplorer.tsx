@@ -50,23 +50,52 @@ const TreeNode: React.FC<{
   const isActive = activeFile === node.path;
   return (
     <div role={isDirectory ? 'group' : undefined}>
-      <button
-        className={`tree-row ${isActive ? 'active' : ''} ${isDirectory && isOpen ? 'expanded' : ''}`}
-        style={{ paddingLeft: depth * 12 + (isDirectory ? 8 : 24) }}
-        onClick={() => isDirectory ? onToggle(node.path) : onSelect(node.path)}
-        onContextMenu={(event) => onContextMenu(event, node)}
-        draggable
-        onDragStart={(event) => event.dataTransfer.setData('text/plain', node.path)}
-        onDragOver={(event) => { if (isDirectory) event.preventDefault(); }}
-        onDrop={(event) => onDrop(event, node)}
-        aria-expanded={isDirectory ? isOpen : undefined}
-        aria-current={isActive ? 'true' : undefined}
-        title={node.path}
-      >
-        {isDirectory && (isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />)}
-        {isDirectory ? (isOpen ? <FolderOpen size={14} /> : <Folder size={14} />) : fileIcon(node)}
-        <span>{node.name}</span>
-      </button>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <button
+          className={`tree-row ${isActive ? 'active' : ''} ${isDirectory && isOpen ? 'expanded' : ''}`}
+          style={{ paddingLeft: depth * 12 + (isDirectory ? 8 : 24), paddingRight: 22 }}
+          onClick={() => isDirectory ? onToggle(node.path) : onSelect(node.path)}
+          onContextMenu={(event) => onContextMenu(event, node)}
+          draggable
+          onDragStart={(event) => event.dataTransfer.setData('text/plain', node.path)}
+          onDragOver={(event) => { if (isDirectory) event.preventDefault(); }}
+          onDrop={(event) => onDrop(event, node)}
+          aria-expanded={isDirectory ? isOpen : undefined}
+          aria-current={isActive ? 'true' : undefined}
+          title={node.path}
+        >
+          {isDirectory && (isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />)}
+          {isDirectory ? (isOpen ? <FolderOpen size={14} /> : <Folder size={14} />) : fileIcon(node)}
+          <span style={{ flex: 1, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis' }}>{node.name}</span>
+        </button>
+        <button
+          type="button"
+          aria-label={`Actions for ${node.name}`}
+          title={`Actions for ${node.name}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+            onContextMenu(
+              { preventDefault: () => {}, clientX: rect.left, clientY: rect.bottom } as React.MouseEvent,
+              node,
+            );
+          }}
+          style={{
+            position: 'absolute',
+            right: 4,
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--color-text-muted)',
+            cursor: 'pointer',
+            opacity: 0.65,
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '2px',
+          }}
+        >
+          <MoreHorizontal size={12} />
+        </button>
+      </div>
       {isDirectory && isOpen && node.children?.map((child) => (
         <TreeNode key={child.path} node={child} depth={depth + 1} activeFile={activeFile} expanded={expanded} onToggle={onToggle} onSelect={onSelect} onContextMenu={onContextMenu} onDrop={onDrop} />
       ))}
@@ -143,7 +172,13 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectId, onSelectF
     const name = promptForName('file');
     if (!name) return;
     setBusy(true);
-    try { await filesApi.createFile(projectId, parent, name); await load(); onSelectFile(`${parent ? `${parent}/` : ''}${name}`); toast(`Created file ${name}`, 'success'); }
+    try {
+      await filesApi.createFile(projectId, parent, name);
+      if (parent) setExpanded((prev) => new Set(prev).add(parent));
+      await load();
+      onSelectFile(`${parent ? `${parent}/` : ''}${name}`);
+      toast(`Created file ${name}`, 'success');
+    }
     catch (err: any) { toast(err.message || 'Could not create file', 'error'); }
     finally { setBusy(false); }
   };
@@ -152,7 +187,12 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectId, onSelectF
     const name = promptForName('folder');
     if (!name) return;
     setBusy(true);
-    try { await filesApi.createFolder(projectId, parent, name); await load(); toast(`Created folder ${name}`, 'success'); }
+    try {
+      await filesApi.createFolder(projectId, parent, name);
+      if (parent) setExpanded((prev) => new Set(prev).add(parent));
+      await load();
+      toast(`Created folder ${name}`, 'success');
+    }
     catch (err: any) { toast(err.message || 'Could not create folder', 'error'); }
     finally { setBusy(false); }
   };
@@ -182,7 +222,13 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectId, onSelectF
   const move = async (source: string, destination: FileNode) => {
     if (destination.type !== 'directory' || source === destination.path) return;
     setBusy(true);
-    try { const response = await filesApi.move(projectId, source, destination.path); await load(); onPathRenamed?.(source, response.data?.path || `${destination.path}/${source.split('/').pop()}`); toast('Moved item', 'success'); }
+    try {
+      const response = await filesApi.move(projectId, source, destination.path);
+      setExpanded((prev) => new Set(prev).add(destination.path));
+      await load();
+      onPathRenamed?.(source, response.data?.path || `${destination.path}/${source.split('/').pop()}`);
+      toast('Moved item', 'success');
+    }
     catch (err: any) { toast(err.message || 'Move failed', 'error'); }
     finally { setBusy(false); }
   };

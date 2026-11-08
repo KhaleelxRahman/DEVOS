@@ -25,9 +25,56 @@ os.environ.setdefault(
     '["http://localhost:5173","http://localhost:3000","https://devos-ebon.vercel.app"]',
 )
 
+# Isolate the AI provider as well. Several API tests assert the
+# "local-mock" provider and expect deterministic offline responses, but
+# AIService.from_settings() reads the developer's real .env. Without this the
+# suite silently makes live, billable provider calls and then fails on
+# whatever the provider happened to answer (rate limits, outages, 5xx).
+# A test that genuinely needs a real provider must opt in explicitly via the
+# `real_ai_provider` fixture below.
+os.environ["AI_PROVIDER"] = "mock"
+os.environ["AI_API_KEY"] = ""
+os.environ["GEMINI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = ""
+os.environ["AI_MODEL"] = ""
+
 # Rate limiting is process-local; reset between tests so per-IP limits in
 # auth/waitlist/contact/AI/terminal do not leak across test cases.
 import pytest as _pytest  # noqa: E402  (kept after env setup by intent)
+
+
+@_pytest.fixture
+def real_ai_provider():
+    """Opt in to the provider configured in the developer's .env.
+
+    This performs a real network call and may consume provider quota, so it is
+    never automatic. Without this fixture the provider stays the local mock.
+
+    ``app.core.config`` builds ``settings`` once at import time, so the module
+    is reloaded for the env vars above to take effect, then restored
+    afterwards so later tests keep the offline mock.
+    """
+    import importlib
+
+    import app.core.config as config
+
+    with open(
+        os.path.join(os.path.dirname(__file__), "..", "backend", ".env"),
+        encoding="utf-8",
+    ) as fh:
+        for line in fh:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, value = line.split("=", 1)
+                os.environ[key.strip()] = value.strip().strip('"')
+
+    reloaded = importlib.reload(config)
+    try:
+        yield reloaded.settings
+    finally:
+        for name in ("AI_PROVIDER", "AI_API_KEY", "GEMINI_API_KEY", "OPENAI_API_KEY", "AI_MODEL"):
+            os.environ[name] = ""
+        importlib.reload(config)
 
 
 @_pytest.fixture(autouse=True)

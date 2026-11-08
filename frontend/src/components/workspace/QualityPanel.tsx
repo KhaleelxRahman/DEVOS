@@ -1,6 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Hammer, Play } from 'lucide-react';
-import { qualityApi, QualityOperation } from '../../api';
+import { Hammer, Play, Wrench } from 'lucide-react';
+import {
+  DiagnosisResult,
+  QualityOperation,
+  RepairProposal,
+  RepairVerification,
+  diagnosticsApi,
+  qualityApi,
+  repairsApi,
+} from '../../api';
 import { Spinner, Badge } from '../common';
 
 interface QualityPanelProps {
@@ -8,6 +16,7 @@ interface QualityPanelProps {
 }
 
 interface OperationResult {
+  execution_id: string;
   operation: string;
   status: string;
   exit_code: number | null;
@@ -26,6 +35,10 @@ export const QualityPanel: React.FC<QualityPanelProps> = ({ projectId }) => {
   const [running, setRunning] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [diagnoses, setDiagnoses] = useState<Record<string, DiagnosisResult>>({});
+  const [proposals, setProposals] = useState<Record<string, RepairProposal>>({});
+  const [verifications, setVerifications] = useState<Record<string, RepairVerification>>({});
+  const [diagBusy, setDiagBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setIsLoading(true);
@@ -51,6 +64,7 @@ export const QualityPanel: React.FC<QualityPanelProps> = ({ projectId }) => {
       setResults((prev) => ({
         ...prev,
         [operation]: {
+          execution_id: record.execution_id,
           operation,
           status: record.status,
           exit_code: record.exit_code,
@@ -68,6 +82,42 @@ export const QualityPanel: React.FC<QualityPanelProps> = ({ projectId }) => {
       setError(message);
     } finally {
       setRunning(null);
+    }
+  };
+
+  const diagnoseAndPropose = async (operation: string, executionId: string) => {
+    setDiagBusy(operation);
+    setError('');
+    try {
+      const [diagRes, propRes] = await Promise.all([
+        diagnosticsApi.diagnoseExecution(projectId, executionId),
+        repairsApi.propose(projectId, executionId).catch(() => null),
+      ]);
+      if (diagRes.success && diagRes.data) {
+        setDiagnoses((prev) => ({ ...prev, [operation]: diagRes.data! }));
+      }
+      if (propRes?.success && propRes.data) {
+        setProposals((prev) => ({ ...prev, [operation]: propRes.data! }));
+      }
+    } catch (err: any) {
+      setError(err.message || 'Unable to diagnose quality failure');
+    } finally {
+      setDiagBusy(null);
+    }
+  };
+
+  const verifyRepair = async (operation: string, executionId: string) => {
+    setDiagBusy(operation);
+    setError('');
+    try {
+      const res = await repairsApi.verify(projectId, executionId);
+      if (res.success && res.data) {
+        setVerifications((prev) => ({ ...prev, [operation]: res.data! }));
+      }
+    } catch (err: any) {
+      setError(err.message || 'Repair verification failed');
+    } finally {
+      setDiagBusy(null);
     }
   };
 
@@ -129,9 +179,52 @@ export const QualityPanel: React.FC<QualityPanelProps> = ({ projectId }) => {
               <p style={{ color: 'var(--color-warning)', margin: '4px 0 0' }}>{op.reason}</p>
             )}
             {result && (
-              <pre style={{ background: 'var(--color-background)', padding: 8, borderRadius: 6, overflowX: 'auto', maxHeight: 160, color: 'var(--color-text-secondary)', marginTop: 6 }}>
-                {result.stdout || result.stderr || result.failure_reason || '(no output)'}
-              </pre>
+              <>
+                <pre style={{ background: 'var(--color-background)', padding: 8, borderRadius: 6, overflowX: 'auto', maxHeight: 160, color: 'var(--color-text-secondary)', marginTop: 6 }}>
+                  {result.stdout || result.stderr || result.failure_reason || '(no output)'}
+                </pre>
+                {failed && result.execution_id && (
+                  <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={diagBusy === op.operation}
+                        onClick={() => void diagnoseAndPropose(op.operation, result.execution_id)}
+                      >
+                        <Wrench size={11} /> {diagBusy === op.operation ? 'Diagnosing…' : 'Diagnose & Repair'}
+                      </button>
+                    </div>
+                    {diagnoses[op.operation] && (
+                      <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-border)', borderRadius: 6, padding: 8, fontSize: 11, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <strong>{diagnoses[op.operation].category.statement}: {diagnoses[op.operation].problem.statement}</strong>
+                        {diagnoses[op.operation].suggested_fix && (
+                          <span style={{ color: 'var(--color-accent)' }}>
+                            Suggested fix: {diagnoses[op.operation].suggested_fix?.statement}
+                          </span>
+                        )}
+                        {proposals[op.operation]?.supported && proposals[op.operation].changes.length > 0 && (
+                          <div style={{ marginTop: 4 }}>
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
+                              disabled={diagBusy === op.operation}
+                              onClick={() => void verifyRepair(op.operation, result.execution_id)}
+                            >
+                              <Wrench size={11} /> Apply &amp; Verify Repair
+                            </button>
+                          </div>
+                        )}
+                        {verifications[op.operation] && (
+                          <span style={{ color: verifications[op.operation].verified ? 'var(--color-success)' : 'var(--color-warning)' }}>
+                            {verifications[op.operation].outcome}: {verifications[op.operation].reason}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
         );

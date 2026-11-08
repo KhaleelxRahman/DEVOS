@@ -257,10 +257,10 @@ class FileService:
         if not os.path.exists(abs_path):
             raise FileNotFoundException()
         parent_abs = os.path.dirname(abs_path)
-        project_root = os.path.abspath(
+        project_root = os.path.realpath(
             ProjectService.get_project_storage_path(project_id)
         )
-        if os.path.abspath(abs_path) == project_root:
+        if os.path.realpath(abs_path) == project_root:
             raise FileAccessDeniedException("Cannot rename the project root")
         parent_rel = os.path.relpath(parent_abs, project_root).replace("\\", "/")
         parent_rel = "" if parent_rel == "." else parent_rel
@@ -277,10 +277,10 @@ class FileService:
         import shutil
 
         abs_path = FileService.validate_safe_path(project_id, relative_path)
-        project_root = os.path.abspath(
+        project_root = os.path.realpath(
             ProjectService.get_project_storage_path(project_id)
         )
-        if os.path.abspath(abs_path) == project_root:
+        if os.path.realpath(abs_path) == project_root:
             raise FileAccessDeniedException("Cannot delete the project root")
         if not os.path.exists(abs_path):
             raise FileNotFoundException()
@@ -293,15 +293,15 @@ class FileService:
     def move(project_id: str, relative_path: str, destination_parent: str) -> str:
         source_abs = FileService.validate_safe_path(project_id, relative_path)
         destination_dir = FileService.validate_safe_path(project_id, destination_parent)
-        project_root = os.path.abspath(ProjectService.get_project_storage_path(project_id))
-        if os.path.abspath(source_abs) == project_root:
+        project_root = os.path.realpath(ProjectService.get_project_storage_path(project_id))
+        if os.path.realpath(source_abs) == project_root:
             raise FileAccessDeniedException("Cannot move the project root")
         if not os.path.exists(source_abs):
             raise FileNotFoundException()
         if not os.path.isdir(destination_dir):
             raise FileNotFoundException()
         source_parent = os.path.dirname(source_abs)
-        if os.path.abspath(source_parent) == os.path.abspath(destination_dir):
+        if os.path.realpath(source_parent) == os.path.realpath(destination_dir):
             return relative_path.replace("\\", "/")
         if os.path.isdir(source_abs):
             source_real = os.path.realpath(source_abs)

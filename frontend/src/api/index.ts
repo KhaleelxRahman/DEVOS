@@ -38,6 +38,13 @@ export const authApi = {
   me: () => apiClient.get<{ user: User }>('/auth/me'),
 };
 
+export const usersApi = {
+  me: () => apiClient.get<User>('/users/me'),
+  updateProfile: (payload: { name: string }) => apiClient.patch<User>('/users/me', payload),
+  getAiProvider: () =>
+    apiClient.get<{ provider: string; model: string; is_mock: boolean; configured: boolean }>('/users/ai-provider'),
+};
+
 export const projectsApi = {
   list: () => apiClient.get<{ projects: Project[] }>('/projects'),
   get: (id: string) => apiClient.get<Project>(`/projects/${id}`),
@@ -72,15 +79,40 @@ export const filesApi = {
   },
 };
 
+export interface ProvenanceCommitPayload {
+  phase4_outcome: string;
+  phase4_reverted?: boolean;
+  files_touched: string[];
+  diagnosis_category?: string;
+  diagnosis_signature?: string;
+  phase4_rerun_exit_code?: number | null;
+  phase4_execution_id?: string | null;
+  message?: string;
+  approved?: boolean;
+}
+
+export interface CommitProvenanceResult {
+  committed: boolean;
+  commit_sha: string;
+  branch: string;
+  files_committed: string[];
+  message: string;
+  provenance: Record<string, unknown>;
+}
+
 export const gitApi = {
   getStatus: (projectId: string) => apiClient.get<GitStatus>(`/projects/${projectId}/git/status`),
   getDiff: (projectId: string) => apiClient.get<GitDiff>(`/projects/${projectId}/git/diff`),
   commit: (projectId: string, message: string) => apiClient.post(`/projects/${projectId}/git/commit`, { message }),
+  commitVerified: (projectId: string, payload: ProvenanceCommitPayload) =>
+    apiClient.post<CommitProvenanceResult>(`/projects/${projectId}/git/commit-verified`, payload),
   getBranches: (projectId: string) => apiClient.get<{ current: string; branches: string[] }>(`/projects/${projectId}/git/branches`),
   getLog: (projectId: string, limit = 20) => apiClient.get<{ commits: { hash: string; author: string; date: string; message: string }[] }>(`/projects/${projectId}/git/log?limit=${limit}`),
   stage: (projectId: string, files: string[]) => apiClient.post(`/projects/${projectId}/git/stage`, { files }),
   unstage: (projectId: string, files: string[]) => apiClient.post(`/projects/${projectId}/git/unstage`, { files }),
   checkout: (projectId: string, branch: string, create = false) => apiClient.post(`/projects/${projectId}/git/checkout`, { branch, create }),
+  merge: (projectId: string, source: string, target?: string) =>
+    apiClient.post<{ merged: boolean; output: string }>(`/projects/${projectId}/git/merge`, { source, target }),
   pull: (projectId: string) => apiClient.post(`/projects/${projectId}/git/pull`),
   push: (projectId: string) => apiClient.post(`/projects/${projectId}/git/push`),
 };
@@ -268,12 +300,152 @@ export const agentApi = {
     max_repeated_failures?: number;
     start?: boolean;
   }) => apiClient.post<AgentRun>('/agent/runs', payload),
+  list: (projectId: string) =>
+    apiClient.get<AgentRun[]>(`/agent/runs?project_id=${encodeURIComponent(projectId)}`),
   get: (runId: string) => apiClient.get<AgentRun>(`/agent/runs/${runId}`),
   cancel: (runId: string) => apiClient.post<{ cancel_requested: boolean }>(`/agent/runs/${runId}/cancel`),
   approve: (runId: string, message: string) =>
     apiClient.post<{ commit_sha: string; paths: string[] }>(`/agent/runs/${runId}/commits/approve`, { message }),
   reject: (runId: string) => apiClient.post<{ approval_state: string }>(`/agent/runs/${runId}/commits/reject`),
   retry: (runId: string) => apiClient.post<AgentRun>(`/agent/runs/${runId}/retry`),
+};
+
+export interface DiagnosisEvidence {
+  tag: 'OBSERVED' | 'INFERRED' | 'UNKNOWN' | string;
+  statement: string;
+  source: string;
+}
+
+export interface DiagnosisLine {
+  file: string;
+  line: number;
+}
+
+export interface DiagnosisResult {
+  diagnosable: boolean;
+  execution_id: string | null;
+  problem: DiagnosisEvidence;
+  category: DiagnosisEvidence;
+  evidence: DiagnosisEvidence[];
+  likely_cause?: DiagnosisEvidence | null;
+  affected_files: string[];
+  affected_lines: DiagnosisLine[];
+  suggested_fix?: DiagnosisEvidence | null;
+  confidence: number;
+  confidence_basis: string;
+  report: string;
+}
+
+export const diagnosticsApi = {
+  diagnoseExecution: (projectId: string, executionId: string) =>
+    apiClient.get<DiagnosisResult>(`/projects/${projectId}/diagnostics/executions/${executionId}`),
+  diagnoseLatest: (projectId: string) =>
+    apiClient.get<DiagnosisResult>(`/projects/${projectId}/diagnostics/latest`),
+};
+
+export interface RepairChange {
+  path: string;
+  diff: string;
+  lines_changed: number;
+  before: string;
+  after: string;
+}
+
+export interface RepairProposal {
+  supported: boolean;
+  execution_id: string;
+  signature: string;
+  reason: string;
+  risk: string;
+  requires_approval: boolean;
+  auto_appliable: boolean;
+  files_touched: string[];
+  changes: RepairChange[];
+}
+
+export interface RepairVerification {
+  verified: boolean;
+  outcome: string;
+  reason: string;
+  diff: string;
+  files_touched: string[];
+  reverted: boolean;
+  original_execution?: ExecutionRecord | null;
+  rerun_execution?: ExecutionRecord | null;
+}
+
+export const repairsApi = {
+  propose: (projectId: string, executionId: string) =>
+    apiClient.get<RepairProposal>(`/projects/${projectId}/repairs/proposal/${executionId}`),
+  apply: (projectId: string, executionId: string) =>
+    apiClient.post<{ applied: boolean; diff: string; files_touched: string[]; backups: Record<string, unknown> }>(
+      `/projects/${projectId}/repairs/apply/${executionId}`
+    ),
+  verify: (projectId: string, executionId: string) =>
+    apiClient.post<RepairVerification>(`/projects/${projectId}/repairs/verify/${executionId}`),
+};
+
+export interface RepoIndexState {
+  project_id: string;
+  generation: number;
+  file_count: number;
+  symbol_count: number;
+  last_reindex_reason?: string | null;
+  languages: Record<string, number>;
+}
+
+export interface RepoFileMatch {
+  path: string;
+  language?: string | null;
+  size_bytes: number;
+}
+
+export interface RepoTextHit {
+  path: string;
+  score: number;
+  kind: string;
+  line?: number | null;
+  snippet?: string | null;
+}
+
+export interface RepoSymbolMatch {
+  name: string;
+  kind: string;
+  path: string;
+  line: number;
+  signature?: string | null;
+}
+
+export interface RepoReference {
+  path: string;
+  line: number;
+  snippet: string;
+}
+
+export interface RepoArchitecture {
+  project_id: string;
+  symbols_by_kind: Record<string, number>;
+  internal_modules: string[];
+  total_symbols: number;
+}
+
+export const repoIndexApi = {
+  getState: (projectId: string, refresh = true) =>
+    apiClient.get<RepoIndexState>(`/projects/${projectId}/repo-index?refresh=${refresh}`),
+  build: (projectId: string) =>
+    apiClient.post<RepoIndexState>(`/projects/${projectId}/repo-index`),
+  findFiles: (projectId: string, q: string) =>
+    apiClient.get<RepoFileMatch[]>(`/projects/${projectId}/repo-index/files?q=${encodeURIComponent(q)}`),
+  searchText: (projectId: string, q: string, limit = 20) =>
+    apiClient.get<RepoTextHit[]>(`/projects/${projectId}/repo-index/search/text?q=${encodeURIComponent(q)}&limit=${limit}`),
+  searchSymbols: (projectId: string, q: string, limit = 25) =>
+    apiClient.get<RepoSymbolMatch[]>(`/projects/${projectId}/repo-index/search/symbols?q=${encodeURIComponent(q)}&limit=${limit}`),
+  findReferences: (projectId: string, name: string, limit = 25) =>
+    apiClient.get<RepoReference[]>(`/projects/${projectId}/repo-index/references?name=${encodeURIComponent(name)}&limit=${limit}`),
+  searchSemantic: (projectId: string, q: string, limit = 10) =>
+    apiClient.get<RepoTextHit[]>(`/projects/${projectId}/repo-index/search/semantic?q=${encodeURIComponent(q)}&limit=${limit}`),
+  getArchitecture: (projectId: string) =>
+    apiClient.get<RepoArchitecture>(`/projects/${projectId}/repo-index/architecture`),
 };
 
 export const qualityApi = {

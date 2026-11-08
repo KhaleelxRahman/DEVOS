@@ -3,16 +3,21 @@ import { ExternalLink, RefreshCw, Star, GitFork, Github } from 'lucide-react';
 import { Card, Button, Badge, Spinner, Input } from '../components/common';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { githubApi, healthApi, GithubRepository } from '../api';
+import { githubApi, healthApi, usersApi, GithubRepository } from '../api';
 import { projectsApi } from '../api';
 import { useProject } from '../hooks/useProject';
 import { useSeo } from '../hooks/useSeo';
+import { useToast } from '../components/common/Toast';
 
 export const SettingsPage: React.FC = () => {
   useSeo({ title: 'Settings', noindex: true });
 
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
+  const [profileName, setProfileName] = useState(user?.name || '');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [aiStatus, setAiStatus] = useState<{ provider: string; model: string; is_mock: boolean; configured: boolean } | null>(null);
   const [github, setGithub] = useState<{ connected: boolean; username: string | null } | null>(null);
   const [githubError, setGithubError] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
@@ -36,6 +41,10 @@ export const SettingsPage: React.FC = () => {
   };
 
   useEffect(() => {
+    if (user?.name) setProfileName(user.name);
+  }, [user?.name]);
+
+  useEffect(() => {
     githubApi
       .getConnection()
       .then((res) => setGithub(res.data || { connected: false, username: null }))
@@ -45,7 +54,31 @@ export const SettingsPage: React.FC = () => {
       .check()
       .then((res) => setApiStatus(res.data?.status || null))
       .catch(() => setApiStatus('unreachable'));
+    usersApi
+      .getAiProvider()
+      .then((res) => {
+        if (res.data) setAiStatus(res.data);
+      })
+      .catch(() => {});
   }, []);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleaned = profileName.trim();
+    if (!cleaned) return;
+    setIsSavingProfile(true);
+    try {
+      const res = await usersApi.updateProfile({ name: cleaned });
+      if (res.success && res.data) {
+        updateUser(res.data);
+        toast('Profile updated', 'success');
+      }
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : 'Unable to update profile', 'error');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   const filteredRepositories = useMemo(() => {
     const query = repositorySearch.trim().toLowerCase();
@@ -111,21 +144,53 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       <Card title="Account Profile" subtitle="Your DEVOS v1.0.0 developer identity" style={{ marginBottom: 'var(--space-4)' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', fontSize: 'var(--font-size-sm)' }}>
-          <div>
-            <span style={{ color: 'var(--color-text-muted)', display: 'block', fontSize: 'var(--font-size-xs)' }}>Name</span>
-            <span style={{ fontWeight: 500 }}>{user?.name || 'Developer'}</span>
+        <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', fontSize: 'var(--font-size-sm)' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'flex-end' }}>
+            <div style={{ flex: 1 }}>
+              <Input
+                label="Display Name"
+                value={profileName}
+                onChange={(e) => setProfileName(e.target.value)}
+                required
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="secondary"
+              size="sm"
+              isLoading={isSavingProfile}
+              disabled={!profileName.trim() || profileName.trim() === (user?.name || '')}
+            >
+              Save Name
+            </Button>
           </div>
           <div>
             <span style={{ color: 'var(--color-text-muted)', display: 'block', fontSize: 'var(--font-size-xs)' }}>Email</span>
             <span style={{ fontWeight: 500 }}>{user?.email || 'developer@example.com'}</span>
           </div>
           <div style={{ marginTop: 'var(--space-2)' }}>
-            <Button variant="danger" size="sm" onClick={handleLogout}>
+            <Button type="button" variant="danger" size="sm" onClick={handleLogout}>
               Sign Out
             </Button>
           </div>
-        </div>
+        </form>
+      </Card>
+
+      <Card title="AI Provider Status" subtitle="Active model configuration" style={{ marginBottom: 'var(--space-4)' }}>
+        {!aiStatus ? (
+          <Spinner size={16} />
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 'var(--font-size-sm)' }}>
+            <span>
+              <Badge variant={aiStatus.configured ? 'success' : 'warning'}>
+                {aiStatus.configured ? `Configured (${aiStatus.provider})` : 'Local Mock AI'}
+              </Badge>{' '}
+              <span style={{ color: 'var(--color-text-secondary)' }}>
+                Model: <code>{aiStatus.model || 'devos-local-mock'}</code>
+              </span>
+            </span>
+          </div>
+        )}
       </Card>
 
       <Card title="GitHub Connection" subtitle="Repository integration status" style={{ marginBottom: 'var(--space-4)' }}>

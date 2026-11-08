@@ -316,9 +316,7 @@ export const BuilderPanel: React.FC<BuilderPanelProps> = ({
         onWorkspaceChanged?.();
         const firstApplied = res.data.applied_files[0];
         if (firstApplied && onOpenFile) {
-          // FileService stores generated files at the project root; open the
-          // real stored path rather than the manifest path.
-          onOpenFile(firstApplied.split("/").pop() ?? firstApplied);
+          onOpenFile(firstApplied);
         }
       } else {
         setError(res.error?.message || 'Apply failed.');
@@ -580,7 +578,7 @@ export const BuilderPanel: React.FC<BuilderPanelProps> = ({
                           <button
                             type="button"
                             className="builder-file-link"
-                            onClick={() => onOpenFile(file.split("/").pop() ?? file)}
+                            onClick={() => onOpenFile(file)}
                           >
                             {file}
                           </button>
@@ -605,7 +603,7 @@ export const BuilderPanel: React.FC<BuilderPanelProps> = ({
                           <button
                             type="button"
                             className="builder-file-link"
-                            onClick={() => onOpenFile(file.split("/").pop() ?? file)}
+                            onClick={() => onOpenFile(file)}
                           >
                             {file}
                           </button>

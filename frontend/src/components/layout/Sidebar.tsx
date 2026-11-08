@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FolderGit2, Code2, Settings, User, Bot, Github, Rocket, PanelLeftClose, PanelLeftOpen, Plus, MessageSquare, Trash2, Pin } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, FolderGit2, Code2, Settings, User, Bot, Github, Rocket, PanelLeftClose, PanelLeftOpen, Plus, MessageSquare, Trash2, Pin, LogOut } from 'lucide-react';
 import { useProject } from '../../hooks/useProject';
+import { useAuth } from '../../hooks/useAuth';
 import { aiApi } from '../../api';
 import { Conversation } from '../../types/ai';
 
 export const Sidebar: React.FC<{ onNavigate?: () => void; collapsed?: boolean; onToggle?: () => void }> = ({ onNavigate, collapsed = false, onToggle }) => {
   const { activeProject } = useProject();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conversation[]>([]);
 
   useEffect(() => {
@@ -160,10 +163,25 @@ export const Sidebar: React.FC<{ onNavigate?: () => void; collapsed?: boolean; o
           <Settings size={16} />
           {!collapsed && <span>Settings</span>}
         </NavLink>
-        <div className="sidebar-item" style={{ cursor: 'default' }}>
+        <div className="sidebar-item" style={{ cursor: 'default' }} title={collapsed ? (user?.name || 'Developer') : undefined}>
           <User size={16} />
-          {!collapsed && <span>Developer</span>}
+          {!collapsed && <span>{user?.name || 'Developer'}</span>}
         </div>
+        <button
+          type="button"
+          className="sidebar-item"
+          style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}
+          onClick={() => {
+            onNavigate?.();
+            logout();
+            navigate('/login');
+          }}
+          title={collapsed ? 'Log Out' : undefined}
+          aria-label="Log out"
+        >
+          <LogOut size={16} />
+          {!collapsed && <span>Log Out</span>}
+        </button>
       </div>
     </aside>
   );

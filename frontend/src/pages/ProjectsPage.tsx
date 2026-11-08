@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, FolderGit2, ArrowRight, Trash2 } from 'lucide-react';
+import { Plus, FolderGit2, ArrowRight, Trash2, Pencil } from 'lucide-react';
 import { Card, Button, Input, Modal, EmptyState, Badge, Spinner } from '../components/common';
 import { Project } from '../types/project';
 import { projectsApi } from '../api';
@@ -16,7 +16,11 @@ export const ProjectsPage: React.FC = () => {
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const { setActiveProject } = useProject();
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editName, setEditName] = useState<string>('');
+  const [editDescription, setEditDescription] = useState<string>('');
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const { activeProject, setActiveProject } = useProject();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isDeployView = searchParams.get('deploy') === '1';
@@ -61,6 +65,37 @@ export const ProjectsPage: React.FC = () => {
   const handleOpenProject = (project: Project) => {
     setActiveProject(project);
     navigate('/app/workspace');
+  };
+
+  const handleOpenEdit = (project: Project) => {
+    setEditingProject(project);
+    setEditName(project.name);
+    setEditDescription(project.description || '');
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProject || !editName.trim()) return;
+    setIsUpdating(true);
+    try {
+      const res = await projectsApi.update(editingProject.id, {
+        name: editName.trim(),
+        description: editDescription.trim(),
+      });
+      if (res.success && res.data) {
+        const updated = res.data;
+        setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+        if (activeProject?.id === updated.id) {
+          setActiveProject(updated);
+        }
+        setEditingProject(null);
+        toast(`Updated project "${updated.name}"`, 'success');
+      }
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : 'Unable to update project', 'error');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleDelete = async (project: Project) => {
@@ -155,6 +190,15 @@ export const ProjectsPage: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="sm"
+                  aria-label={`Edit project ${project.name}`}
+                  title="Edit project"
+                  onClick={() => handleOpenEdit(project)}
+                >
+                  <Pencil size={14} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   aria-label={`Delete project ${project.name}`}
                   isLoading={deletingId === project.id}
                   onClick={() => handleDelete(project)}
@@ -197,6 +241,39 @@ export const ProjectsPage: React.FC = () => {
             placeholder="Brief explanation of project domain or tech stack"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+          />
+        </form>
+      </Modal>
+      {/* Edit Project Modal */}
+      <Modal
+        isOpen={!!editingProject}
+        onClose={() => setEditingProject(null)}
+        title="Edit Project"
+        description="Update project name and workspace description."
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setEditingProject(null)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleUpdate} isLoading={isUpdating}>
+              Save Changes
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handleUpdate}>
+          <Input
+            label="Project Name"
+            placeholder="e.g. Sentinel API"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            required
+          />
+          <Input
+            label="Description (Optional)"
+            placeholder="Brief explanation of project domain or tech stack"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
           />
         </form>
       </Modal>

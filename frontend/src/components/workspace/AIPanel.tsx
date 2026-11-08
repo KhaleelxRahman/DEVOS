@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Bot, Copy, Plus, Send, Check, Pencil, RefreshCw, ChevronDown, ChevronUp, X, Square, Paperclip, Pin, Trash2 } from 'lucide-react';
-import { aiApi, filesApi, gitApi, projectsApi, testingApi } from '../../api';
+import { aiApi, diagnosticsApi, filesApi, gitApi, projectsApi, qualityApi, testingApi } from '../../api';
 import { AIMessage, Conversation, PlannerIntent, PlannerRequirementKey } from '../../types/ai';
 import { Spinner, Button, MarkdownContent } from '../common';
 
@@ -65,11 +65,12 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [input, setInput] = useState('');
   const [attachmentName, setAttachmentName] = useState('');
+  const [attachmentContent, setAttachmentContent] = useState('');
   const [conversationSearch, setConversationSearch] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
-  const [mode, setMode] = useState<'assistant' | 'planner'>('planner');
+  const [mode, setMode] = useState<'assistant' | 'planner'>('assistant');
   const [idea, setIdea] = useState('');
   const [intent, setIntent] = useState<PlannerIntent>(EMPTY_INTENT);
   const [accepted, setAccepted] = useState<PlannerRequirementKey[]>([]);
@@ -186,12 +187,37 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
     }
   };
 
+  const handleAttachmentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setAttachmentName('');
+      setAttachmentContent('');
+      return;
+    }
+    setAttachmentName(file.name);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === 'string' ? reader.result.slice(0, 32000) : '';
+      setAttachmentContent(text);
+    };
+    reader.onerror = () => {
+      setAttachmentContent('');
+    };
+    reader.readAsText(file);
+  };
+
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     const message = input.trim();
-    if (!message || isSending) return;
+    if ((!message && !attachmentContent) || isSending) return;
+    const fullPrompt = attachmentName && attachmentContent
+      ? `${message ? `${message}\n\n` : ''}Attached file (\`${attachmentName}\`):\n\`\`\`\n${attachmentContent}\n\`\`\``
+      : message;
     setInput('');
-    await runSend(message);
+    setAttachmentName('');
+    setAttachmentContent('');
+    if (attachmentRef.current) attachmentRef.current.value = '';
+    await runSend(fullPrompt);
   };
 
   const stopGeneration = () => abortRef.current?.abort();
@@ -340,56 +366,65 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
   const queueDone = queue.filter((task) => task.status === 'completed').length;
   const currentTask = queue.find((task) => task.status === 'running') || queue.find((task) => task.status === 'pending');
 
-  const runQaAudit = () => {
-    const issues: QaIssue[] = [
-      {
-        id: 'auth-header',
-        category: 'API contract',
-        severity: 'low',
-        file: 'src/api/client.ts',
-        reason: 'Shared API client keeps auth tokens in the request header when present.',
-        suggestion: 'Keep bearer token handling centralized and validate non-JSON requests separately.',
-        confidence: 0.94,
-      },
-      {
-        id: 'route-guard',
-        category: 'Authentication',
-        severity: 'low',
-        file: 'src/App.tsx',
-        reason: 'Protected routes redirect unauthenticated requests to the login flow.',
-        suggestion: 'Keep using the auth gate and verify the redirect target after session restore.',
-        confidence: 0.96,
-      },
-      {
-        id: 'workspace-state',
-        category: 'State sync',
-        severity: 'medium',
-        file: 'src/pages/WorkspacePage.tsx',
-        reason: 'Stale project IDs are cleared and routed back to the project list instead of leaving a broken workspace.',
-        suggestion: 'Preserve the stale-project recovery path and a user-visible toast message.',
-        confidence: 0.93,
-      },
-      {
-        id: 'explorer-safety',
-        category: 'Safe self-healing',
-        severity: 'medium',
-        file: 'src/components/workspace/FileExplorer.tsx',
-        reason: 'Existing files require confirmation before overwrite; the UI and queue explicitly avoid silent destructiveness.',
-        suggestion: 'Keep overwrite confirmations and refresh the tree after every file mutation.',
-        confidence: 0.9,
-      },
-      {
-        id: 'render-fallback',
-        category: 'Error boundary',
-        severity: 'medium',
-        file: 'src/components/common/ErrorBoundary.tsx',
-        reason: 'The app now fails safely and shows a recoverable fallback instead of crashing the entire workspace.',
-        suggestion: 'Keep the boundary at the app root and log render issues to the console for debugging.',
-        confidence: 0.91,
-      },
-    ];
-    setQaIssues(issues);
-    setQaSummary(`QA audit complete — ${issues.filter((issue) => issue.severity !== 'high').length} safe checks passed and 0 destructive auto-fixes were applied.`);
+  const runQaAudit = async () => {
+    setQaSummary('Running live project QA & diagnostics audit…');
+    try {
+      const [qualRes, diagRes, gitRes] = await Promise.all([
+        qualityApi.listOperations(projectId).catch(() => null),
+        diagnosticsApi.diagnoseLatest(projectId).catch(() => null),
+        gitApi.getStatus(projectId).catch(() => null),
+      ]);
+      const issues: QaIssue[] = [];
+      const ops = qualRes?.data?.operations || [];
+      for (const op of ops) {
+        issues.push({
+          id: `qual-${op.operation}`,
+          category: `Quality · ${op.operation}`,
+          severity: op.supported && op.available ? 'low' : 'medium',
+          file: op.source || 'project workspace',
+          reason: op.supported
+            ? `Detected ${op.operation}: ${op.command || ''} ${(op.arguments || []).join(' ')} (${op.available ? 'tool available' : 'tool unavailable'})`
+            : op.reason || `${op.operation} not configured in project manifests`,
+          suggestion: op.supported && op.available
+            ? `Run ${op.operation} in the Quality panel to verify.`
+            : `Configure a ${op.operation.toLowerCase()} script in package.json or pyproject.toml.`,
+          confidence: 1.0,
+        });
+      }
+      if (diagRes?.success && diagRes.data?.diagnosable) {
+        const d = diagRes.data;
+        issues.push({
+          id: `diag-${d.execution_id || 'latest'}`,
+          category: `Failure Diagnosis · ${d.category.statement}`,
+          severity: 'high',
+          file: d.affected_files[0] || 'latest execution',
+          reason: d.problem.statement,
+          suggestion: d.suggested_fix?.statement || d.likely_cause?.statement || 'Inspect execution output in Runs / Quality.',
+          confidence: Math.max(0, Math.min(1, (d.confidence || 80) / 100)),
+        });
+      }
+      if (gitRes?.success && gitRes.data) {
+        const g = gitRes.data;
+        issues.push({
+          id: 'git-status',
+          category: 'Git Working Tree',
+          severity: g.is_clean ? 'low' : 'medium',
+          file: `branch: ${g.branch || 'main'}`,
+          reason: g.is_clean
+            ? 'Working tree is clean.'
+            : `${(g.modified || []).length} modified, ${(g.untracked || []).length} untracked file(s) uncommitted.`,
+          suggestion: g.is_clean ? 'Ready for verification.' : 'Review diff in the Git panel before committing.',
+          confidence: 1.0,
+        });
+      }
+      setQaIssues(issues);
+      const highCount = issues.filter((i) => i.severity === 'high').length;
+      setQaSummary(
+        `Live QA audit complete — ${issues.length} check(s) evaluated from backend quality, diagnostics, and Git APIs (${highCount} high-severity finding(s)).`
+      );
+    } catch (err: unknown) {
+      setQaSummary(err instanceof Error ? err.message : 'Unable to complete live QA audit');
+    }
   };
 
   return (
@@ -543,8 +578,8 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
           ref={attachmentRef}
           type="file"
           hidden
-          accept=".md,.txt,.json,.js,.ts,.tsx,.py,.pdf,image/*"
-          onChange={(event) => setAttachmentName(event.target.files?.[0]?.name || '')}
+          accept=".md,.txt,.json,.js,.ts,.tsx,.py,.html,.css,.yml,.yaml,.sh,.sql"
+          onChange={handleAttachmentChange}
         />
         <button type="button" className="btn btn-secondary btn-sm" onClick={() => attachmentRef.current?.click()} aria-label="Attach a file">
           <Paperclip size={12} />
@@ -571,7 +606,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ projectId, activeFile, onWorks
         <span className="ai-composer-meta" aria-live="polite">
           {attachmentName ? `${attachmentName} · ` : ''}{input.length}/4000 · ~{Math.ceil(input.length / 4)} tokens
         </span>
-        <Button type={isSending ? 'button' : 'submit'} variant="primary" size="sm" disabled={!isSending && !input.trim()} onClick={isSending ? stopGeneration : undefined} aria-label={isSending ? 'Stop generation' : 'Send message'}>
+        <Button type={isSending ? 'button' : 'submit'} variant="primary" size="sm" disabled={!isSending && !input.trim() && !attachmentContent} onClick={isSending ? stopGeneration : undefined} aria-label={isSending ? 'Stop generation' : 'Send message'}>
           {isSending ? <Square size={12} /> : <Send size={12} />}
         </Button>
         {!isSending && messages.some((message) => message.role === 'assistant') && (

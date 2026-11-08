@@ -57,7 +57,8 @@ class TestingService:
             )
 
         executable = spec["argv"][0]
-        if shutil.which(executable) is None:
+        resolved_exe = shutil.which(executable)
+        if resolved_exe is None:
             raise AppException(
                 f"Required tool '{executable}' is not installed on this server",
                 code="TEST_TOOL_UNAVAILABLE",
@@ -67,8 +68,9 @@ class TestingService:
         project_dir = ProjectService.get_project_storage_path(project_id)
         start_time = time.time()
 
+        argv = [resolved_exe] + list(spec["argv"][1:])
         proc = await asyncio.create_subprocess_exec(
-            *spec["argv"],
+            *argv,
             cwd=project_dir,
             env=build_child_env(),
             stdout=asyncio.subprocess.PIPE,

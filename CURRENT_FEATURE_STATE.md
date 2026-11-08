@@ -49,7 +49,7 @@ Verdict key: **PASS** (verified working) | **PARTIAL** (works, but has a real bu
 | D | Terminal / Execution | **PARTIAL** |
 | E | Git | **PASS** |
 | F | GitHub integration | **PARTIAL** (real code, unconfigured, honest) |
-| G | AI / Builder | **PARTIAL** (AI is a labelled STUB; Builder Apply is broken) |
+| G | AI / Builder | **PARTIAL** (live native Gemini streaming verified 2026-10-02; Builder Apply is broken) |
 | H | Preview | **PASS** |
 | I | Quality checks | **PASS** |
 | J | Settings / misc | **PARTIAL** |
@@ -59,7 +59,78 @@ Verdict key: **PASS** (verified working) | **PARTIAL** (works, but has a real bu
 
 ## SECTION A - Auth: **PARTIAL**
 
-### Verified working
+### A2 - mid-session 401 recovery: **FIXED and verified 2026-10-02 (was the serious defect in this report)**
+
+The dead-end described below no longer reproduces. A global 401 handler now clears auth **once**,
+redirects through the existing protected route, and shows a read-once "session expired" message.
+Covered by 6 dedicated Playwright tests (`qa/tests-live/a2-session-recovery.spec.ts`), all passing:
+a 200 keeps the user working; a 401 clears auth and returns to login; simultaneous 401s cause a single
+recovery with no redirect loop; a login 401 shows the normal error; a logout 401 leaves the app
+unauthenticated without a loop; and the user can sign in again afterwards. A1 (logout always fires a
+401) remains cosmetic and unchanged.
+
+### RE-VERIFIED LIVE 2026-10-01 (this session, branch `phase3-enhancement-20260920` @ `355e7bc`)
+
+Re-run against the real dev stack (backend `http://127.0.0.1:8000` `/version` -> HTTP 200; frontend
+Vite on `http://localhost:5173`), real Chromium, real register/login/logout. **Verdict unchanged:
+PARTIAL.** Both historical defects still reproduce; nothing regressed.
+
+| Check | Result | Live evidence |
+|---|---|---|
+| Register | **PASS** | `secaudit01@example.com` created; UI redirected to `/app/dashboard` |
+| Login | **PASS** | Correct credentials -> `/app/dashboard`; wrong password -> `401 INVALID_CREDENTIALS` "Invalid email or password" |
+| Session persistence (hard reload) | **PASS** | Reload of `/app/dashboard` stayed authenticated; `localStorage['devos_token']` present, 188 chars; `AuthContext` re-validates via `GET /auth/me` |
+| Invalid token on load | **PASS** | Set `devos_token=garbage.invalid.token`, reloaded -> redirected to `/login`, bad token purged |
+| Logout | **PASS (behaviour)** | "Sign Out" on **Settings** -> redirected to `/login`, `devos_token` back to `null` |
+| Password hashing | **PASS** | bcrypt via passlib, unchanged (`security.py`) |
+| Backend 401 on bad token | **PASS** | `GET /auth/me` -> `401 AUTH_REQUIRED` "Invalid or expired session token" |
+
+**Note on where logout lives:** "Sign Out" is on the **Settings page only** (`SettingsPage.tsx`,
+button "Sign Out"). There is no logout control in the sidebar, top bar, or user menu. Verified this
+session by walking the authenticated shell snapshot — `Home / Projects / Workspace / AI / GitHub /
+Deploy` plus a `Preferences > Settings` link, no sign-out. Functional, but low discoverability.
+
+**A1 - Logout always fires a 401 — STILL PRESENT, confirmed this session.**
+`AuthContext.logout()` clears `localStorage` *before* calling `authApi.logout()`, and the API client
+reads the token from `localStorage` when building headers, so the request goes out unauthenticated.
+Reproduced verbatim on a real click:
+
+```
+[ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized)
+        @ http://localhost:5173/api/v1/auth/logout
+[WARNING] Logout request failed after local cleanup ApiError: Authentication required
+    at ApiClient.request (src/api/client.ts:40:11) @ src/context/AuthContext.tsx:41
+```
+
+Consequence is cosmetic (local state is cleared, so the user does land on `/login`), but every logout
+writes a 401 into the console and the network log.
+
+**A2 - No mid-session 401 handling — STILL PRESENT, confirmed this session, and this is the serious one.**
+Reproduced the exact real-world sequence: authenticated shell rendered -> token expires/invalidates ->
+navigate within the SPA (no page load, so `AuthContext`'s mount-time `me()` re-validation never runs).
+The client has no 401 interceptor: `ApiClient.request` just throws `ApiError`
+(`client.ts:55-59`) and every caller renders its own inline error.
+
+Observed result on `/app/projects`: the full authenticated shell stays mounted (header, sidebar,
+user's email still shown in the header area) while the panel body degrades to:
+
+```
+Unable to load projects
+Invalid or expired session token        [Retry]
+```
+
+- `localStorage['devos_token']` is **not** cleared (`tokenStillStored: true`), because nothing in the
+  non-mount path removes it — only `AuthContext`'s boot `useEffect` does, and that never re-runs.
+- The only affordance is "Retry", which re-issues the same request with the same dead token — so it
+  fails identically, forever. There is no "Session expired, sign in again" path and no automatic
+  redirect to `/login`.
+- Recoverable by hand (Settings -> Sign Out, or clearing localStorage), but the user is not told that.
+
+This is a genuine UX dead-end, not a cosmetic issue: a 30-minute token expiry
+(`ACCESS_TOKEN_EXPIRE_MINUTES = 30`, `security.py`) lands the user in this state on a routine
+afternoon of use, with no path forward offered by the UI. Screenshot: `seca-mid-session-401.png`.
+
+### Verified working (original 2026-09-26 audit)
 
 - **Register - PASS.** `POST /auth/register` created a real user; UI redirected to `/app/dashboard`.
 - **Login - PASS.** Credentials accepted, JWT issued, UI redirected to dashboard.
@@ -173,10 +244,26 @@ transaction.
 `window.prompt("Name of the new file:")`. It is unstyled, unlocalised, unvalidated at the UI layer, and
 inconsistent with every other form in the app (which use proper modals). Poor, but functional.
 
-**C2 - The editor status bar claims "Auto-save enabled" while showing "Unsaved changes".** Both strings
-render simultaneously in the same status area. There is no autosave: the dirty dot proves the buffer is
-only persisted on an explicit Save. The claim is false and directly contradicts the adjacent real state.
-This is exactly the REQ-TRUST-001 failure mode ("must not present non-functional features as working").
+**C2 - RESOLVED in Phase 10. The original note was wrong; a real data-loss bug hid behind it.**
+The previous entry claimed "There is no autosave: the dirty dot proves the buffer is only persisted on an
+explicit Save." **That claim was false.** `CodeViewer.handleChange` has always debounced a 1200ms
+auto-save, so the status-bar claim "Auto-save enabled" was accurate and the DOCUMENTATION was wrong.
+
+Verifying it properly did surface three genuine defects, all in the multi-tab case:
+
+1. **Shared buffers.** `valueRef`/`baselineRef` were single slots for all tabs, so switching tabs mid-debounce
+   re-pointed them at the new file and a pending auto-save wrote the wrong file's text.
+2. **Shared save timer (silent data loss).** One `saveTimerRef` served every tab, so typing in tab B
+   **cancelled** tab A's pending auto-save. A's edit was never persisted while the UI still showed
+   "Unsaved changes" - no error, no loss warning.
+3. **Shared in-flight guard.** A single `savingRef` meant an auto-save for B arriving while A's request was
+   still open returned early and never persisted.
+
+Buffers, timers and in-flight guards are now keyed per path. Verified live (`qa/tests-live/c2-autosave.spec.ts`,
+**5/5**): an edit persists with no manual Save, survives reload, the dirty indicator clears only on success, a
+failed save keeps reporting "Unsaved changes" and writes nothing, and switching tabs mid-debounce leaves each
+file with only its own text. Mutation-checked: reintroducing the shared-timer bug fails C4. The status bar now
+reads "Auto-save enabled (1.2s)" so the debounce is stated rather than implied.
 
 **C3 - No rename/move affordance surfaced where expected.** The logic exists and works, but it hangs off
 per-node context interactions in the tree rather than an obvious, discoverable control.
@@ -211,9 +298,9 @@ implements it, but the Projects list offers only Open and Delete.
 
 ### Real bugs
 
-**D1 - Quoted arguments are destroyed by naive whitespace splitting. Highest-impact terminal bug.**
-`TerminalPanel.run()` does `const [command, ...args] = trimmed.split(/\s+/)`. There is no quote handling,
-so any argument containing a space is shredded. Typing the following:
+**D1 - RESOLVED in Phase 10. Quoted arguments are now tokenized correctly.**
+`TerminalPanel.run()` used to do `const [command, ...args] = trimmed.split(/\s+/)`, which shredded any argument
+containing a space and forwarded quote characters as literal text.
 
 ```
 python -c "print('REAL_STDOUT_OK')"
@@ -233,6 +320,26 @@ the mangled args produced a command that exited 0. The same class of failure rep
 (`import time;time.sleep(45)` and `import sys;sys.exit(3)` both became `["import","time;time.sleep(45)"]`
 and raised a `SyntaxError`). Called through the API with correct args, the same command returns
 `stdout: "REAL_STDOUT_OK\r\n"`, so **the engine is fine and the terminal's argument parser is the bug**.
+
+**Fix (Phase 10):** a dedicated tokenizer, `frontend/src/lib/shellTokenize.ts`, decides argument boundaries
+client-side. It groups quoted runs, honours backslash escapes, preserves explicitly empty arguments
+(`echo ""`), and **reports an unterminated quote as an error instead of guessing**. Substitution, pipes,
+redirection and globbing are deliberately NOT interpreted - they stay literal text so the backend policy
+sees and rejects them. The backend remains the authoritative security boundary; the tokenizer changes only
+where an argument ends.
+
+**Verified both directions against the live stack.** Old argv reproduces the silent failure
+(`status: COMPLETED, exit: 0, stdout: ''`); the new tokenizer yields
+`arguments: ['-c', "print('REAL_STDOUT_OK')"]` and `stdout: 'REAL_STDOUT_OK\r\n'`.
+Regression coverage: `tests/frontend/test_shell_tokenize.mjs` runs the **real TypeScript source** via Node
+type-stripping (**20/20**), and `tests/api/test_terminal_config_10.py` asserts the security policy is
+unchanged (metacharacters, chaining, traversal and `.env` all still 403).
+
+**Separate security defect found and fixed while verifying D1.** The per-argument containment check could
+not see a path hidden inside an option value: `ntpath.isabs("--git-dir=C:/elsewhere")` is False and the value
+never starts with `/`. `git --git-dir=<outside repo> show HEAD:file` was confirmed to return the contents of
+a file **outside** the project sandbox. `--flag=value` arguments are now validated with the same containment
+rules.
 
 **D2 - The on-screen allowlist note is wrong, so users hit walls constantly.**
 `BLOCKED_NOTE` advertises "Allowed: git, npm, node, python, python3, pip, pip3, pytest, cargo, ls, dir,
@@ -321,20 +428,26 @@ history API is dead in practice.
 
 ## SECTION G - AI / Builder: **PARTIAL**
 
-### AI Assistant: **STUB (by design, honestly labelled)**
+### AI Assistant: **live-capable (was a labelled STUB; re-verified 2026-10-02)**
 
-- `backend/.env` has `AI_PROVIDER=mock` with `AI_API_KEY` and `OPENAI_API_KEY` empty and `AI_MODEL` empty.
-- Chat returns a self-disclosing message:
+- `backend/.env` is configured with `AI_PROVIDER=gemini` and a real key for local verification.
+- **With no provider configured the app still self-discloses honestly** (unchanged, still correct):
 
   > **DEVOS v1.0.0 Local/Mock AI** (no AI provider configured - set `AI_PROVIDER` and `AI_API_KEY` to
   > enable a real model). This is a deterministic local response for development.
   > `provider: "local-mock"`
 
-  The UI badge reads **"Local/Mock AI"**. **No hallucinated context is presented as real.** This is the
-  correct, requirement-compliant behaviour: it is a labelled stub, not a deceptive one.
-- **Context assembly is real and would work with a real provider.** `GET /projects/{id}/context` returned
-  a genuine project name, default branch, the live file tree with sizes, and live git status. So the
-  *plumbing* for real context is in place.
+- **Real streaming now works end-to-end.** `ai_service.py` uses the genuine
+  `:streamGenerateContent?alt=sse` transport with the key in the `x-goog-api-key` **header** (never the
+  URL). Verified live 2026-10-02: `event: start` +2.03s, `event: delta` `"1,"` +5.77s,
+  `event: delta` `" 2, 3, 4, 5."` +5.83s, `event: complete` +5.88s - genuine incremental deltas.
+  This replaces the previous non-streaming call sliced into 64-char pieces, which satisfied the
+  streaming *contract* without being real streaming.
+- **`AI_MODEL` needs correcting in local `.env`:** the configured `gemini-3.8-flash` returns **429**
+  (and 404s on `generateContent` despite appearing in `ListModels`); `gemini-3.6-flash` streams fine.
+- **Context assembly is real and works with a real provider.** `GET /projects/{id}/context` returned
+  a genuine project name, default branch, the live file tree with sizes, and live git status.
+
 
 **G1 - Real bug: the mock AI cannot read file *contents*.** Asked "What is the exact content of
 gitprobe.txt? Quote it verbatim", the response echoed the question and explained what a real provider
@@ -487,9 +600,10 @@ surfaced in the UI, so it is harmless.)
 | 1 | **Critical** | B1 | **Delete Project 500s and does not delete.** `shutil.rmtree` hits read-only `.git` objects on Windows; the DB transaction is also stranded mid-failure. |
 | 2 | **Critical** | G3 | **Builder Apply flattens the directory structure** (`path.split("/")[-1]`, `builder.py:426,535`) and silently collides same-named files, producing an unrunnable project. |
 | 3 | **High** | A2 | **No mid-session 401 handling.** An expired token leaves a half-rendered shell with no error and no way to recover. |
-| 4 | **High** | D1 | **Terminal mangles quoted arguments** (`split(/\s+/)`), and a failed run can display a green "completed" with empty output. |
+| 4 | ~~High~~ **RESOLVED** | D1 | Terminal mangled quoted arguments (`split(/\s+/)`), showing a green "completed" with empty output. **Fixed in Phase 10** via `shellTokenize.ts`; verified live both directions. |
+| 4b | **High** | NEW | **Workspace escape via `--flag=value`.** `git --git-dir=<outside repo> show HEAD:file` returned a file from outside the sandbox. **Fixed in Phase 10**; regression-tested. |
 | 5 | **High** | D2 | **Terminal allowlist note contradicts the enforced policy**; three divergent policy sources (`execution_service`, `terminal_service`, `terminal_policy.json`) plus the UI's own list. |
-| 6 | **Medium** | C2 | **"Auto-save enabled" shown next to "Unsaved changes"** - a false capability claim. |
+| 6 | **Medium** | C2 | **RESOLVED in Phase 10.** The "false claim" was wrong - auto-save was always real. Three genuine multi-tab defects were found and fixed, incl. a silent data-loss bug where typing in tab B cancelled tab A's pending auto-save. |
 | 7 | **Medium** | G4 | Builder apply is not idempotent, and `.env.example` can never be generated (hidden-file block). |
 | 8 | **Medium** | D3 | Rate limiting makes the execution history silently render empty. |
 | 9 | **Medium** | G2 | Dashboard AI composer is a silent dead end with no project selected. |

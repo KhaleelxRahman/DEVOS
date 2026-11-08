@@ -12,11 +12,15 @@ production deployment is missing the minimum security requirements
 
 import json
 import os
-from typing import Any
+from typing import Annotated, Any
 
 from dotenv import load_dotenv
 from pydantic import field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+# Imported directly rather than via app.core.crypto: crypto imports settings,
+# so importing it here would be circular. Fernet is an external dependency.
+from cryptography.fernet import Fernet
 
 load_dotenv()
 
@@ -43,10 +47,68 @@ class Settings(BaseSettings):
     # in production (test suite and Alembic rely on async engines).
     DATABASE_URL: str = "sqlite+aiosqlite:///./data/devos.db"
 
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def _validate_database_url(cls, v: str) -> str:
+        """Reject a DATABASE_URL that SQLAlchemy cannot parse, and say why.
+
+        An ambient OS-level `DATABASE_URL` (a User/Machine environment
+        variable) takes precedence over `backend/.env`, because real
+        environment variables outrank the dotenv file for pydantic-settings.
+        A stale value such as `file:./dev.db` therefore silently replaced the
+        real database and surfaced much later as an opaque
+        `sqlalchemy.exc.ArgumentError: Could not parse SQLAlchemy URL from
+        given URL string` raised from deep inside engine creation, which gave
+        no hint that an unrelated ambient variable was the cause.
+
+        Validating the scheme here turns that into an actionable startup
+        error naming the supported forms. This deliberately does NOT work
+        around the precedence: the repository keeps the documented behaviour
+        and instead refuses to start on a URL it cannot use.
+        """
+        value = (v or "").strip()
+        if not value:
+            raise ValueError(
+                "DATABASE_URL must not be empty. Use "
+                "'sqlite+aiosqlite:///./data/devos.db' locally or "
+                "'postgresql+asyncpg://...' in production."
+            )
+        # Accept both the bare SQLAlchemy form and the URL-embedded form.
+        scheme = value.split("://", 1)[0].lower() if "://" in value else ""
+        if not scheme:
+            raise ValueError(
+                f"DATABASE_URL {value!r} is not a valid SQLAlchemy URL "
+                f"(missing '://'). This often means an ambient OS-level "
+                f"DATABASE_URL is overriding backend/.env - clear it and "
+                f"retry. Expected 'sqlite+aiosqlite:///...' or "
+                f"'postgresql+asyncpg://...'."
+            )
+        if scheme.startswith("sqlite") and not scheme.startswith("sqlite+aiosqlite"):
+            raise ValueError(
+                f"DATABASE_URL must use an async driver, got {scheme!r}. "
+                f"Use 'sqlite+aiosqlite:///...'."
+            )
+        if scheme.startswith("postgresql") and not scheme.startswith(
+            "postgresql+asyncpg"
+        ):
+            raise ValueError(
+                f"DATABASE_URL must use an async driver, got {scheme!r}. "
+                f"Use 'postgresql+asyncpg://...'."
+            )
+        return value
+
     # --- CORS ---
     # Accepts a JSON array ("[\"https://a.com\", \"https://b.com\"]") or a
     # comma-separated string from a hosting-provider dashboard.
-    BACKEND_CORS_ORIGINS: list[str] = []
+    # NoDecode is load-bearing, not cosmetic. `BACKEND_CORS_ORIGINS` is a
+    # complex (list) field, so pydantic-settings' env/dotenv source tries
+    # json.loads() on the raw value while BUILDING settings - which runs
+    # BEFORE any `mode="before"` field validator. A perfectly reasonable
+    # `BACKEND_CORS_ORIGINS=http://localhost:5173` therefore aborted startup
+    # with SettingsError and the validator below never got a chance to run.
+    # NoDecode hands the raw string to the validator, which then accepts both
+    # a bare/comma-separated string and a JSON list.
+    BACKEND_CORS_ORIGINS: Annotated[list[str], NoDecode] = []
 
     # --- Project workspace storage ---
     PROJECTS_STORAGE_PATH: str = "./data/projects"
@@ -158,6 +220,25 @@ def _validate_production_safety(s: Settings) -> Settings:
         problems.append("BACKEND_CORS_ORIGINS must list the allowed frontend origins")
     if s.DATABASE_URL.startswith("sqlite"):
         problems.append("DATABASE_URL must not use SQLite in production")
+    # A GitHub access token is a live bearer credential. Encryption already
+    # fails loudly at save time when the key is missing, but a production boot
+    # that SUCCEEDS and only breaks later means the misconfiguration is
+    # discovered by a user, not by the deploy. Require it up front.
+    key = (s.TOKEN_ENCRYPTION_KEY or "").strip()
+    if not key:
+        problems.append(
+            "TOKEN_ENCRYPTION_KEY must be set in production so GitHub tokens "
+            "are never stored in plaintext"
+        )
+    else:
+        try:
+            Fernet(key.encode("utf-8"))
+        except (ValueError, TypeError):
+            problems.append(
+                "TOKEN_ENCRYPTION_KEY must be a valid Fernet key; generate one "
+                'with: python -c "from cryptography.fernet import Fernet; '
+                'print(Fernet.generate_key().decode())"'
+            )
     if problems:
         raise ValueError("Insecure production configuration: " + "; ".join(problems))
     return s

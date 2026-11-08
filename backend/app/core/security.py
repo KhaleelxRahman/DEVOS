@@ -4,6 +4,7 @@ Keys and algorithms are read from application settings so they are identical
 for authentication routes, GitHub OAuth state, and the API dependency layer.
 """
 
+import asyncio
 from datetime import datetime, timedelta, timezone
 import os
 
@@ -12,7 +13,19 @@ from passlib.context import CryptContext
 
 from app.core.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Cost factor 10 (~75ms) meets OWASP bcrypt guidance while cutting login CPU
+# time by ~4x compared to rounds=12 (~300ms). Existing $2b$12$ hashes remain
+# 100% verifiable because bcrypt embeds the round count in each stored hash.
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__rounds=10,
+)
+
+# Pre-computed dummy hash used when a login email is not found so unknown-user
+# and wrong-password paths perform equivalent work, and to pre-warm passlib's
+# bcrypt backend at import time instead of on the first user request.
+_DUMMY_BCRYPT_HASH = pwd_context.hash("devos-startup-prewarm-only")
 
 
 def hash_password(password: str) -> str:
@@ -28,6 +41,18 @@ def get_password_hash(password: str) -> str:
 def verify_password(password: str, hashed: str) -> bool:
     """Return True when the plaintext matches the stored hash."""
     return pwd_context.verify(password, hashed)
+
+
+async def async_get_password_hash(password: str) -> str:
+    """Hash a plaintext password in a worker thread without blocking the event loop."""
+    return await asyncio.to_thread(pwd_context.hash, password)
+
+
+async def async_verify_password(password: str, hashed: str | None) -> bool:
+    """Verify a password in a worker thread without blocking the event loop."""
+    target_hash = hashed if hashed else _DUMMY_BCRYPT_HASH
+    matched = await asyncio.to_thread(pwd_context.verify, password, target_hash)
+    return bool(matched and hashed)
 
 
 def create_access_token(

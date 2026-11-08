@@ -24,6 +24,7 @@ const usageLabel = (source: string): string =>
 export const AgentPanel: React.FC<{ projectId: string }> = ({ projectId }) => {
   const [task, setTask] = useState('');
   const [run, setRun] = useState<AgentRun | null>(null);
+  const [runs, setRuns] = useState<AgentRun[]>([]);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,10 +32,36 @@ export const AgentPanel: React.FC<{ projectId: string }> = ({ projectId }) => {
 
   const running = run ? ACTIVE.has(run.state) : false;
 
+  const loadRuns = useCallback(async () => {
+    try {
+      const res = await agentApi.list(projectId);
+      const list = res.data ?? [];
+      setRuns(list);
+      setRun((current) => {
+        if (current) {
+          return list.find((item) => item.id === current.id) ?? current;
+        }
+        const activeRun = list.find((item) => ACTIVE.has(item.state));
+        return activeRun ?? null;
+      });
+    } catch {
+      // Non-fatal on mount
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    setRun(null);
+    void loadRuns();
+  }, [projectId, loadRuns]);
+
   const refresh = useCallback(async (runId: string) => {
     try {
       const res = await agentApi.get(runId);
-      setRun(res.data ?? null);
+      if (res.data) {
+        const updated = res.data;
+        setRun(updated);
+        setRuns((prev) => prev.some((r) => r.id === updated.id) ? prev.map((r) => (r.id === updated.id ? updated : r)) : [updated, ...prev]);
+      }
     } catch (err) {
       setError((err as Error).message);
     }
@@ -58,7 +85,10 @@ export const AgentPanel: React.FC<{ projectId: string }> = ({ projectId }) => {
     setError(null);
     try {
       const res = await agentApi.create({ project_id: projectId, task: task.trim() });
-      setRun(res.data ?? null);
+      if (res.data) {
+        setRun(res.data);
+        setRuns((prev) => [res.data!, ...prev.filter((r) => r.id !== res.data!.id)]);
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -97,6 +127,30 @@ export const AgentPanel: React.FC<{ projectId: string }> = ({ projectId }) => {
               Start agent run
             </Button>
           </div>
+          {runs.length > 0 && (
+            <div className="agent-changes" style={{ marginTop: 12 }} data-testid="agent-run-history">
+              <span className="agent-task-label">Recent runs ({runs.length})</span>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '6px 0 0', display: 'grid', gap: 6 }}>
+                {runs.slice(0, 8).map((pastRun) => (
+                  <li key={pastRun.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      style={{ textAlign: 'left', flex: 1, justifyContent: 'flex-start' }}
+                      onClick={() => setRun(pastRun)}
+                    >
+                      <span className={`agent-state agent-state--${pastRun.state.toLowerCase()}`} style={{ marginRight: 6 }}>
+                        {pastRun.state}
+                      </span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {pastRun.task}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
@@ -218,9 +272,14 @@ export const AgentPanel: React.FC<{ projectId: string }> = ({ projectId }) => {
               </Button>
             )}
             {TERMINAL.has(run.state) && (
-              <Button variant="secondary" leftIcon={<RotateCcw size={13} />} disabled={busy} onClick={() => void act(() => agentApi.retry(run.id))}>
-                Retry
-              </Button>
+              <>
+                <Button variant="secondary" leftIcon={<RotateCcw size={13} />} disabled={busy} onClick={() => void act(() => agentApi.retry(run.id))}>
+                  Retry
+                </Button>
+                <Button variant="ghost" onClick={() => setRun(null)} disabled={busy}>
+                  New Run
+                </Button>
+              </>
             )}
           </div>
 

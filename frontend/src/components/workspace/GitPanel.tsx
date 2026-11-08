@@ -27,6 +27,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ projectId }) => {
   const [showDiff, setShowDiff] = useState(false);
   const [commitMessage, setCommitMessage] = useState('');
   const [newBranch, setNewBranch] = useState('');
+  const [mergeSource, setMergeSource] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState('');
@@ -63,6 +64,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ projectId }) => {
       await fn();
       setNotice(successMessage);
       await load();
+      window.dispatchEvent(new Event('devos:gitChanged'));
     } catch (err: any) {
       setError(err.message || 'Git operation failed');
     } finally {
@@ -146,9 +148,37 @@ export const GitPanel: React.FC<GitPanelProps> = ({ projectId }) => {
             variant="secondary"
             size="sm"
             disabled={isBusy || !newBranch.trim()}
-            onClick={() => run(() => gitApi.checkout(projectId, newBranch.trim(), true), `Created ${newBranch.trim()}`)}
+            onClick={() => run(() => gitApi.checkout(projectId, newBranch.trim(), true), `Created ${newBranch.trim()}`).then(() => setNewBranch(''))}
           >
             +
+          </Button>
+        </div>
+      )}
+
+      {branches && branches.branches.filter((b) => b !== branches.current).length > 0 && branches.current !== 'main' && (
+        <div style={{ marginBottom: 8, display: 'flex', gap: 6, alignItems: 'center' }}>
+          <select
+            className="input"
+            style={{ flex: 1, fontSize: 12, padding: '4px 8px' }}
+            value={mergeSource}
+            aria-label="Select branch to merge into current branch"
+            onChange={(e) => setMergeSource(e.target.value)}
+            disabled={isBusy}
+          >
+            <option value="">Merge branch into {branches.current}…</option>
+            {branches.branches
+              .filter((b) => b !== branches.current)
+              .map((b) => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+          </select>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={isBusy || !mergeSource}
+            onClick={() => run(() => gitApi.merge(projectId, mergeSource, branches.current), `Merged ${mergeSource} into ${branches.current}`).then(() => setMergeSource(''))}
+          >
+            Merge
           </Button>
         </div>
       )}

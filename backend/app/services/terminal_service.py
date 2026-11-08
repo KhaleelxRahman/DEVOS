@@ -1,6 +1,7 @@
 import asyncio
 import os
 import re
+import shutil
 import sys
 import time
 import ntpath
@@ -80,6 +81,26 @@ class TerminalService:
                     code="TERMINAL_BLOCKED",
                     status_code=403,
                 )
+            # A path can also be smuggled inside a `--flag=value` argument, which
+            # the checks above cannot see because the whole token looks like an
+            # opaque option: `"--git-dir=C:/elsewhere"` splits to
+            # ["--git-dir=C:", "elsewhere"], so ntpath.isabs() is False and the
+            # value never starts with "/". git would then happily read objects
+            # from a repository outside the sandbox. Validate the value part of
+            # any `=`-bearing option with the same containment rules.
+            if "=" in arg:
+                option_value = arg.split("=", 1)[1].replace("\\", "/")
+                if (
+                    ntpath.isabs(option_value)
+                    or option_value.startswith("/")
+                    or ".." in option_value.split("/")
+                    or re.match(r"^[A-Za-z]:", option_value)
+                ):
+                    raise AppException(
+                        "Command arguments must stay within the project workspace",
+                        code="TERMINAL_BLOCKED",
+                        status_code=403,
+                    )
             if any(
                 part.lower()
                 in {
@@ -205,6 +226,10 @@ class TerminalService:
             )
         elif os.name == "nt" and command.lower() in {"python", "python3"}:
             exec_args = [sys.executable] + (args or [])
+        elif os.name == "nt":
+            resolved = shutil.which(exec_args[0])
+            if resolved:
+                exec_args[0] = resolved
 
         try:
             proc = await asyncio.create_subprocess_exec(

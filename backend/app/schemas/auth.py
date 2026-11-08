@@ -34,6 +34,10 @@ class UserLogin(BaseModel):
     password: str = Field(min_length=1)
 
 
+class UserUpdateRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+
+
 class UserResponse(BaseModel):
     id: str
     name: str

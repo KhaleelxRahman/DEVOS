@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Terminal, Bot, GitBranch, FolderGit2, Menu, X, Settings, Wifi, WifiOff, ChevronDown, Rocket, Github, Search } from 'lucide-react';
+import { Terminal, Bot, GitBranch, FolderGit2, Menu, X, Settings, Wifi, WifiOff, ChevronDown, Rocket, Github, Search, LogOut } from 'lucide-react';
 import { Badge } from '../common/Badge';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useProject } from '../../hooks/useProject';
-import { projectsApi } from '../../api';
+import { useAuth } from '../../hooks/useAuth';
+import { projectsApi, usersApi, gitApi } from '../../api';
 import { Project } from '../../types/project';
 
 export interface TopBarProps {
@@ -25,8 +26,12 @@ export const TopBar: React.FC<TopBarProps> = ({
   const [online, setOnline] = useState(() => navigator.onLine);
   const [projects, setProjects] = useState<Project[]>([]);
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [liveBranch, setLiveBranch] = useState<string | null>(null);
+  const [aiStatus, setAiStatus] = useState<{ provider: string; is_mock: boolean; configured: boolean } | null>(null);
   const switcherRef = useRef<HTMLDivElement>(null);
-  const { setActiveProject } = useProject();
+  const { activeProject, setActiveProject } = useProject();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -40,7 +45,27 @@ export const TopBar: React.FC<TopBarProps> = ({
 
   useEffect(() => {
     projectsApi.list().then((res) => setProjects(res.data?.projects || [])).catch(() => setProjects([]));
+    usersApi.getAiProvider().then((res) => {
+      if (res.data) setAiStatus(res.data);
+    }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!activeProject?.id) {
+      setLiveBranch(null);
+      return;
+    }
+    const fetchBranch = () => {
+      gitApi.getStatus(activeProject.id)
+        .then((res) => {
+          if (res.data?.branch) setLiveBranch(res.data.branch);
+        })
+        .catch(() => setLiveBranch(null));
+    };
+    fetchBranch();
+    window.addEventListener('devos:gitChanged', fetchBranch);
+    return () => window.removeEventListener('devos:gitChanged', fetchBranch);
+  }, [activeProject?.id]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -124,10 +149,13 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Status badges */}
         <div className="top-bar-status">
           <Badge variant="default" icon={<GitBranch size={11} />}>
-            {gitBranch}
+            {liveBranch || gitBranch}
           </Badge>
-          <Badge variant="accent" icon={<Bot size={11} />}>
-            AI Ready
+          <Badge
+            variant={aiStatus?.configured ? 'accent' : 'default'}
+            icon={<Bot size={11} />}
+          >
+            {aiStatus ? (aiStatus.configured ? `AI Ready (${aiStatus.provider})` : 'Mock AI') : 'AI'}
           </Badge>
           <Badge variant="default" icon={online ? <Wifi size={11} /> : <WifiOff size={11} />}>
             {online ? 'Online' : 'Offline'}
@@ -150,6 +178,18 @@ export const TopBar: React.FC<TopBarProps> = ({
         <Link className="top-bar-icon-action" to="/app/settings" aria-label="Open settings" title="Settings">
           <Settings size={15} />
         </Link>
+        <button
+          type="button"
+          className="top-bar-icon-action"
+          onClick={() => {
+            logout();
+            navigate('/login');
+          }}
+          aria-label="Log out"
+          title="Log out"
+        >
+          <LogOut size={15} />
+        </button>
       </div>
     </header>
   );

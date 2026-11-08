@@ -77,7 +77,7 @@ pydantic-settings==2.15.0
 pydantic_core==2.46.4
 PyGithub==2.10.0
 Pygments==2.21.0
-PyJWT==2.13.0
+PyJWT==2.15.0
 PyNaCl==1.6.2
 pyparsing==3.3.2
 pytest==9.1.1
@@ -112,7 +112,7 @@ truststore==0.10.4
 typing-inspection==0.4.4
 typing_extensions==4.16.0
 tzdata==2025.3
-urllib3==2.7.0
+urllib3==2.8.0
 uvicorn==0.52.4
 watchfiles==1.2.0
 websockets==17.0.1

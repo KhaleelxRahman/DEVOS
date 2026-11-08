@@ -2,7 +2,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppException, InvalidCredentialsException
-from app.core.security import create_access_token, get_password_hash, verify_password
+from app.core.security import (
+    async_get_password_hash,
+    async_verify_password,
+    create_access_token,
+)
 from app.models.user import User
 from app.schemas.auth import UserLogin, UserRegister
 
@@ -31,7 +35,7 @@ class AuthService:
                 status_code=400,
             )
 
-        hashed_pw = get_password_hash(data.password)
+        hashed_pw = await async_get_password_hash(data.password)
         user = User(
             name=data.name.strip(),
             email=data.email.strip().lower(),
@@ -47,10 +51,8 @@ class AuthService:
     @staticmethod
     async def login(db: AsyncSession, data: UserLogin) -> tuple[User, str]:
         user = await AuthService.get_by_email(db, data.email)
-        if not user or not user.password_hash:
-            raise InvalidCredentialsException()
-
-        if not verify_password(data.password, user.password_hash):
+        password_hash = user.password_hash if user else None
+        if not await async_verify_password(data.password, password_hash) or not user:
             raise InvalidCredentialsException()
 
         token = create_access_token(subject=user.id)

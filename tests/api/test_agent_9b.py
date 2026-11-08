@@ -408,6 +408,59 @@ async def test_token_charging_classifies_its_source():
         assert AgentService.tokens_charged(run) == 150
 
 
+@pytest.mark.asyncio
+async def test_chat_and_stream_chat_never_leak_the_provider_key():
+    """Regression (Phase 10 final audit).
+
+    `structured()` sanitised provider errors, but `chat()` - the path used by
+    run_action and the chat route - called the provider with no exception
+    handling. A real 429/401/500 therefore escaped as an HTTPStatusError whose
+    message contains the full request URL, i.e. `?key=<API KEY>`, straight into
+    logs and potentially into an API error response.
+    """
+    import httpx
+    import pytest as _pytest
+
+    from app.core.errors import ValidationException
+    from app.services.ai_service import AIService, GeminiProvider
+
+    real_key = "AQ.NOT-A-REAL-KEY-0000000000000000000000"
+
+    class Boom(GeminiProvider):
+        async def generate_response(self, prompt, context, history):
+            req = httpx.Request(
+                "POST",
+                "https://generativelanguage.googleapis.com/v1beta/models/"
+                f"m:generateContent?key={real_key}",
+            )
+            raise httpx.HTTPStatusError(
+                f"Client error '429 Too Many Requests' for url '{req.url}'",
+                request=req, response=httpx.Response(429, request=req),
+            )
+
+        async def stream_response(self, prompt, context, history):
+            raise httpx.HTTPStatusError(
+                f"boom for url 'https://x/generateContent?key={real_key}'",
+                request=httpx.Request("POST", "https://x"),
+                response=httpx.Response(500),
+            )
+            yield ""  # pragma: no cover
+
+    ai = AIService(Boom(real_key, "some-model"))
+
+    with _pytest.raises(ValidationException) as exc:
+        await ai.chat("hi", {})
+    assert real_key not in str(exc.value), "chat() leaked the key"
+    assert "429" in str(exc.value), "the real reason must survive"
+    assert "key=" not in str(exc.value)
+
+    with _pytest.raises(ValidationException) as exc2:
+        async for _ in ai.stream_chat("hi", {}):
+            pass
+    assert real_key not in str(exc2.value), "stream_chat() leaked the key"
+    assert "key=" not in str(exc2.value)
+
+
 def test_state_machine_includes_every_required_state():
     for state in (
         "PLANNING", "EDITING", "BUILDING", "TESTING", "DIAGNOSING", "FIXING",
@@ -564,11 +617,22 @@ async def test_risky_command_escalates_to_the_user(client):
 
 
 @pytest.mark.asyncio
-async def test_without_a_real_model_the_agent_does_not_invent_code(client):
+async def test_without_a_real_model_the_agent_does_not_invent_code(client, monkeypatch):
     """No provider configured -> the agent plans deterministically and says so.
 
     It must NOT fabricate an implementation it never received.
+
+    The provider is pinned to `mock` because this test asserts the NO-PROVIDER
+    behaviour; without pinning it would depend on the developer's local .env
+    (and on a real provider being reachable or rate-limited).
     """
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "AI_PROVIDER", "mock")
+    monkeypatch.setattr(settings, "AI_API_KEY", "")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "")
+    monkeypatch.setattr(settings, "OPENAI_API_KEY", "")
+
     headers = await _register(client, f"a{uuid.uuid4().hex[:8]}@x.com")
     pid = await _project(client, headers, "NoModel", {"build": "echo B", "test": "echo T"})
 

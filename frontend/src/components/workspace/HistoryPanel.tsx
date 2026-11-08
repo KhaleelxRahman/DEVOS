@@ -1,6 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ChevronDown, ChevronRight, Clock, RefreshCw, RotateCcw, Square } from 'lucide-react';
-import { ExecutionRecord, executionApi } from '../../api';
+import { ChevronDown, ChevronRight, Clock, RefreshCw, RotateCcw, Square, Wrench } from 'lucide-react';
+import {
+  DiagnosisResult,
+  ExecutionRecord,
+  RepairProposal,
+  RepairVerification,
+  diagnosticsApi,
+  executionApi,
+  repairsApi,
+} from '../../api';
 
 interface HistoryPanelProps {
   projectId: string;
@@ -38,6 +46,10 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ projectId }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<ExecutionRecord | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [diagnoses, setDiagnoses] = useState<Record<string, DiagnosisResult>>({});
+  const [proposals, setProposals] = useState<Record<string, RepairProposal>>({});
+  const [verifications, setVerifications] = useState<Record<string, RepairVerification>>({});
+  const [diagBusyId, setDiagBusyId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -91,6 +103,43 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ projectId }) => {
       setError(err.message || `${action} failed`);
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const handleDiagnose = async (executionId: string) => {
+    setDiagBusyId(executionId);
+    setError(null);
+    try {
+      const [diagRes, propRes] = await Promise.all([
+        diagnosticsApi.diagnoseExecution(projectId, executionId),
+        repairsApi.propose(projectId, executionId).catch(() => null),
+      ]);
+      if (diagRes.success && diagRes.data) {
+        setDiagnoses((prev) => ({ ...prev, [executionId]: diagRes.data! }));
+      }
+      if (propRes?.success && propRes.data) {
+        setProposals((prev) => ({ ...prev, [executionId]: propRes.data! }));
+      }
+    } catch (err: any) {
+      setError(err.message || 'Unable to diagnose execution');
+    } finally {
+      setDiagBusyId(null);
+    }
+  };
+
+  const handleVerifyRepair = async (executionId: string) => {
+    setDiagBusyId(executionId);
+    setError(null);
+    try {
+      const res = await repairsApi.verify(projectId, executionId);
+      if (res.success && res.data) {
+        setVerifications((prev) => ({ ...prev, [executionId]: res.data! }));
+        await load();
+      }
+    } catch (err: any) {
+      setError(err.message || 'Repair verification failed');
+    } finally {
+      setDiagBusyId(null);
     }
   };
 
@@ -226,7 +275,66 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ projectId }) => {
                         <RotateCcw size={11} /> Retry
                       </button>
                     )}
+                    {(shown.status === 'FAILED' || shown.status === 'TIMED_OUT') && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => void handleDiagnose(shown.execution_id)}
+                        disabled={diagBusyId === shown.execution_id}
+                        aria-label="Diagnose execution failure"
+                      >
+                        <Wrench size={11} /> {diagBusyId === shown.execution_id ? 'Diagnosing…' : 'Diagnose & Repair'}
+                      </button>
+                    )}
                   </div>
+
+                  {diagnoses[shown.execution_id] && (
+                    <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-border)', borderRadius: 6, padding: 8, fontSize: 11, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Diagnosis · {diagnoses[shown.execution_id].category.statement}</strong>
+                        <span style={{ color: 'var(--color-text-muted)' }}>Confidence: {diagnoses[shown.execution_id].confidence}%</span>
+                      </div>
+                      <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>{diagnoses[shown.execution_id].problem.statement}</p>
+                      {diagnoses[shown.execution_id].suggested_fix && (
+                        <p style={{ margin: 0, color: 'var(--color-accent)' }}>
+                          Suggested fix: {diagnoses[shown.execution_id].suggested_fix?.statement}
+                        </p>
+                      )}
+                      {proposals[shown.execution_id] && (
+                        <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: 6 }}>
+                          {proposals[shown.execution_id].supported && proposals[shown.execution_id].changes.length > 0 ? (
+                            <>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                <strong>Proposed Repair ({proposals[shown.execution_id].files_touched.join(', ')})</strong>
+                                <button
+                                  type="button"
+                                  className="btn btn-primary btn-sm"
+                                  onClick={() => void handleVerifyRepair(shown.execution_id)}
+                                  disabled={diagBusyId === shown.execution_id}
+                                >
+                                  <Wrench size={11} /> Apply &amp; Verify Repair
+                                </button>
+                              </div>
+                              {proposals[shown.execution_id].changes.map((c) => (
+                                <pre key={c.path} style={{ margin: 0, maxHeight: 120, overflowX: 'auto', fontSize: 10 }}>
+                                  {c.diff}
+                                </pre>
+                              ))}
+                            </>
+                          ) : (
+                            <span style={{ color: 'var(--color-text-muted)' }}>
+                              Automated repair: {proposals[shown.execution_id].reason}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {verifications[shown.execution_id] && (
+                        <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: 6, color: verifications[shown.execution_id].verified ? 'var(--color-success)' : 'var(--color-warning)' }}>
+                          <strong>{verifications[shown.execution_id].outcome}:</strong> {verifications[shown.execution_id].reason}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </li>

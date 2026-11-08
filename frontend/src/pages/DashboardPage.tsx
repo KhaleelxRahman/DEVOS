@@ -3,7 +3,7 @@ import { Plus, Bot, FolderGit2, GitBranch, Rocket, Send, Sparkles, Code2, Bug, B
 import { Button, Badge, Spinner } from '../components/common';
 import { useProject } from '../hooks/useProject';
 import { Link, useNavigate } from 'react-router-dom';
-import { aiApi, projectsApi } from '../api';
+import { aiApi, projectsApi, usersApi, gitApi } from '../api';
 import { Project } from '../types/project';
 import { useSeo } from '../hooks/useSeo';
 import { useToast } from '../components/common/Toast';
@@ -24,11 +24,28 @@ export const DashboardPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [liveBranch, setLiveBranch] = useState<string | null>(null);
+  const [aiStatus, setAiStatus] = useState<{ provider: string; is_mock: boolean; configured: boolean } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     projectsApi.list().then((res) => setProjects(res.data?.projects || [])).catch(() => setProjects([]));
+    usersApi.getAiProvider().then((res) => {
+      if (res.data) setAiStatus(res.data);
+    }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!activeProject?.id) {
+      setLiveBranch(null);
+      return;
+    }
+    gitApi.getStatus(activeProject.id)
+      .then((res) => {
+        if (res.data?.branch) setLiveBranch(res.data.branch);
+      })
+      .catch(() => setLiveBranch(null));
+  }, [activeProject?.id]);
 
   const resizeTextarea = useCallback(() => {
     const el = textareaRef.current;
@@ -72,7 +89,7 @@ export const DashboardPage: React.FC = () => {
   };
 
   const activeProjectName = activeProject?.name;
-  const activeBranch = activeProject?.default_branch || 'main';
+  const activeBranch = liveBranch || activeProject?.default_branch || 'main';
 
   return (
     <div className="ai-home">
@@ -93,7 +110,12 @@ export const DashboardPage: React.FC = () => {
         <div className="ai-home-context-item">
           <Bot size={14} />
           <span className="ai-home-context-label">AI</span>
-          <Badge variant="accent" icon={<Sparkles size={10} />}>Ready</Badge>
+          <Badge
+            variant={aiStatus?.configured ? 'accent' : 'default'}
+            icon={<Sparkles size={10} />}
+          >
+            {aiStatus ? (aiStatus.configured ? `Ready (${aiStatus.provider})` : 'Mock AI') : 'Checking…'}
+          </Badge>
         </div>
         <div className="ai-home-context-divider" />
         <div className="ai-home-context-item">
